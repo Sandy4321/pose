@@ -1,4 +1,4 @@
-gamma_lasso
+The Gamma Lasso
 ===========
 
-"The Gamma Lasso" research paper
+The gamma lasso paper, with arXiv publication @ http://arxiv.org/abs/1308.5623.
