@@ -1,3 +1,15 @@
+x <- matrix(rnorm(100),ncol=5)
+x <- t(t(x)/sqrt(colSums(x^2)/20))
+x <- t(t(x)-colMeans(x))
+g <- crossprod(x)
+p <- x%*%solve(g)%*%t(x)-diag(20)
+
+b <- c(3,2,1,0,0)
+e <- rnorm(20)
+y <- x%*%b + e
+y <- y-mean(y)
+
+lm(y~x)
 
 library(Matrix)
 library(gamlr)

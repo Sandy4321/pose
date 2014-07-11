@@ -34,8 +34,6 @@
 
 \usepackage[bottom,hang,flushmargin]{footmisc}
 
-\graphicspath{{/home/taddy/project/fresh/glpath/graphs/},{/Users/mtaddy/project/fresh/glpath/graphs/}}
-
 \pdfminorversion=4
 \begin{document}
 
@@ -225,7 +223,7 @@ continuous).
 
 \begin{figure}[h!]
 \vskip .5cm
-\hskip -.2cm\includegraphics[width=6.5in]{gamlr_eg}
+\hskip -.2cm\includegraphics[width=6.5in]{../graphs/gamlr_eg}
 \vskip -.25cm
 \caption{\label{gamlr_eg} Gamma lasso estimation on $n=10^3$ 
  observations of $y_i = 4 +
@@ -349,7 +347,7 @@ The penalty is illustrated in Figure \ref{solution}.
 
 \begin{figure}[tbh]
 \vskip -.25cm
-\includegraphics[width=6.4in]{solution}
+\includegraphics[width=6.4in]{../graphs/solution}
 \caption{\label{solution} Log penalties $c(\beta) = s\log(1 + \gamma|\beta|)$ 
 and penalized objectives $(\beta-B)^2 + c(\beta)$.}
 \end{figure}
@@ -435,7 +433,7 @@ applications the jumps become prohibitively expensive.
 \begin{figure}[bht]
 \vskip -.5cm
 \centering
-\includegraphics[width=5.5in]{nhl_time}
+\includegraphics[width=5.5in]{../graphs/nhl_time}
 \vskip -.25cm
 \caption{\label{nhltime} 
 Timings for the hockey data fits of Section \ref{nhl}
@@ -965,19 +963,19 @@ for large $j$.
 { \hskip 2.5cm$\bs{\gamma=0}$\hskip 4cm$\bs{\gamma=2}$\hskip 4cm$\bs{\gamma=10}$}
 
 \vskip .2cm
-\includegraphics[width=6.5in]{sim_paths}
+\includegraphics[width=6.5in]{../graphs/sim_paths}
 \caption{\label{simpaths} Regularization paths for a single run of our simulated linear regression example, on $\gamma = 0,2,10$ from left.
 Vertical lines mark the BIC selection, and  degrees of freedom $df^t$ are along the top. }
 
 \vskip .7cm
 { \hskip 2.5cm$\bs{\gamma=0}$\hskip 4cm$\bs{\gamma=2}$\hskip 4cm$\bs{\gamma=10}$}
 \vskip -.25cm
-\includegraphics[width=6.3in]{sim_ic}
+\includegraphics[width=6.3in]{../graphs/sim_ic}
 \caption{\label{simic} BIC (with AIC in light gray) for our simulated linear regression example, on $\gamma = 0,2,10$. }
 
 \vskip .7cm
 { \hskip 2.5cm$\bs{\gamma=0}$\hskip 4cm$\bs{\gamma=2}$\hskip 4cm$\bs{\gamma=10}$}
-\includegraphics[width=6.3in]{sim_cv}
+\includegraphics[width=6.3in]{../graphs/sim_cv}
 \caption{\label{simcv} 5-fold CV results for our simulated data example. 
 Points-and-bars show mean OOS deviance $\pm 1$se. Minimum and 1se selection rules are marked with dotted lines. }
 \vspace{-.25cm}
@@ -1005,7 +1003,7 @@ under more concave penalties.
 
 \begin{figure}[tbh] \vskip -.25cm { \hskip
 2.5cm$\bs{\gamma=0}$\hskip 4cm$\bs{\gamma=2}$\hskip 4cm$\bs{\gamma=10}$}
-\includegraphics[width=6.3in]{sim_oos} \caption{\label{simoos}
+\includegraphics[width=6.3in]{../graphs/sim_oos} \caption{\label{simoos}
 Out-of-sample simulation experiment results. } \end{figure}
 
 AIC and BIC values along the paths are plotted in Figure \ref{simic}. Minimum
@@ -1051,7 +1049,7 @@ concavity offered by a gamma lasso with small $\gamma$.
 
 \begin{figure}[p]
 \vskip -1cm
-\hskip -.5cm \includegraphics[width=6.5in]{nhl_ic}
+\hskip -.5cm \includegraphics[width=6.5in]{../graphs/nhl_ic}
 \caption{ \label{nhlic} Hockey example AIC and BIC for 
  100 $\log(\lambda)$ from -6 to -10.6 in models with  
  $\log_{10}\gamma = -5 \ldots 5$ and lasso $\gamma=0$.  `X' mark the 
@@ -1059,13 +1057,13 @@ concavity offered by a gamma lasso with small $\gamma$.
 }
 
 \vskip 1cm
-\includegraphics[width=6.4in]{nhl_paths}
+\includegraphics[width=6.4in]{../graphs/nhl_paths}
 \caption{\label{nhlpaths} Hockey example regularization paths for 
 $\gamma = 10^{\{-1,0,1\}}$; minimum AIC and BIC are marked with the dashed vertical lines.
 Positions are shaded grey:goalie, blue:defense, green:center, red:winger.}
 
 \vskip 1cm
-\includegraphics[width=6.4in]{nhl_cv}
+\includegraphics[width=6.4in]{../graphs/nhl_cv}
 \caption{\label{nhlcv} Hockey example 20-fold CV: mean OOS deviance $\pm 1$se, with minimum and 1se selection rules marked with black dotted lines.  
 Dashed (orange) lines show AIC and BIC selections. }
 \end{figure}
