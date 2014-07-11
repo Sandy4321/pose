@@ -1,8 +1,31 @@
-x <- matrix(rnorm(100),ncol=5)
-x <- t(t(x)/sqrt(colSums(x^2)/20))
-x <- t(t(x)-colMeans(x))
-g <- crossprod(x)
-p <- x%*%solve(g)%*%t(x)-diag(20)
+
+
+n <- 50
+p <- 50
+rho <- 0.98
+xvar <- matrix(ncol=p,nrow=p)
+for(i in 1:p) for(j in i:p) xvar[i,j] <- rho^{abs(i-j)}
+
+x <- matrix(rnorm(n*p),ncol=p)%*%chol(xvar)
+x <- scale(x)*sqrt(n/(n-1))
+
+s <- 5
+g <- crossprod(x[,1:s])/n
+d <- t(x[,-(1:s)])%*%(x[,1:s])/n
+one <- rep(1,s)
+
+## bickle assumption 2: this < 1/2c0
+max(abs(d%*%one))/min(eigen(g)$val)
+
+## irrepresentable
+max(abs(d%*%solve(g)%*%one))
+
+
+
+
+
+
+p <- %*%solve(g)%*%t(x)-diag(20)
 
 b <- c(3,2,1,0,0)
 e <- rnorm(20)
@@ -14,6 +37,9 @@ lm(y~x)
 xxi <- solve(g[1:3,1:3])
 xxxi <- x[,1:3]%*%xxi 
 dj <- t(x[,4])%*%xxxi
+
+
+
 library(Matrix)
 library(gamlr)
 library(snow)
