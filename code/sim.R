@@ -11,6 +11,9 @@ y <- y-mean(y)
 
 lm(y~x)
 
+xxi <- solve(g[1:3,1:3])
+xxxi <- x[,1:3]%*%xxi 
+dj <- t(x[,4])%*%xxxi
 library(Matrix)
 library(gamlr)
 library(snow)
