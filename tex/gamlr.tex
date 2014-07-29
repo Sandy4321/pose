@@ -410,6 +410,43 @@ Finally, many
 practitioners familiar with classical methods (and versions of subset
 selection) will seek out low-bias estimates, regardless of the application.
 
+\subsection{Sparse Approximation for Prediction}
+
+One advantage of diminishing bias is that you reduce the difference between
+estimated $\hat y$ and prediction from an optimal sparse approximation to
+$\bs{\beta}$ (e.g., the MLE restriced to large coefficients).  Suppose each
+response can be written $y = f(\bm{x}) + \varepsilon$, where $f$ is the `true'
+best predictor for $y \mid\bm{x}$, and $\bm{f} = [f(\bm{x}_1)\cdots
+f(\bm{x}_n)]'$.  Say $S \subset 1\ldots p$ with $|S|=s$, denote vectors
+restricted to $S$ as $\bs{\beta}_S = [\beta_j:j\in S]'$, etc, and write
+$f_S(\bm{x}) = \alpha + \bm{x}'\bs{\beta} =  \alpha + \bm{x}_s'\bs{\beta}_S$
+as a sparse approximation  with $\beta_j = 0$ for $j\in S^c$.  It is
+straightforward to show that an appropriately weighted $L_1$ penalized
+deviance estimator will give predictions close to those from any such sparse
+approximation.  Our results are adapted from those in
+\citet{van_de_geer_adaptive_2011}.
+
+
+\begin{prop} \label{sparseapprox}  Consider the weighted $L_1$ minimization from (\ref{l1pen}) in
+Algorithm 1, under squared-error loss $l(\hat\alpha,\bs{\hat\beta}) =
+\frac{1}{2}\|\bm{\hat y} - \bm{f} - \bs{\varepsilon}\|^2$.   Assume weights
+$\|\bs{\omega}_S\| = c_S\sqrt{s}/2$ and $\omega_j = 1$ $\forall j \in S^c$.
+Then for $\lambda$ large enough that $\max_j |\bs{x}_j'\bs{\varepsilon}| <
+n\lambda/4$, with $\bs{x}_j$ the $j^{th}$ design column, 
+\begin{equation} \frac{\|\bm{\hat y} - \bm{f}\|^2}{2n}\leq
+\frac{\|\bm{f}_S-\bm{f}\|^2}{n} +  \frac{3n\lambda^2 (1+c_S)^2 s}{4\phi^2(2(1+c_S), s)}
+\end{equation} 
+where $\phi^2(L,s)$ is the restricted eigenvalue
+$
+\phi^2(L,s) = \min_{\{\bm{v}: |\bm{v}_{S^c}| \leq \sqrt{s}L\|\bm{v}_S\|\}}\bm{v}'\bs{\Sigma}\bm{v}
+$
+ defined on gram matrix $\bs{\Sigma} = \bm{X}'\bm{X}/n$.
+\end{prop}
+
+
+\subsection{Support Recovery}
+
+
 \section{Stability and Continuity}
 \label{stability}
 
@@ -608,7 +645,7 @@ quasi-Newton step \citep[e.g.,][]{lange_numerical_2010} as in Appendix
 worth the extra computational overhead.}
 
 \vspace{.25cm}
-\begin{algorithm}[h]
+\begin{algorithm}[ht]
 \vspace{.25cm}
 \caption{Coordinate descent\label{bmove}}
 
@@ -1141,7 +1178,7 @@ complexity; use your knowledge of the application-at-hand (and OOS experiments
 if possible) to make a final decision.
 
 
-\begin{figure}[h!]
+\begin{figure}[ht]
 
 \vskip 1cm
 {\footnotesize\sgl
@@ -1247,6 +1284,33 @@ x_{ij}^2q_i(1-q_i).
 \]
 
 
+\subsection{Proofs for Section 4}
+
+
+\subsubsection*{Proposition \ref{sparseapprox}} 
+
+This result is a direct adaptation of those in the book by \cite{buhlmann_statistics_2011}.
+
+\noindent We know that at convergence
+\[
+\|\bm{\hat y}-\bm{f}\|^2 + 2\bs{\varepsilon}'\bm{\hat y} + n\lambda\bs{\omega}'|\bs{\hat\beta}| \leq
+\|\bm{f}_S-\bm{f}\|^2 + 2\bs{\varepsilon}'\bm{f}_S + n\lambda\bs{\omega}_S'|\bs{\beta}_S|.
+\]
+By assumption $|\bs{\varepsilon}'\bs{x}_j|\leq n\lambda/4$ $\forall j$, so that $|\bs{\varepsilon}'\bm{\hat y}| = |\bs{\varepsilon}'\bm{X}\bs{\hat\beta}|
+\leq n\lambda|\bs{\hat\beta}_{S^c}|/4 + |\bs{\varepsilon}'\bm{X}_S\bs{\hat\beta}_S|$ and
+\begin{align*}
+\|\bm{\hat y}-\bm{f}\|^2 + \frac{n\lambda}{2}|\bs{\hat\beta}_{S^c}| &\leq 
+\|\bm{f}_S-\bm{f}\|^2 + |2\bs{\varepsilon}'\bm{X}_S (\bs{\hat\beta}_S - \bs{\beta}_S)| + n\lambda\bs{\omega}_S'|\bs{\hat\beta}_S - \bs{\beta}_S|\\
+&\leq \|\bm{f}_S-\bm{f}\|^2 + \frac{n\lambda}{2}|\bs{\hat\beta}_S - \bs{\beta}_S| + n\lambda\|\bs{\omega}_S\|\|\bs{\hat\beta}_S - \bs{\beta}_S\|\\
+&\leq \|\bm{f}_S-\bm{f}\|^2 + \frac{n\lambda\sqrt{s}}{2}\left(1+c_S\right)\|\bs{\hat\beta}_S - \bs{\beta}_S\|
+\end{align*}
+where we recall $c_S = 2\|\bs{\omega}_S\|/\sqrt{s}$.
+
+If the RHS above is less than or equal to $2\|\bm{f}_S-\bm{f}\|^2 $ then we are done.  Otherwise,
+\begin{align*}
+\|\bm{\hat y}-\bm{f}\|^2 + \frac{n\lambda}{2}|\bs{\hat\beta}_{S^c}| & <
+n\lambda \sqrt{s}\left(1+c_S\right)\|\bs{\hat\beta}_S - \bs{\beta}_S\|
+\end{align*}
 
 \subsection{Quasi-Newton acceleration}
 \label{qn}
