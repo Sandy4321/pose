@@ -444,7 +444,13 @@ $
  defined on gram matrix $\bs{\Sigma} = \bm{X}'\bm{X}/n$.
 \end{prop}
 
-In the gamma lasso path context, where 
+\noindent {\bf Remarks}
+
+$\bullet$ For $j \in F=\hat S \cup S_\star^c$, the KKT conditions without any assumptions on irrepresentability imply
+\[
+1 = \frac{1+\gamma\beta_j^{t-1}}{n\lambda_t}|\bs{x}_j'(\bm{\hat y} - \bm{f}-\varepsilon)|.
+\]
+Thus $n^2\lambda^2|F|^2/\|1+\gamma\beta_F^{t-1}\| < n^2\lambda^2\|\bs{\omega}_F\|$
 
 \subsection{Support Recovery}
 
@@ -1295,8 +1301,8 @@ This result is a direct adaptation of those in the book by \cite{buhlmann_statis
 
 \noindent We know that at convergence
 \[
-\|\bm{\hat y}-\bm{f}\|^2 + 2\bs{\varepsilon}'\bm{\hat y} + n\lambda\bs{\omega}'|\bs{\hat\beta}| \leq
-\|\bm{f}_S-\bm{f}\|^2 + 2\bs{\varepsilon}'\bm{f}_S + n\lambda\bs{\omega}_S'|\bs{\beta}_S|.
+\|\bm{\hat y}-\bm{f}\|^2 - 2\bs{\varepsilon}'\bm{\hat y} + n\lambda\bs{\omega}'|\bs{\hat\beta}| \leq
+\|\bm{f}_S-\bm{f}\|^2 - 2\bs{\varepsilon}'\bm{f}_S + n\lambda\bs{\omega}_S'|\bs{\beta}_S|.
 \]
 By assumption $|\bs{\varepsilon}'\bs{x}_j|\leq n\lambda/4$ $\forall j$, so that $|\bs{\varepsilon}'\bm{\hat y}| = |\bs{\varepsilon}'\bm{X}\bs{\hat\beta}|
 \leq n\lambda|\bs{\hat\beta}_{S^c}|/4 + |\bs{\varepsilon}'\bm{X}_S\bs{\hat\beta}_S|$ and

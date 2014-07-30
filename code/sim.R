@@ -1,13 +1,28 @@
 
 
 n <- 50
-p <- 50
+p <- 5
 rho <- 0.98
 xvar <- matrix(ncol=p,nrow=p)
 for(i in 1:p) for(j in i:p) xvar[i,j] <- rho^{abs(i-j)}
 
 x <- matrix(rnorm(n*p),ncol=p)%*%chol(xvar)
 x <- scale(x)*sqrt(n/(n-1))
+gi <- solve(crossprod(x))
+e <- rnorm(n)
+e <- e-mean(e)
+y <- rowSums(x)+e
+
+H <- x%*%gi%*%t(x)
+B <- gi%*%t(x)%*%y
+BS <- B + gi%*%t(x)%*%y
+
+fs <- x%*%BS
+cor(fs,(diag(n)-H)%*%e)
+
+
+
+
 
 s <- 5
 g <- crossprod(x[,1:s])/n
