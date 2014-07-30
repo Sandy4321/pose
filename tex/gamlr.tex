@@ -434,7 +434,7 @@ $\|\bs{\omega}_S\| = c_S\sqrt{s}/2$ and $\omega_j = 1$ $\forall j \in S^c$.
 Then for $\lambda$ large enough that $\max_j |\bs{x}_j'\bs{\varepsilon}| <
 n\lambda/4$, with $\bs{x}_j$ the $j^{th}$ design column, 
 \begin{equation} \frac{\|\bm{\hat y} - \bm{f}\|^2}{2n}\leq
-\frac{\|\bm{f}_S-\bm{f}\|^2}{n} +  \frac{3n\lambda^2 (1+c_S)^2 s}{4\phi^2(2(1+c_S), s)}
+\frac{\|\bm{f}_S-\bm{f}\|^2}{n} +  \frac{3\lambda^2 (1+c_S)^2 s}{4\phi^2(2(1+c_S), s)}
 \end{equation} 
 where $\phi^2(L,s)$ is the restricted eigenvalue
 $
@@ -1306,11 +1306,17 @@ By assumption $|\bs{\varepsilon}'\bs{x}_j|\leq n\lambda/4$ $\forall j$, so that 
 \end{align*}
 where we recall $c_S = 2\|\bs{\omega}_S\|/\sqrt{s}$.
 
-If the RHS above is less than or equal to $2\|\bm{f}_S-\bm{f}\|^2 $ then we are done.  Otherwise,
+If $\|\bm{\hat y}-\bm{f}\|^2 + \frac{n\lambda}{2}|\bs{\hat\beta}_{S^c}|\leq2\|\bm{f}_S-\bm{f}\|^2 $ then we are done.  Otherwise,
+$\|\bm{\hat y}-\bm{f}\|^2 + \frac{n\lambda}{2}|\bs{\hat\beta}_{S^c}| <
+n\lambda \sqrt{s}\left(1+c_S\right)\|\bs{\hat\beta}_S - \bs{\beta}_S\|$.  By definition of the restricted eigenvalue, this yields $\|\bs{\hat\beta}_S - \bs{\beta}_S\| < 
+\|\bm{\hat y} - \bm{f}_S\|/[\sqrt{n}\phi(2(1+c_S),S)] < \left[\|\bm{\hat y} - \bm{f}\| + \|\bm{f}_S-\bm{f}\|\right]/[\sqrt{n}\phi(2(1+c_S),S)]$ and thus
 \begin{align*}
-\|\bm{\hat y}-\bm{f}\|^2 + \frac{n\lambda}{2}|\bs{\hat\beta}_{S^c}| & <
-n\lambda \sqrt{s}\left(1+c_S\right)\|\bs{\hat\beta}_S - \bs{\beta}_S\|
+\|\bm{\hat y}-\bm{f}\|^2 &\leq \frac{\sqrt{n}\lambda\sqrt{s}(1+c_S)}{\phi(2(1+c_S),S)}
+\left[\|\bm{\hat y} - \bm{f}\| + \|\bm{f}_S-\bm{f}\|\right] \\
+&\leq  \|\bm{f}_S-\bm{f}\|^2 + \frac{3n\lambda^2(1+c_S)^2s}{4\phi^2(2(1+c_S),S)} +
+\frac{\|\bm{\hat y}-\bm{f}\|^2}{2}
 \end{align*}
+since $0 \leq 2(\frac{a}{2}-c)^2 + (b-c)^2 = \frac{a^2}{2}+b^2+3c^2-2c(a+b)$ for any $a,b,c$.  \hfill$\square$
 
 \subsection{Quasi-Newton acceleration}
 \label{qn}
