@@ -1,11 +1,15 @@
 
-
 n <- 50
 p <- 5
-rho <- 0.98
+rho <- 0
 xvar <- matrix(ncol=p,nrow=p)
 for(i in 1:p) for(j in i:p) xvar[i,j] <- rho^{abs(i-j)}
 
+
+moms <- c()
+
+B <- 100
+for(b in 1:B){
 x <- matrix(rnorm(n*p),ncol=p)%*%chol(xvar)
 x <- scale(x)*sqrt(n/(n-1))
 gi <- solve(crossprod(x))
@@ -15,14 +19,24 @@ y <- rowSums(x)+e
 
 H <- x%*%gi%*%t(x)
 B <- gi%*%t(x)%*%y
-BS <- B + gi%*%t(x)%*%y
+f <- lm(y~x)$fitted
 
-fs <- x%*%BS
-cor(fs,(diag(n)-H)%*%e)
+summary(m3 <- lm(y~x[,1:3]))
+summary(m4 <- lm(y~x[,1:4]))
+moms <- cbind(moms, 
+	c(cov(m3$resid,x[,4])^2, (var(m3$resid)-var(m4$resid))))
+print(b)
+}
+
+range(moms[2,]-moms[1,])
+plot(moms[1,],moms[2,]-moms[1,])
 
 
+summary(m4)$r.square - summary(m3)$r.square
+summary(me <- lm(m3$resid~x[,4]))
 
-
+ff <- m3$fitted + me$fitted
+f3 <- m3$fitted
 
 s <- 5
 g <- crossprod(x[,1:s])/n

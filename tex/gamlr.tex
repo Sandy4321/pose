@@ -440,8 +440,7 @@ n\lambda/4$, with $\bs{x}_j$ the $j^{th}$ design column,
 where $\phi^2(L,s)$ is the restricted eigenvalue
 $
 \phi^2(L,s) = \min_{\{\bm{v}: |\bm{v}_{S^c}| \leq \sqrt{s}L\|\bm{v}_S\|\}}\bm{v}'\bs{\Sigma}\bm{v}
-$
- defined on gram matrix $\bs{\Sigma} = \bm{X}'\bm{X}/n$.
+$ defined on gram matrix $\bs{\Sigma} = \bm{X}'\bm{X}/n$.
 \end{prop}
 
 \noindent {\bf Remarks}
@@ -451,6 +450,8 @@ $\bullet$ For $j \in F=\hat S \cup S_\star^c$, the KKT conditions without any as
 1 = \frac{1+\gamma\beta_j^{t-1}}{n\lambda_t}|\bs{x}_j'(\bm{\hat y} - \bm{f}-\varepsilon)|.
 \]
 Thus $n^2\lambda^2|F|^2/\|1+\gamma\beta_F^{t-1}\| < n^2\lambda^2\|\bs{\omega}_F\|$
+
+$\bullet$  We refer to {\it stagewise} regression as iterative fitting of new covariates to the residuals of an existing linear model; the term has more recently been appropriated by HTF as a version of LARS. 
 
 \subsection{Support Recovery}
 
