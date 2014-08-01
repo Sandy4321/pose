@@ -8,7 +8,7 @@ for(i in 1:p) for(j in i:p) xvar[i,j] <- rho^{abs(i-j)}
 
 moms <- c()
 
-B <- 1000
+B <- 100
 for(b in 1:B){
 
 x <- matrix(rnorm(n*p),ncol=p)%*%chol(xvar)
@@ -25,7 +25,7 @@ f <- lm(y~x)$fitted
 summary(m3 <- lm(y~x[,1:3]))
 summary(m4 <- lm(y~x[,1:4]))
 moms <- cbind(moms, 
-	c(mean(m3$resid*x[,4])^2, (mean(m3$resid^2)-mean(m4$resid^2))))
+	c(sum((m3$resid*x[,4]))^2, n*(sum(m3$resid^2)-sum(m4$resid^2))))
 print(b)
 }
 
