@@ -1,15 +1,16 @@
 
-n <- 50
+n <- 500
 p <- 5
-rho <- 0
+rho <- -0.1
 xvar <- matrix(ncol=p,nrow=p)
 for(i in 1:p) for(j in i:p) xvar[i,j] <- rho^{abs(i-j)}
 
 
 moms <- c()
 
-B <- 100
+B <- 1000
 for(b in 1:B){
+
 x <- matrix(rnorm(n*p),ncol=p)%*%chol(xvar)
 x <- scale(x)*sqrt(n/(n-1))
 gi <- solve(crossprod(x))
@@ -24,7 +25,7 @@ f <- lm(y~x)$fitted
 summary(m3 <- lm(y~x[,1:3]))
 summary(m4 <- lm(y~x[,1:4]))
 moms <- cbind(moms, 
-	c(cov(m3$resid,x[,4])^2, (var(m3$resid)-var(m4$resid))))
+	c(mean(m3$resid*x[,4])^2, (mean(m3$resid^2)-mean(m4$resid^2))))
 print(b)
 }
 
