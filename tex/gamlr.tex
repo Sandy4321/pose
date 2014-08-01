@@ -9,7 +9,8 @@
 \usepackage{algorithm}
 
 \newtheorem{prop}{\sc Proposition}[section]
-\renewcommand{\qedsymbol}{}
+\newtheorem{theorem}{\sc Theorem}[section]
+\newtheorem{definition}{\sc Definition}[section]
 
 
 \marginsize{1.1in}{.9in}{.3in}{1.4in}
@@ -415,43 +416,71 @@ selection) will seek out low-bias estimates, regardless of the application.
 
 One advantage of diminishing bias is that you reduce the difference between
 estimated $\hat y$ and prediction from an optimal sparse approximation to
-$\bs{\beta}$ (e.g., the MLE restriced to large coefficients).  Suppose each
-response can be written $y = f(\bm{x}) + \varepsilon$, where $f$ is the `true'
-best predictor for $y \mid\bm{x}$, and $\bm{f} = [f(\bm{x}_1)\cdots
-f(\bm{x}_n)]'$.  Say $S \subset 1\ldots p$ with $|S|=s$, denote vectors
-restricted to $S$ as $\bs{\beta}_S = [\beta_j:j\in S]'$, etc, and write
+$\bs{\beta}$ (e.g., the MLE restriced to large coefficients).  Say $S \subset 1\ldots p$ with $|S|=s$, denote vectors
+restricted to $S$ as $\bs{\beta}_S = [\beta_j:j\in S]'$, $\bm{X}_S$, etc, and write
 $f_S(\bm{x}) = \alpha + \bm{x}'\bs{\beta} =  \alpha + \bm{x}_s'\bs{\beta}_S$
-as a sparse approximation  with $\beta_j = 0$ for $j\in S^c$.  It is
-straightforward to show that an appropriately weighted $L_1$ penalized
-deviance estimator will give predictions close to those from any such sparse
-approximation.  Our results are adapted from those in
-\citet{van_de_geer_adaptive_2011}.
+as a sparse approximation  with $\beta_j = 0$ for $j\in S^c$, and say 
+$\bm{f}_S = [f_S(\bm{x}_1)\cdots
+f_S(\bm{x}_n)]'$. 
 
-
-\begin{prop} \label{sparseapprox}  Consider the weighted $L_1$ minimization from (\ref{l1pen}) in
-Algorithm 1, under squared-error loss $l(\hat\alpha,\bs{\hat\beta}) =
-\frac{1}{2}\|\bm{\hat y} - \bm{f} - \bs{\varepsilon}\|^2$.   Assume weights
-$\|\bs{\omega}_S\| = c_S\sqrt{s}/2$ and $\omega_j = 1$ $\forall j \in S^c$.
-Then for $\lambda$ large enough that $\max_j |\bs{x}_j'\bs{\varepsilon}| <
-n\lambda/4$, with $\bs{x}_j$ the $j^{th}$ design column, 
-\begin{equation} \frac{\|\bm{\hat y} - \bm{f}\|^2}{2n}\leq
-\frac{\|\bm{f}_S-\bm{f}\|^2}{n} +  \frac{3\lambda^2 (1+c_S)^2 s}{4\phi^2(2(1+c_S), s)}
-\end{equation} 
-where $\phi^2(L,s)$ is the restricted eigenvalue
+\begin{definition}
+$\phi^2(L,S)$ is the restricted eigenvalue
 $
-\phi^2(L,s) = \min_{\{\bm{v}: |\bm{v}_{S^c}| \leq \sqrt{s}L\|\bm{v}_S\|\}}\bm{v}'\bs{\Sigma}\bm{v}
+\phi^2(L,S) = \min_{\{\bm{v}: |\bm{v}_{S^c}| \leq L\|\bm{v}_S\|\}}\bm{v}'\bs{\Sigma}\bm{v}
 $ defined on gram matrix $\bs{\Sigma} = \bm{X}'\bm{X}/n$.
+\end{definition}
+
+\begin{prop} \label{sparseapprox}  Consider squared-error loss $l(\bs{\beta}) =
+\frac{1}{2}\|\bm{X}\bs{\beta}-\bm{y}\|^2$, and suppose $\bs{\beta}_S$ optimizes the $L_0$ penalized objective $l(\bs{\beta}) + n\nu$ with $S<n$.  Write $\bs{\hat\beta}$ as solution to the weighted $L_1$ minimization from $l(\bs{\beta}) + n\lambda\bs{\omega}'|\bs{\beta}|$.
+
+Then  
+$\omega^{\mr{min}}_{S^c}\lambda > \sqrt{2\nu}$ while $\phi^2(L,S) > 0$ for 
+ $L = \|\bs{\omega}_S\|/(\omega^{\mr{min}}_{S^c}-\sqrt{2\nu}/\lambda)$ implies
+\begin{equation} \frac{\|\bm{X}(\bs{\hat\beta}-\bs{\beta}_S)\|^2}{n}\leq
+\frac{4\lambda^2 \|\bs{\omega}_S\|^2}{\phi^2(L, S)}
+\end{equation} 
 \end{prop}
+\begin{proof}
+Say $\bm{e} = \bm{y}-\bm{f}_s = (\bm{I}-\bm{H}_S)\bm{y}$ where 
+$\bm{H}_S = \bm{X}_S(\bm{X}_S'\bm{X}_S)^{-1}\bm{X}_S'$, so that
+\begin{equation}
+\|\bm{\hat y}-\bm{y}\|^2 = \|\bm{\hat y}-\bm{f}_S + \bm{e}\|^2
+= \|\bm{\hat y}-\bm{f}_S\|^2 + \|\bm{e}\|^2 - 2\bm{\hat y}'\bm{e}.
+\end{equation}
+Also, 
+\begin{equation}\bm{\hat y}'\bm{e} = \bm{\hat y}'(\bm{I}-\bm{H}_S)\bm{y} =
+\bs{\hat\beta}'\bm{X}'(\bm{y}-\bm{X}\bs{\beta}_S) = 
+\sum_{j\in S^c} \hat\beta_j\bs{x}_j'(\bm{y}-\bm{X}\bs{\beta}_S)
+\end{equation}
+and 
+\begin{equation}
+\left(\frac{\bs{x}_j'(\bm{y}-\bm{X}\bs{\beta}_S)}{n}\right)^2
+\leq \mr{MSE}_S - \mr{MSE}_{S+j} < 2\nu 
+\end{equation}
+So that $|\bs{x}_j'(\bm{y}-\bm{X}\bs{\beta}_S)| < n\sqrt{2\nu}~~\forall j$.
+
+Hence,
+\begin{align}
+\frac{\|\bm{X}(\bs{\hat\beta}-\bs{\beta}_S)\|^2}{2} 
+  + n\lambda\bs{\omega}_{S^c}'|\bs{\hat\beta}_{S^c}| - \bm{\hat y}'(\bm{I}-\bm{H}_S)\bm{y}
+  &~\leq~ n\lambda\bs{\omega}_{S}'|\bs{\hat\beta}_{S}-\bs{\beta}_S| \\
+  \Rightarrow ~~ \frac{\|\bm{X}(\bs{\hat\beta}-\bs{\beta})\|^2}{2}
+  + n\left(\lambda\omega^{\mr{min}}_{S^c}-\sqrt{2\nu}\right)|\bs{\hat\beta}_{S^c}|
+  &~\leq~ n\lambda\|\bs{\omega}_S\|\|\bs{\hat\beta}_S-\bs{\beta}_S\|\\
+    \Rightarrow ~~ \frac{\|\bm{X}(\bs{\hat\beta}-\bs{\beta})\|^2}{2}
+  &~\leq~ \frac{n\lambda\|\bs{\omega}_S\|\|\bm{X}(\bs{\hat\beta}-\bs{\beta})\|}
+  {\sqrt{n}\phi(L, S)}\\
+ \Rightarrow ~~ \frac{\|\bm{X}(\bs{\hat\beta}-\bs{\beta})\|}{\sqrt{n}}
+ &~\leq~\frac{2\lambda \|\bs{\omega}_S\|}{\phi(L, S)}
+\end{align}
+
+\end{proof}
 
 \noindent {\bf Remarks}
 
-$\bullet$ For $j \in F=\hat S \cup S_\star^c$, the KKT conditions without any assumptions on irrepresentability imply
-\[
-1 = \frac{1+\gamma\beta_j^{t-1}}{n\lambda_t}|\bs{x}_j'(\bm{\hat y} - \bm{f}-\varepsilon)|.
-\]
-Thus $n^2\lambda^2|F|^2/\|1+\gamma\beta_F^{t-1}\| < n^2\lambda^2\|\bs{\omega}_F\|$
-
 $\bullet$  We refer to {\it stagewise} regression as iterative fitting of new covariates to the residuals of an existing linear model; the term has more recently been appropriated by HTF as a version of LARS. 
+
+$\bullet$ $\bs{x}_j$ the $j^{th}$ design column.
 
 \subsection{Support Recovery}
 
@@ -1293,11 +1322,31 @@ x_{ij}^2q_i(1-q_i).
 \]
 
 
-\subsection{Proofs for Section 4}
+\subsection{Extra Proofs}
+
+It is
+straightforward to show that an appropriately weighted $L_1$ penalized
+deviance estimator will give predictions close to those from any such sparse
+approximation.  Our results are adapted from those in
+\citet{van_de_geer_adaptive_2011}.
 
 
-\subsubsection*{Proposition \ref{sparseapprox}} 
+\begin{prop} Consider the weighted $L_1$ minimization from (\ref{l1pen}) in
+Algorithm 1, under squared-error loss $l(\hat\alpha,\bs{\hat\beta}) =
+\frac{1}{2}\|\bm{\hat y} - \bm{f} - \bs{\varepsilon}\|^2$.   Assume weights
+$\|\bs{\omega}_S\| = c_S\sqrt{s}/2$ and $\omega_j = 1$ $\forall j \in S^c$.
+Then for $\lambda$ large enough that $\max_j |\bs{x}_j'\bs{\varepsilon}| <
+n\lambda/4$, with $\bs{x}_j$ the $j^{th}$ design column, 
+\begin{equation} \frac{\|\bm{\hat y} - \bm{f}\|^2}{2n}\leq
+\frac{\|\bm{f}_S-\bm{f}\|^2}{n} +  \frac{3\lambda^2 (1+c_S)^2 s}{4\phi^2(2(1+c_S), s)}
+\end{equation} 
+where $\phi^2(L,s)$ is the restricted eigenvalue
+$
+\phi^2(L,s) = \min_{\{\bm{v}: |\bm{v}_{S^c}| \leq \sqrt{s}L\|\bm{v}_S\|\}}\bm{v}'\bs{\Sigma}\bm{v}
+$ defined on gram matrix $\bs{\Sigma} = \bm{X}'\bm{X}/n$.
+\end{prop}
 
+\begin{proof}
 This result is a direct adaptation of those in the book by \cite{buhlmann_statistics_2011}.
 
 \noindent We know that at convergence
@@ -1325,7 +1374,17 @@ n\lambda \sqrt{s}\left(1+c_S\right)\|\bs{\hat\beta}_S - \bs{\beta}_S\|$.  By def
 &\leq  \|\bm{f}_S-\bm{f}\|^2 + \frac{3n\lambda^2(1+c_S)^2s}{4\phi^2(2(1+c_S),S)} +
 \frac{\|\bm{\hat y}-\bm{f}\|^2}{2}
 \end{align*}
-since $0 \leq 2(\frac{a}{2}-c)^2 + (b-c)^2 = \frac{a^2}{2}+b^2+3c^2-2c(a+b)$ for any $a,b,c$.  \hfill$\square$
+since $0 \leq 2(\frac{a}{2}-c)^2 + (b-c)^2 = \frac{a^2}{2}+b^2+3c^2-2c(a+b)$ for any $a,b,c$.  
+\end{proof}
+
+
+\noindent {\bf Remarks}
+
+$\bullet$ For $j \in F=\hat S \cup S_\star^c$, the KKT conditions without any assumptions on irrepresentability imply
+\[
+1 = \frac{1+\gamma\beta_j^{t-1}}{n\lambda_t}|\bs{x}_j'(\bm{\hat y} - \bm{f}-\varepsilon)|.
+\]
+Thus $n^2\lambda^2|F|^2/\|1+\gamma\beta_F^{t-1}\| < n^2\lambda^2\|\bs{\omega}_F\|$
 
 \subsection{Quasi-Newton acceleration}
 \label{qn}
