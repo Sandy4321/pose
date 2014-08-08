@@ -518,7 +518,7 @@ $\omega^{\mr{min}}_{S^c} > (\sigma/\lambda)\sqrt{2/n}$, comparison to $C_p$ sugg
 
 \subsection{Sign Recovery}
 
-Two related goals in high-dimensional estimation are  support recovery -- having the set $\{j: \hat\beta_j \neq 0\} = \{j: \beta_j \neq 0\}$ for some `true' $\bs{\beta}$ -- and  sign recovery -- in addition, $\mr{sgn}(\hat\beta_j) = \mr{sgn}(\beta_j) ~\forall~ j$.  For standard lasso estimated $\bs{\hat\beta}$, many authors have shown \citep[e.g.,][]{buhlmann_statistics_2011,zou_adaptive_2006} that to get exact support recovery asymptotically or with high probability requires an {\it irrepresentability condition} which limits the size of least-squares projections from `true support' onto spurious covariates.  
+Two related goals in high-dimensional estimation are  support recovery -- having the set $\{j: \hat\beta_j \neq 0\} = \{j: \beta_j \neq 0\}$ for some `true' $\bs{\beta}$ -- and  sign recovery -- in addition, $\mr{sgn}(\bs{\hat\beta}) = \mr{sgn}(\bs{\beta})$.  For standard lasso estimated $\bs{\hat\beta}$, many authors have shown \citep[e.g.,][]{buhlmann_statistics_2011,zou_adaptive_2006} that to get exact support recovery asymptotically or with high probability requires an {\it irrepresentability condition} which limits the size of least-squares projections from `true support' onto spurious covariates.  
 \begin{definition} 
 The $(\theta,S,\bm{v})$-irrepresentable condition for $\theta\in[0,1]$ and $\bm{v}\in \ds{R}^s$ holds that, 
 \begin{equation}\label{irrep}
@@ -535,9 +535,24 @@ support recovery {\it without} such conditions; see, e.g.,
 \cite{fan_strong_2014} for a recent overview that provides finite sample
 theory.  
 
+Our exposition here will compare $\hat S = \{j: \hat\beta_j \neq 0\}$, for $\bs{\hat\beta}$ from weighted $L_1$ penalized estimation, to $S = \{j: \beta^\nu_j \neq 0\}$ for $\beta^\nu$ from $L_0$ penalized estimation as in Theorem \ref{sparseapprox}.  The result uses an irrepresentable condition with $\bm{v} = \bs{\omega}_S$, an assumption that becomes less restrictive as one is able to shrink weights $\omega_j$ for $j\in S$.
 
+\begin{theorem}
+Under the same setting of Theorem \ref{sparseapprox}, for $\lambda > \sqrt{2\nu}$, if
+\begin{equation}
+\mr{(i)}~~~\bs{x}_j'\bm{y} > \lambda\omega_j ~~\forall~j 
+~~~~~~~~~~\mr{(ii)}~~~|\bs{x}_j'\bm{X}_S(\bm{X}_S'\bm{X}_S)^{-1}\bs{\omega}_S| \leq 1 - \frac{\sqrt{2\nu}}{\lambda}
+\end{equation}
+then $\mr{sgn}(\bs{\hat\beta}) = \mr{sgn}(\bs{\beta}^\nu)$.
+\end{theorem}
 
 \noindent {\bf Remarks}
+
+\noindent $\bullet$ A path-wise interpretation is that you get (i) before (ii) fails, or rather that $\gamma$ is big enough so that elements of $\bs{\omega}_S$ shrink fast enough to allow this to happen.
+
+\noindent $\bullet$ Connection to restricted regressions, and $\sqrt{s}L$ from above.
+
+\noindent $\bullet$ Connection to marginal regression screening, which should also have nice stability properties.
 
 \noindent $\bullet$ Without any irrepresentability condition,  limits on false discovery are more pessimistic.  For example, under the setting of Theorem \ref{sparseapprox},  local optimality
 conditions imply that for $j \in S^c \cap \hat S$ we have
