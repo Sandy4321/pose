@@ -452,7 +452,7 @@ Every goal back to 2002-2003:
 Our `regression plus-minus' model {\gr({\small Gramacy, Jensen, Taddy})}:
 \[
 \mr{logit}\left[\mr{p}(\text{home~team~scored~goal}~i)\right] = \alpha +
-\bm{u}'\bs{\phi} + \bm{x}'\bs{\beta}, 
+\bm{u}'\bs{\varphi} + \bm{x}'\bs{\beta}, 
 \]
 
 
@@ -460,13 +460,13 @@ $x_{ij}=1$ if player $j$ was on the home team and on ice for goal $i$, $x_{ij}=-
 $j$ on ice, and $x_{ij}=0$ otherwise.  
 
 \vskip .1cm 
-$\bm{u}$ is a vector of indicators for special-teams scenarios.
+$\bm{u}$ includes controls: team$\times$season, special-teams scenarios.
 
 \vskip .25cm {\nv $\Rightarrow \beta_j$ is the  effect of a player on the log odds
 that, given a goal has been scored, the goal was scored by his team.}
 
 \vskip .25cm
-We'll fit a GL path  for $\bs{\beta}$, leave $\bs{\phi}$ unpenalized.
+We'll fit a GL path  for $\bs{\beta}$, leave $\bs{\varphi}$ unpenalized.
 
 \end{frame}
 
@@ -512,40 +512,103 @@ Some predictive benefit from small $\gamma>0$.
 \vskip .2cm
 For larger $\gamma$, you just get more variability.
 
+\vskip .25cm
+But increasing $\gamma$ does change our story about contributions.
+
 \end{frame}
 
-\begin{frame}[fragile]
+\begin{frame}
+{partial plus minus}
 
-{\bf \theme BIC selected player coefficients}
-{\scriptsize
-\begin{verbatim}
-  PETER_FORSBERG       MARIAN_HOSSA   PAVEL_DATSYUK       HENRIK_SEDIN 
-           0.768              0.276           0.268              0.221 
-NICKLAS_LIDSTROM        ZDENO_CHARA   SIDNEY_CROSBY  DANIEL_ALFREDSSON 
-           0.137              0.134           0.115              0.114 
-       DAN_BOYLE      NATHAN_HORTON    JOE_THORNTON     JONATHAN_TOEWS 
-           0.114              0.097           0.092              0.085 
-   ALEX_OVECHKIN       RYAN_GETZLAF    CHRIS_KUNITZ       JASON_ARNOTT 
-           0.075              0.066           0.052              0.039 
-    ALEX_TANGUAY VINCENT_LECAVALIER  MARIAN_GABORIK        ZACH_PARISE 
-           0.036              0.033           0.019              0.015 
-  ROBERTO_LUONGO 
-           0.002 
-\end{verbatim}}
+First, convert from player $\beta_j$ to the scale of `plus/minus'.
 
-All total stars for BIC at  $\gamma=10$.  \\
-In contrast, AIC at $\gamma=10$ selects 350 good and bad players.
+\vskip .25cm
+If we know nothing else (not team, home/away, etc), then the probability a goal was scored by his team given player $j$ is on ice becomes
+$p_j = e^{\beta_j}/(1+e^{\beta_j})$ and our `partial plus/minus' is
+\[
+\mr{ppm}_j = N_j(p_j - (1-p_j)) = N_j(2p_j-1)
+\]
+where $N_j$ is the total \# of goals he was on-ice for.
+
+\vskip .25cm  This measures quality and quantity of contribution.
+\end{frame}
+
+\begin{frame}[fragile]{top ten list}
+
+All sorts at AICc for $\gamma=0$ (lasso)
+
+\begin{semiverbatim}\nv\setstretch{1}
+ gamma=0: 619 nonzero player effects.
+                 player  beta    ppm  pm
+ 1         ONDREJ_PALAT 0.599 37.257  14
+ 2        SIDNEY_CROSBY 0.371 28.994  -4
+ 3       JONATHAN_TOEWS 0.287 22.908   5
+ 4        ANDREI_MARKOV 0.261 22.612  -6
+ 5     HENRIK_LUNDQVIST 0.132 21.742  49
+ 6         JOE_THORNTON 0.363 20.841 -22
+ 7         ANZE_KOPITAR 0.221 19.930  29
+ 8  RYAN_NUGENT-HOPKINS 0.270 17.994   2
+ 9        PAVEL_DATSYUK 0.363 17.778 -13
+ 10   GABRIEL_LANDESKOG 0.239 16.868  26
+\end{semiverbatim}
+
+
+\end{frame}
+
+
+\begin{frame}[fragile]{top ten list}
+
+$\gamma=1$ brings up Sid to \#1 and introduces Toffoli.
+
+\begin{semiverbatim}\nv\setstretch{1}
+  gamma=1: 591 nonzero career effects
+                 player  beta    ppm  pm
+ 1        SIDNEY_CROSBY 0.402 31.353  -4
+ 2        TYLER_TOFFOLI 0.825 29.288  11
+ 3         ONDREJ_PALAT 0.419 26.425  14
+ 4       JONATHAN_TOEWS 0.314 25.063   5
+ 5        ANDREI_MARKOV 0.276 23.819  -6
+ 6     HENRIK_LUNDQVIST 0.137 22.719  49
+ 7         ANZE_KOPITAR 0.246 22.162  29
+ 8         JOE_THORNTON 0.376 21.534 -22
+ 9  RYAN_NUGENT-HOPKINS 0.318 21.137   2
+ 10   GABRIEL_LANDESKOG 0.278 19.599  26
+\end{semiverbatim}
+
+\end{frame}
+
+
+\begin{frame}[fragile]{top ten list}
+
+$\gamma=10$ leaves only big name big minute guys.
+
+\begin{semiverbatim}\nv\setstretch{1}
+ gamma=10: 136 nonzero player effects
+             player  beta    ppm  pm
+ 1    SIDNEY_CROSBY 0.411 32.055  -4
+ 2     ANZE_KOPITAR 0.245 22.102  29
+ 3     JOE_THORNTON 0.385 22.037 -22
+ 4   JONATHAN_TOEWS 0.269 21.540   5
+ 5    ANDREI_MARKOV 0.240 20.769  -6
+ 6    LOGAN_COUTURE 0.421 20.133 -27
+ 7    ALEX_OVECHKIN 0.355 19.299 -14
+ 8    JORDAN_EBERLE 0.291 18.084   9
+ 9    PAVEL_DATSYUK 0.340 16.672 -13
+ 10 ALEXANDER_SEMIN 0.376 16.157  17
+\end{semiverbatim}
 
 \end{frame}
 
 \begin{frame}
 
 \begin{center}
-\Huge Thanks!
+\Huge \theme Thanks!
 \end{center}
 
 \vskip 1cm
-Papers at {\tt faculty.chicagobooth.edu/matt.taddy/research} (revised GL draft soon)
+Papers at {\tt faculty.chicagobooth.edu/matt.taddy/research} \\{\gr(revised GL draft soon)}
+
+\vskip .25cm hockey data and code at {\tt github.com/mataddy/hockey}.
 
 \vskip .25cm and R package {\tt gamlr} for all your weighted lasso needs.
 
