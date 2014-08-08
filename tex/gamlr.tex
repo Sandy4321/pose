@@ -526,7 +526,7 @@ The $(\theta,S,\bm{v})$-irrepresentable condition for $\theta\in[0,1]$ and $\bm{
 \end{equation}
 \end{definition}
 
-A common form of (\ref{irrep}) has $\bm{v}=\bm{1}$.  In this case, it
+A common form of (\ref{irrep}) has $\bm{v}=\bm{1}$.\footnote{\cite{wainwright_sharp_2009} shows that the irrepresentable condition with $\theta=1$ and $\bm{v}=\bm{1}$ is necessary for lasso sign recovery in the {\it noiseless} estimation setting} In this case, it
 is a strict design restriction; for example,
 \citet{buhlmann_statistics_2011} have a single variable that is
 highly correlated with many columns of $\bm{X}_S$ leading to failure. Much
@@ -545,14 +545,36 @@ Under the same setting of Theorem \ref{sparseapprox}, for $\lambda > \sqrt{2\nu}
 \end{equation}
 then $\mr{sgn}(\bs{\hat\beta}) = \mr{sgn}(\bs{\beta}^\nu)$.
 \end{theorem}
+\begin{proof}
+From the local convergence conditions, if we have no false positives
+\begin{equation}
+\bm{X}_S'\bm{X}_S(\bs{\hat\beta}_S-\bs{\beta}^\nu_S) = -n\lambda\bs{\zeta}_S ~~\Rightarrow~~ \bs{\hat\beta}_S-\bs{\beta}^\nu_S = -n\lambda(\bm{X}_S'\bm{X}_S)^{-1}\bs{\zeta}_S
+\end{equation}
+where $|\zeta_j| = \omega_j$ for $j\in\hat S$ and $|\zeta_j| \leq \omega_j$ for $j\in\hat S^c$. Thus all of the spurious regressors will have $\hat \beta_j = 0$
+if 
+\begin{equation}
+\bs{x}_j'\bm{x}_S(\bs{\hat\beta}_S-\bs{\beta}^\nu_S) - \bs{x}_j'\bm{e}^S 
+\leq n\lambda\zeta_j ~~\Leftarrow~~
+1 - \left|\frac{x_j'\bm{e}^S}{n}\right| \geq 1 - \frac{2\nu}{\lambda} \geq |\bs{x}_j'\bm{X}_S(\bm{X}_S'\bm{X}_S)^{-1}\bs{\omega}_S|.
+\end{equation}
+At the same time, for sign recovery on $j\in S$ we need (with inequalities implied on all elements of the compared vectors)
+\begin{equation}
+\bs{\beta}_S^\nu > |\bs{\hat\beta}_S - \bs{\beta}^\nu_S| = n\lambda (\bm{X}_S'\bm{X}_S)^{-1}|\bs{\zeta}_S|.
+\end{equation}
+This holds if $\bm{X}_S'\bm{X}_S|\bs{\beta}^\nu_S| = |\bm{X}_s'\bm{y}| > \lambda\bs{\omega}_S$.
+
+\end{proof}
 
 \noindent {\bf Remarks}
 
 \noindent $\bullet$ A path-wise interpretation is that you get (i) before (ii) fails, or rather that $\gamma$ is big enough so that elements of $\bs{\omega}_S$ shrink fast enough to allow this to happen.
 
-\noindent $\bullet$ Connection to restricted regressions, and $\sqrt{s}L$ from above.
 
 \noindent $\bullet$ Connection to marginal regression screening, which should also have nice stability properties.
+
+\noindent $\bullet$ From Theorem 7.4 in \cite{buhlmann_statistics_2011}, 
+the irrepresentability condition holds with 
+$|\bs{x}_j'\bm{X}_S(\bm{X}_S'\bm{X}_S)^{-1}\bs{\omega}_S|\theta_{\mr{adap}}(S)/\sqrt{s}$ where $\theta_{\mr{adap}}$ is their `adaptive restricted regression' coefficient.  Of direct interest here, they show in general that $\theta_{\mr{adap}}(S) \leq \sqrt{s}/\Lambda_{\mr{min}}(S)$ where $\Lambda_{\mr{min}}(S) = \mr{min}_{\{\bm{v}:\|\bm{v}\|=1\}}\bm{v}'\left(\frac{\bm{X}_S'\bm{X}_S}{n}\right)^{-1}\bm{v}$ is the minimum eigenvalue of $\bm{X}_S'\bm{X}_S/n$.  Thus, in general, condition (ii) can be re-stated as $\Lambda_{\mr{min}}(S) \geq \|\bs{\omega}_S\|(1 - \sqrt{2\nu}/\lambda)^{-1}$, and is thus roughly constrained by an eigenvalue restriction.  Of interest here, we note that this is $\Lambda_{\mr{min}}(S) \geq \sqrt{s}L$, with $L$ from Theorem \ref{sparseapprox}, showing small values for that constant are key in both predictive performance and support recovery.
 
 \noindent $\bullet$ Without any irrepresentability condition,  limits on false discovery are more pessimistic.  For example, under the setting of Theorem \ref{sparseapprox},  local optimality
 conditions imply that for $j \in S^c \cap \hat S$ we have
@@ -713,6 +735,14 @@ continuity is impossible. To see this, note that one could choose $b_1$ and
 $b_2$ arbitrarily close but on either side of the discontinuity threshold
 $\lambda$.  For this reason it is clear that Lipschitz continuity {\it does not
 hold} for $\gamma =\infty$.
+
+\subsection{Forward vs Backward Selection}
+
+Most authors looking at weighted $L_1$ estimation start from more complex models to derive the penalty weights -- in our context, use $\bs{\beta}^0$ for $\lambda_0$ to define weights at $\lambda_1 \geq \lambda_0$.  This approach seems to have developed because, with the exception of marginal regression-based weights, it easier to derive oracle inequalities for this `backwards' rather than our `forwards' algorithm.  A quick result here argues that, in any case, the greedy forward algorithm provides lower variance prediction than a backwards algorithm.
+\begin{prop}
+forward var $<$ backward var
+\end{prop}
+We're not certain that, e.g., support recovery has lower probability under the forward rather than backward algorithm.  However, we don't doubt this to be the case, and it would be another example of the stability vs selection trade-off.
 
 \section{Implementation via coordinate descent}
 \label{implement}
