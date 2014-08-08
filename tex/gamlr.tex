@@ -540,7 +540,7 @@ Our exposition here will compare $\hat S = \{j: \hat\beta_j \neq 0\}$, for $\bs{
 \begin{theorem}
 Under the same setting of Theorem \ref{sparseapprox}, for $\lambda > \sqrt{2\nu}$, if
 \begin{equation}
-\mr{(i)}~~~\bs{x}_j'\bm{y} > \lambda\omega_j ~~\forall~j 
+\mr{(i)}~~~\frac{1}{n}\bs{x}_j'\bm{y} > \lambda\omega_j ~~\forall~j 
 ~~~~~~~~~~\mr{(ii)}~~~|\bs{x}_j'\bm{X}_S(\bm{X}_S'\bm{X}_S)^{-1}\bs{\omega}_S| \leq 1 - \frac{\sqrt{2\nu}}{\lambda}
 \end{equation}
 then $\mr{sgn}(\bs{\hat\beta}) = \mr{sgn}(\bs{\beta}^\nu)$.
@@ -553,13 +553,13 @@ From the local convergence conditions, if we have no false positives
 where $|\zeta_j| = \omega_j$ for $j\in\hat S$ and $|\zeta_j| \leq \omega_j$ for $j\in\hat S^c$. Thus all of the spurious regressors will have $\hat \beta_j = 0$
 if 
 \begin{equation}
-\bs{x}_j'\bm{x}_S(\bs{\hat\beta}_S-\bs{\beta}^\nu_S) - \bs{x}_j'\bm{e}^S 
+\bs{x}_j'\bm{X}_S(\bs{\hat\beta}_S-\bs{\beta}^\nu_S) - \bs{x}_j'\bm{e}^S 
 \leq n\lambda\zeta_j ~~\Leftarrow~~
 1 - \left|\frac{x_j'\bm{e}^S}{n}\right| \geq 1 - \frac{2\nu}{\lambda} \geq |\bs{x}_j'\bm{X}_S(\bm{X}_S'\bm{X}_S)^{-1}\bs{\omega}_S|.
 \end{equation}
 At the same time, for sign recovery on $j\in S$ we need (with inequalities implied on all elements of the compared vectors)
 \begin{equation}
-\bs{\beta}_S^\nu > |\bs{\hat\beta}_S - \bs{\beta}^\nu_S| = n\lambda (\bm{X}_S'\bm{X}_S)^{-1}|\bs{\zeta}_S|.
+|\bs{\beta}_S^\nu| > |\bs{\hat\beta}_S - \bs{\beta}^\nu_S| = n\lambda (\bm{X}_S'\bm{X}_S)^{-1}|\bs{\zeta}_S|.
 \end{equation}
 This holds if $\bm{X}_S'\bm{X}_S|\bs{\beta}^\nu_S| = |\bm{X}_s'\bm{y}| > \lambda\bs{\omega}_S$.
 
