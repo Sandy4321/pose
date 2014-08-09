@@ -75,7 +75,7 @@ Matt Taddy, University of Chicago Booth School of Business
 
 Estimate regression coefficients for $\bm{y} \approx f(\bm{X}\bs{\beta})$ by solving
 {\Large\vspace{-.25cm}\[\nv
-{\tt min}\{~l({\bs{\beta}}) + \lambda c(\bs{\beta})~\}.\]}
+{\tt min}\{~l({\bs{\beta}}) + n\lambda c(\bs{\beta})~\}.\]}
 $\bullet$ $l(\bs{\beta})$ is [proportional to] a negative log likelihood, like SS $0.5\sum_i \left(y_i - \bm{x}_i'\bs{\beta}\right)^2$ or logistic  loss $\sum_i \left[
 \log(1+e^{\bm{x}_i'\bs{\beta}})-\bm{x}_i'\bs{\beta}y_i \right]$.  
 
@@ -190,7 +190,7 @@ Concave (e.g., log or $L_q$ with $q<1$) penalties have diminishing bias, so that
 \vskip .25cm Concave penalties are a popular idea
 \begin{itemize}
 \item oracle theory and variable selection.
-\item suck up all endogenaity in causal schemes.
+%\item suck up all endogenaity in causal schemes.
 \item same information from a sparser dictionary.
 \item some (economists) hate bias no matter what.
 \end{itemize}
@@ -330,9 +330,7 @@ with
 \begin{frame}
 {optimal sparse approximation}
 
-Recall that GL weights will decrease faster with big $\gamma$.
 
-\sk
 Suppose that $\bm{y} \sim
 (\bm{f},\sigma^2\bm{I})$.
 
@@ -345,12 +343,15 @@ $\mr{MSE}_S + 2s\sigma^2/n$.
 \vskip .25cm
 Condition on min weight is then
 $\omega^{\mr{min}}_{S^c} > (\sigma/\lambda)\sqrt{2/n}$, \\so $C_p$ suggests we  can use larger $\gamma$ with large $n$ or small $\sigma$.
+
+\vskip .1cm
+(recall that GL weights will decrease faster with big $\gamma$)
 \end{frame}
 
 \begin{frame}
 {sign recovery}
 
-A massive amount of effort (too much?) has gone into showing support and sign recovery for concave penalized estimators.
+A massive amount of effort has gone into showing support and sign recovery for concave penalized estimators.
 
 \vskip .25cm
 You get $L_0$ estimator sign recovery from weighted $L_1$ estimation, but only under a weighted irrepresentable condition (ii below).
@@ -393,7 +394,7 @@ L|b_1-b_2| $ for  finite $L$ on all $b_1,b_2$.}
 \vskip .5cm
 {\nv Sub-optimality of the one-step-estimator gives us this stability.}
 
-\vskip .1cm Easy to show that if the implicit weight function of $\bm{y}$ are continuous, then your weighted lasso will be also.
+\vskip .1cm If the implicit weight function of $\bm{y}$ are continuous, and the weights are finite, then your weighted lasso will be continuous.
 
 \end{frame}
 
