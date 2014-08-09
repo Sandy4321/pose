@@ -377,31 +377,31 @@ Recall: $\omega^{t+1}_j = 1/\left(1 + \gamma |\hat\beta^t_j|\right)$
 
 \vskip .25cm
 The $\gamma$ parameter governs how quickly bias disappears:\\
-\hfill $\gamma=0$ is the lasso, and $\gamma = \infty$ is subset selection.
+% \hfill $\gamma=0$ is the lasso, and $\gamma = \infty$ is subset selection.
 
-\vskip .25cm
+\vskip .1cm
 {What are we giving away?  How stable is the procedure?}
 
 \vskip .5cm
-GL has a nice type of theoretical stability for all $\gamma < \infty$:\\ \hfill  Lipschitz continuity with respect to jitter in the response $\bm{y}$.
+GL has a nice type of theoretical stability for all $\gamma < \infty$:\\ ~~~ Lipschitz continuity with respect to jitter in the response $\bm{y}$.
 
-\vskip .15cm
-{\gr $f$ is Lipschitz continuous if  $ |f(b_1)-f(b_2)| \leq
-L|b_1-b_2| $ \\for some finite constant $L$ on all $b_1,b_2$ in the domain of
-$f$.} 
+\vskip .1cm
+{\gr $ |f(b_1)-f(b_2)| \leq
+L|b_1-b_2| $ for  finite $L$ on all $b_1,b_2$.} 
 
-\vskip .15cm
-Intuitively, this requires Lipschitz regularization paths.
 
-\vskip .25cm
+\vskip .5cm
 {\nv Sub-optimality of the one-step-estimator gives us this stability.}
+
+\vskip .1cm Easy to show that if the implicit weight function of $\bm{y}$ are continuous, then your weighted lasso will be also.
 
 \end{frame}
 
 
 \begin{frame}
+{theory vs practice}
 
-Be careful: Lipschitz does not guarantee `practical' stability.
+Lipschitz does not guarantee `practical' stability.
 
 \vskip .25cm
 e.g., Making $\gamma$ too big causes timings to blow up.
@@ -413,8 +413,7 @@ for $\bs{\hat\beta}^t$.
 \end{frame}
 
 \begin{frame}
-
-{\bf  $\lambda$ just indexes models.  \theme How do you choose?}
+{choosing $\lambda$}
 
 \vskip .2cm
 ~~~~~~~~~~~e.g., AICc = deviance($\bs{\hat\beta}$) + 2$df\frac{n}{n-df-1}$.
@@ -426,7 +425,7 @@ y_i/\partial y_i\right]$.
 \vskip .25cm
 Zou et al. 2007 apply this with lasso ($L1$) penalties
 \[
-\ds{E}\left[ \ds{1}_{[|g_j|<\tau_j]} \right] \approx \sum_j |g_j| < \omega_j\lambda 
+\ds{E}\left[ \ds{1}_{[|g_j|>\tau_j]} \right] \approx \sum_j \ds{1}_{\hat\beta_j \neq 0}
 \]
 \vskip -.35cm
 where $g_j$ is $\partial l /\partial x_j |_{\hat \beta_j=0}$.
@@ -434,15 +433,14 @@ where $g_j$ is $\partial l /\partial x_j |_{\hat \beta_j=0}$.
 \vskip .5cm
 Use the Bayesian model to get heuristic version for GL:
 \[\nv
-\widehat{df} = \sum_j \pi(|g_j| < \omega_j\lambda) \gr = \sum_j \mr{Ga}(|g_{j}|;~ n\lambda/\gamma, 1/\gamma).
+\widehat{df} = \sum_j \pi(\omega_j\lambda< |g_j|) \gr = \sum_j \mr{Ga}(|g_{j}|;~ n\lambda/\gamma, 1/\gamma).
 \]
 \vskip -1cm
 
 \end{frame}
 
 \begin{frame}
-
-{\bf An example: \theme NHL hockey players}
+{An example: \theme NHL hockey players}
 
 \vskip .25cm
 Every goal back to 2002-2003:
@@ -471,10 +469,8 @@ We'll fit a GL path  for $\bs{\beta}$, leave $\bs{\varphi}$ unpenalized.
 \end{frame}
 
 \begin{frame}
+{Hockey GL paths}
 
-{\bf \theme Hockey GL paths}
-
-\vskip .5cm
 \includegraphics[width=4.25in]{../graphs/nhl_paths}
 
 \sk
@@ -486,11 +482,8 @@ grey:goalie, blue:defense, green:center, red:winger.
 \end{frame}
 
 \begin{frame}
+{Hockey IC surfaces}
 
-
-{\bf \theme Hockey IC surfaces}
-
-\vskip .5cm
 \includegraphics[width=4.25in]{../graphs/nhl_ic}
 
 \vskip .5cm
@@ -501,10 +494,8 @@ Both seem to hate [practical] instability.
 \end{frame}
 
 \begin{frame}
+{Hockey 20-fold CV}
 
-{\bf \theme Hockey 20-fold CV}
-
-\sk
 \includegraphics[width=4.25in]{../graphs/nhl_cv}
 
 \sk
