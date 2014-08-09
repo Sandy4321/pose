@@ -90,6 +90,29 @@ $\bullet$ $c(\bs{\beta})$ is a positive cost function, often $\|\bs{\beta}\|_q$.
 \end{frame}
 
 \begin{frame}
+{regularization paths}
+
+\sk
+Since we don't know $\lambda$, the penalization doesn't actually {\it do} model selection.  Instead, it {\it indexes} a set of candidate models.
+
+\vskip .1cm
+{\gr Think of $\lambda$ as a signal-to-noise filter: like squelch on a radio.}
+
+\sk
+Fortunately, path algorithms can do fast fits over grids of $\lambda_t$:
+\begin{itemize}
+\item Start at $\lambda_1$ large enough that $\bs{\hat\beta}^1 = \bm{0}$.
+\item Incrementally decrease $\lambda_t = \delta \lambda_{t-1}$, $\delta \in (0,1)$.
+\item Re-fit coefficients $\bs{\hat\beta}^t$, using $\bs{\hat\beta}^{t-1}$ as hot-starts.
+\end{itemize}
+{\it If} the coefficients change little under small changes to $\lambda$, \\then a full path can take far less time then a single OLS fit.
+
+\vskip .25cm
+{\gr The `if' here is stability: continuity of the regularization path.}
+
+\end{frame}
+
+\begin{frame}
 {big data why?}
 
 \vskip .25cm
@@ -195,29 +218,6 @@ The solution can jump away from the origin.
 
 \vskip .25cm
 This increases estimator variance, and computation cost.
-\end{frame}
-
-\begin{frame}
-{regularization paths}
-
-\sk
-Since we don't know $\lambda$, the penalization doesn't actually {\it do} model selection.  Instead, it {\it indexes} a set of candidate models.
-
-\vskip .1cm
-{\gr Think of $\lambda$ as a signal-to-noise filter: like squelch on a radio.}
-
-\sk
-Fortunately, path algorithms can do fast fits over grids of $\lambda_t$:
-\begin{itemize}
-\item Start at $\lambda_1$ large enough that $\bs{\hat\beta}^1 = \bm{0}$.
-\item Incrementally decrease $\lambda_t = \delta \lambda_{t-1}$, $\delta \in (0,1)$.
-\item Re-fit coefficients $\bs{\hat\beta}^t$, using $\bs{\hat\beta}^{t-1}$ as hot-starts.
-\end{itemize}
-{\it If} the coefficients change little under small changes to $\lambda$, \\then a full path can take far less time then a single OLS fit.
-
-\vskip .25cm
-{\gr The `if' here is stability: continuity of the regularization path.}
-
 \end{frame}
 
 
@@ -417,7 +417,7 @@ for $\bs{\hat\beta}^t$.
 {\bf  $\lambda$ just indexes models.  \theme How do you choose?}
 
 \vskip .2cm
-~~~~~~~~~~~e.g., AIC = deviance($\bs{\hat\beta}$) + 2$df$.
+~~~~~~~~~~~e.g., AICc = deviance($\bs{\hat\beta}$) + 2$df\frac{n}{n-df-1}$.
 
 \vskip .5cm
 Useful benefit of Lipschitz: use Stein's $df = \ds{E}\left[\sum_i \partial \hat
