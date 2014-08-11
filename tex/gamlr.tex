@@ -458,7 +458,8 @@ Write $\bs{\hat\beta}$ as solution to the weighted $L_1$ minimization $l(\bs{\be
 
 Then  
 $\omega^{\mr{min}}_{S^c}\lambda > \sqrt{2\nu}$ while $\phi^2(L,S) > 0$ implies
-\begin{equation} \frac{\|\bm{X}(\bs{\hat\beta}-\bs{\beta}^\nu)\|^2}{n}\leq
+\begin{equation} \label{sparseineq}
+\frac{\|\bm{X}(\bs{\hat\beta}-\bs{\beta}^\nu)\|^2}{n}\leq
 \frac{4\lambda^2 \|\bs{\omega}_S\|^2}{\phi^2(L, S)}
 \end{equation} 
 with the restricted eigenvalue defined for 
@@ -502,11 +503,11 @@ Dividing each side by $\sqrt{n}\|\bm{X}(\bs{\hat\beta}-\bs{\beta}^\nu)\|/2$ and 
 
 \noindent {\bf Remarks}
 
-\noindent $\bullet$   Does not depend upon $\sigma^2$!  Nor have we made any parametric assumptions.
+\vskip .25cm
+\noindent $\bullet$~~   The comparison to $L_0$ estimation, as opposed to some assumed model truth, is key to the simplicity of our inequality in (\ref{sparseineq}).  The result is finite sample exact, and completely non-parametric -- it makes no reference to the true distribution of $\bm{y}\mid \bm{X}$.  Indeed, if we are to make such assumptions, Theorem \ref{sparseapprox} provides bounds on the distance between a weighted lasso and optimal sparse prediction.  The next remark is an example.
 
-\noindent $\bullet$  Restricted eigenvalues.
-
-\noindent $\bullet$ From \cite{efron_estimation_2004}, the $C_p$ statistic
+\vskip .25cm
+\noindent $\bullet$~~ From \cite{efron_estimation_2004}, the $C_p$ statistic
 \citep{mallows_comments_1973} implies that choosing $S$ to minimize
 $\mr{MSE}_S + 2s\sigma^2/n$, Mallows' unbiased estimate of residual variance,
 is optimal for minimizing prediction error on $\bm{y} \sim
@@ -515,6 +516,11 @@ and shared variance $\sigma^2$. Theorem (\ref{sparseapprox}) with $\nu = \sigma^
 $C_p$ here, rather than $AIC$ or $AICc$, since $C_p$ is conveniently defined
 the scale of squared errors.} Note that, since the condition on minimum $S^c$ weights has become
 $\omega^{\mr{min}}_{S^c} > (\sigma/\lambda)\sqrt{2/n}$, comparison to $C_p$ suggests we can use larger $\gamma$ (faster diminishing bias) with large $n$ or small $\sigma$.
+
+
+\vskip .25cm
+\noindent $\bullet$~~  Plausibility of the restricted eigenvale assumption $\phi(L,S) > 0$ depends critically upon $L$.  Here, the assumption is less restrictive if we can reduce $\|\bs{\omega}_S\|$ without making $\omega^{\mr{min}}_{S_c}$ small.  For example, the next sub-section suggests using large $\gamma$ so long as $\lambda$ is big enough to avoid false discovery. More generally, \cite{raskutti_restricted_2010} show that similar conditions hold  with very high probability for $\bm{X}$ drawn from a broad class of Gaussian distributions.  \cite{bickel_simultaneous_2009} provide a nice overview of sufficient conditions, and \cite{buhlmann_statistics_2011} have extensive discussion and examples related to restricted eigenvalue assumptions.
+
 
 \subsection{Sign Recovery}
 
@@ -526,7 +532,7 @@ The $(\theta,S,\bm{v})$-irrepresentable condition for $\theta\in[0,1]$ and $\bm{
 \end{equation}
 \end{definition}
 
-A common form of (\ref{irrep}) has $\bm{v}=\bm{1}$.\footnote{\cite{wainwright_sharp_2009} shows that the irrepresentable condition with $\theta=1$ and $\bm{v}=\bm{1}$ is necessary for lasso sign recovery in the {\it noiseless} estimation setting} In this case, it
+A common form of (\ref{irrep}) has $\bm{v}=\bm{1}$.\footnote{\cite{wainwright_sharp_2009} shows that the irrepresentable condition with $\theta=1$ and $\bm{v}=\bm{1}$ is necessary for lasso sign recovery in the {\it noiseless} estimation setting.} In this case, it
 is a strict design restriction; for example,
 \citet{buhlmann_statistics_2011} have a single variable that is
 highly correlated with many columns of $\bm{X}_S$ leading to failure. Much
@@ -537,51 +543,62 @@ theory.
 
 Our exposition here will compare $\hat S = \{j: \hat\beta_j \neq 0\}$, for $\bs{\hat\beta}$ from weighted $L_1$ penalized estimation, to $S = \{j: \beta^\nu_j \neq 0\}$ for $\beta^\nu$ from $L_0$ penalized estimation as in Theorem \ref{sparseapprox}.  The result uses an irrepresentable condition with $\bm{v} = \bs{\omega}_S$, an assumption that becomes less restrictive as one is able to shrink weights $\omega_j$ for $j\in S$.
 
-\begin{theorem}
-Under the same setting of Theorem \ref{sparseapprox}, for $\lambda > \sqrt{2\nu}$, if
+\begin{theorem}\label{signrecov}
+Under the setting of Theorem \ref{sparseapprox}, $\mr{sgn}(\bs{\hat\beta}) = \mr{sgn}(\bs{\beta}^\nu)$ for $\omega_{S^c}^{\mr{min}}\lambda > \sqrt{2\nu}$ if
 \begin{equation}
-\mr{(i)}~~~\frac{1}{n}\bs{x}_j'\bm{y} > \lambda\omega_j ~~\forall~j 
-~~~~~~~~~~\mr{(ii)}~~~|\bs{x}_j'\bm{X}_S(\bm{X}_S'\bm{X}_S)^{-1}\bs{\omega}_S| \leq 1 - \frac{\sqrt{2\nu}}{\lambda}
+\mr{(i)}~~~|\bs{x}_j'\bm{X}_S(\bm{X}_S'\bm{X}_S)^{-1}\bs{\omega}_S| \leq 1 - \frac{\sqrt{2\nu}}{\lambda\omega_j}~~\forall~j ~\in~S^c
+~~~~~~~~~~\mr{(ii)}~~~\frac{1}{n}\bs{x}_j'\bm{y} > \lambda\omega_j ~~\forall~j ~\in~S.
 \end{equation}
-then $\mr{sgn}(\bs{\hat\beta}) = \mr{sgn}(\bs{\beta}^\nu)$.
 \end{theorem}
-\begin{proof}
-From the local convergence conditions, if we have no false positives
+\begin{proof} We adapt results of \cite{wainwright_sharp_2009}.
+From the Karush-Kuhn-Tucker (KKT) conditions, 
+$\bm{x}_j'\bm{X}(\bs{\hat\beta}_S-\bs{\beta}^\nu) + \bm{X}'\bm{e}^S = -n\lambda\zeta_j$ at convergence where $|\zeta_j| = \omega_j$ for $j\in\hat S$ and $|\zeta_j| \leq \omega_j$ for $j\in\hat S^c$.
+Thus we we have no false positives if and only if
 \begin{equation}
-\bm{X}_S'\bm{X}_S(\bs{\hat\beta}_S-\bs{\beta}^\nu_S) = -n\lambda\bs{\zeta}_S ~~\Rightarrow~~ \bs{\hat\beta}_S-\bs{\beta}^\nu_S = -n\lambda(\bm{X}_S'\bm{X}_S)^{-1}\bs{\zeta}_S
+\bm{X}_S'\bm{X}_S(\bs{\hat\beta}_S-\bs{\beta}^\nu_S) + \bm{X}_S'\bm{e}^S =-n\lambda\bs{\zeta}_S ~~\Rightarrow~~ \bs{\hat\beta}_S-\bs{\beta}^\nu_S = -n\lambda(\bm{X}_S'\bm{X}_S)^{-1}\bs{\zeta}_S.
 \end{equation}
-where $|\zeta_j| = \omega_j$ for $j\in\hat S$ and $|\zeta_j| \leq \omega_j$ for $j\in\hat S^c$. Thus all of the spurious regressors will have $\hat \beta_j = 0$
-if 
+And all of the spurious regressors in $S^c$ will have $\hat \beta_j = 0$
+if and only if
 \begin{equation}
 \bs{x}_j'\bm{X}_S(\bs{\hat\beta}_S-\bs{\beta}^\nu_S) - \bs{x}_j'\bm{e}^S 
 \leq n\lambda\zeta_j ~~\Leftarrow~~
-1 - \left|\frac{x_j'\bm{e}^S}{n}\right| \geq 1 - \frac{2\nu}{\lambda} \geq |\bs{x}_j'\bm{X}_S(\bm{X}_S'\bm{X}_S)^{-1}\bs{\omega}_S|.
+1 - \left|\frac{x_j'\bm{e}^S}{n}\right| \geq 1 - \frac{\sqrt{2\nu}}{\lambda\omega_j} \geq |\bs{x}_j'\bm{X}_S(\bm{X}_S'\bm{X}_S)^{-1}\bs{\omega}_S|.
 \end{equation}
-At the same time, for sign recovery on $j\in S$ we need (with inequalities implied on all elements of the compared vectors)
+Finally, for sign recovery on $j\in S$ we need (with inequalities implied on all elements of the compared vectors)
 \begin{equation}
 |\bs{\beta}_S^\nu| > |\bs{\hat\beta}_S - \bs{\beta}^\nu_S| = n\lambda (\bm{X}_S'\bm{X}_S)^{-1}|\bs{\zeta}_S|.
 \end{equation}
-This holds if $\bm{X}_S'\bm{X}_S|\bs{\beta}^\nu_S| = |\bm{X}_s'\bm{y}| > \lambda\bs{\omega}_S$.
+This holds if $\bm{X}_S'\bm{X}_S|\bs{\beta}^\nu_S| = |\bm{X}_s'\bm{y}| > n\lambda\bs{\omega}_S$.
 
 \end{proof}
 
 \noindent {\bf Remarks}
 
-\noindent $\bullet$ A path-wise interpretation is that you get (i) before (ii) fails, or rather that $\gamma$ is big enough so that elements of $\bs{\omega}_S$ shrink fast enough to allow this to happen.
-
-
-\noindent $\bullet$ Connection to marginal regression screening, which should also have nice stability properties.
-
-\noindent $\bullet$ From Theorem 7.4 in \cite{buhlmann_statistics_2011}, 
+\vskip .25cm
+\noindent $\bullet$~~ A path-wise interpretation of Theorem \ref{signrecov} is that the gamma lasso achieves exact sign recovery if $(i)$ holds until $(ii)$ occurs.  We can re-state the result in terms of false positives relative to $\bs{\beta}^{\nu}$ along the path, with $\bs{\hat\beta}^t$ and $\hat S_t = \{j: \hat\beta^t_j\neq 0\}$ the  weighted lasso coefficient estimates and support under $\bs{\omega}^t$ and $\lambda_t$ at path segment $t$.
+\begin{corollary}
+Under the setting of Theorem \ref{signrecov}, if $\hat S_{t-1} \cap S^c = \varnothing$ and $\lambda_t > \sqrt{2\nu}$ then
+\begin{equation}\label{falsepos}
+\|\bm{X}_{S^c}'\bm{X}_S(\bm{X}_S'\bm{X}_S)^{-1}\bs{\omega}^t_S\|_{\infty} \leq 1 - \frac{\sqrt{2\nu}}{\lambda_t} ~~\Rightarrow~~\hat S_{t} \cap S^c = \varnothing.
+\end{equation}
+\end{corollary}
+\noindent 
+The results uses $\hat S_{t-1} \cap S^c = \varnothing \Rightarrow \omega_{S^c}^{t~\mr{min}} = 1$ for the GL algorithm.  So long as $\lambda_t$ is large enough, (\ref{falsepos}) suggests that  big $\gamma$ (for fast diminishing $\omega_j$) will help control false discovery.  Of course, the momment $\hat S_{t-1} \cap S^c \neq \varnothing$,  a large $\gamma$ allows spurious covariates to enter with very little shrinkage and can move the fit arbitratily far away from $L_0$ optimal support.
+\vskip .25cm
+\noindent $\bullet$~~ Condition $(ii)$ shows that sign recovery relative to $L_0$ optimal $\bs{\beta}^S$ relies upon the strength of  {\it marginal} correlations with the response.  It directly suggests use of the marginal regression coefficient estimates as weights for an adaptive lasso, as proposed in \cite{huang_adaptive_2008} for the $p>n$ setting.  Indeed, since marginal correlations tend to have a lower sampling variance than conditional coefficients, this strategy should also yield low variance weights and stable estimation.  Our simulation study investigates marginal-correlation-based adaptive lasso.
+\vskip .25cm
+\noindent $\bullet$~~ From Theorem 7.4 in \cite{buhlmann_statistics_2011}, 
 the irrepresentability condition holds with 
-$|\bs{x}_j'\bm{X}_S(\bm{X}_S'\bm{X}_S)^{-1}\bs{\omega}_S|\theta_{\mr{adap}}(S)/\sqrt{s}$ where $\theta_{\mr{adap}}$ is their `adaptive restricted regression' coefficient.  Of direct interest here, they show in general that $\theta_{\mr{adap}}(S) \leq \sqrt{s}/\Lambda_{\mr{min}}(S)$ where $\Lambda_{\mr{min}}(S) = \mr{min}_{\{\bm{v}:\|\bm{v}\|=1\}}\bm{v}'\left(\frac{\bm{X}_S'\bm{X}_S}{n}\right)^{-1}\bm{v}$ is the minimum eigenvalue of $\bm{X}_S'\bm{X}_S/n$.  Thus, in general, condition (ii) can be re-stated as $\Lambda_{\mr{min}}(S) \geq \|\bs{\omega}_S\|(1 - \sqrt{2\nu}/\lambda)^{-1}$, and is thus roughly constrained by an eigenvalue restriction.  Of interest here, we note that this is $\Lambda_{\mr{min}}(S) \geq \sqrt{s}L$, with $L$ from Theorem \ref{sparseapprox}, showing small values for that constant are key in both predictive performance and support recovery.
+$|\bs{x}_j'\bm{X}_S(\bm{X}_S'\bm{X}_S)^{-1}\bs{\omega}_S|
+\leq \frac{\|\bs{\omega}_S\|}{\sqrt{s}}\theta_{\mr{adap}}(S)$ where $\theta_{\mr{adap}}(S)$ is their `adaptive restricted regression' coefficient.  Of direct interest here, they show that $\theta_{\mr{adap}}(S) \leq \sqrt{s}/\Lambda_{\mr{min}}(S)$ where $\Lambda_{\mr{min}}(S) = \mr{min}_{\{\bm{v}:\|\bm{v}\|=1\}}\bm{v}'\left(\frac{\bm{X}_S'\bm{X}_S}{n}\right)^{-1}\bm{v}$ is the minimum eigenvalue of $\bm{X}_S'\bm{X}_S/n$.  Thus, $(i)$ can be replaced by the restriction $\Lambda_{\mr{min}}(S) \geq \|\bs{\omega}_S\|(1 - \sqrt{2\nu}/(\omega_{S^c}^{\mr{min}}\lambda))^{-1} = \sqrt{s}L$, with $L$ from Theorem \ref{sparseapprox}. Small values for $L$ are key in both predictive performance and support recovery.
 
-\noindent $\bullet$ Without any irrepresentability condition,  limits on false discovery are more pessimistic.  For example, under the setting of Theorem \ref{sparseapprox},  local optimality
+\vskip .25cm
+\noindent $\bullet$~~ Without any irrepresentability condition,  limits on false discovery are more pessimistic.  For example, under the setting of Theorem \ref{sparseapprox},  local optimality
 conditions imply that for $j \in S^c \cap \hat S$ we have
 $n\lambda \omega_j = |\bs{x}_j'(\bm{X}\bs{\hat\beta}-\bm{y})| \leq
 |\bs{x}_j'\bm{X}(\bs{\hat\beta}-\bs{\beta}^\nu)| + |\bs{x}_j'\bm{e}^S| \leq
 n\left(2\|\bs{\omega}_S\|/\phi(L,S) + \sqrt{2\nu}/\lambda\right) ~\forall~j$. 
-Dividing the right by $n\lambda\omega_j$ and counting yields
+Dividing by $n\lambda\omega_j$ and counting yields
 \begin{equation}\label{pessimism}
 |S^c \cap \hat S| \leq \left|\frac{1}{\bs{\omega}_{S^c \cap \hat S}}\right|
 \left(\frac{2\|\omega_S\|}{\phi(L,S)} + \frac{\sqrt{2\nu}}{\lambda}\right)
