@@ -1,74 +1,86 @@
 
-n <- 50
-p <- 5
-rho <- 0.98
-xvar <- matrix(ncol=p,nrow=p)
-for(i in 1:p) for(j in i:p) xvar[i,j] <- rho^{abs(i-j)}
+## monte carlo
+metrics <- c("AIC","BIC","CV1se","CVmin","EBF")
+select <- function(fit,x){
+	preds <- predict(fit$g,x,select=NULL)
+	preds <- preds[,c(which.min(AIC(fit$g)),
+					which.min(BIC(fit$g)),
+					fit$seg.1se,
+					fit$seg.min,
+					which.min(ebf(fit,x)) )]
+	colnames(preds) <- metrics
+	as.matrix(preds)
+}
 
+eval <- function(y, f){
+	f <- as.matrix(f)
+	sst <- sum( (y-mean(y))^2 )
+	sse <- colSums( (y-f)^2 )
+	r2 <- 1-sse/sst
+	return(r2)
+}
 
-moms <- c()
+cl <- makeCluster(spec=rep("localhost", NC))
+clusterSetupRNG(cl)
+clusterExport(cl, ls())
 
-B <- 100
-#for(b in 1:B){
+dofit <- function(b){
 
-x <- matrix(rnorm(n*p),ncol=p)%*%chol(xvar)
-x <- scale(x)*sqrt(n/(n-1))
-gi <- solve(crossprod(x))
-e <- rnorm(n)
-e <- e-mean(e)
-y <- rowSums(x)+e
+	require(Matrix)
+	require(gamlr)
 
-H <- x%*%gi%*%t(x)
-B <- gi%*%t(x)%*%y
-f <- lm(y~x)$fitted
+	d <- dgp(n*2)
+	x <- d$x[1:n,]
+	y <- d$y[1:n]
 
-summary(m3 <- lm(y~x[,1:3]))
-summary(m4 <- lm(y~x[,1:4]))
-moms <- cbind(moms, 
-	c(sum((m3$resid*x[,4]))^2, n*(sum(m3$resid^2)-sum(m4$resid^2))))
+	## train
+	lasso <- cv.gamlr(x, y)
+	smvar <- cv.gamlr(x, y, gamma=smv)
+	bgvar <- cv.gamlr(x, y, gamma=bgv)
 
-#print(b)}
+	## test
+	x <- d$x[n + 1:n,]
+	y <- d$y[n + 1:n]
 
-range(moms[2,]-moms[1,])
-plot(moms[1,],moms[2,]-moms[1,])
+	lassopred <- select(lasso,x)
+	smvarpred <- select(smvar,x)
+	bgvarpred <- select(bgvar,x)
 
+	oos <- c(eval(y, lassopred),
+			eval(y, smvarpred),
+			eval(y, bgvarpred))
 
-summary(m4)$r.square - summary(m3)$r.square
-summary(me <- lm(m3$resid~x[,4]))
+	return(oos)
+}
 
-ff <- m3$fitted + me$fitted
-f3 <- m3$fitted
+oos <- clusterApplyLB(cl,1:B,dofit)
+stopCluster(cl)
 
-s <- 5
-g <- crossprod(x[,1:s])/n
-d <- t(x[,-(1:s)])%*%(x[,1:s])/n
-one <- rep(1,s)
+oos <- matrix(unlist(oos),byrow=TRUE,ncol=length(metrics)*3)
+colnames(oos)<- paste(
+	rep(c("lasso","smvar","bgvar"),each=length(metrics)),
+	metrics,sep=".")
+oos <- as.data.frame(oos)
+save(oos,lasso,smvar,bgvar,d,file="../results/sim.rda", compress="xz")
 
-## bickle assumption 2: this < 1/2c0
-max(abs(d%*%one))/min(eigen(g)$val)
+print(lapply(oos,mean))
 
-## irrepresentable
-max(abs(d%*%solve(g)%*%one))
-
-
-
-
-
-
-p <- %*%solve(g)%*%t(x)-diag(20)
-
-b <- c(3,2,1,0,0)
-e <- rnorm(20)
-y <- x%*%b + e
-y <- y-mean(y)
-
-lm(y~x)
-
-xxi <- solve(g[1:3,1:3])
-xxxi <- x[,1:3]%*%xxi 
-dj <- t(x[,4])%*%xxxi
-
-
+crit <- c("EBF","AIC","BIC","CV1se","CVmin")
+critcol <- c(rep("dodgerblue",3),rep("lawngreen",2))
+pdf(file="sim_oos.pdf", width=9, height=2.5)
+par(mfrow=c(1,3), 
+	mai=c(.4,.4,.2,.1), 
+	omi=c(0,.2,0,0))
+for(m in c("lasso","smvar","bgvar")){
+	lab=paste(m,crit,sep=".")
+	boxplot(oos[,lab], col=critcol,
+		xaxt="n", xlab="",ylab="",ylim=c(0,.4))# ,main=m)
+	axis(1,at=1:length(crit), labels=crit)
+}
+mtext(side=2, "R2", 
+	font=3, outer=TRUE, cex=.9)
+dev.off()
+## sim X
 
 library(Matrix)
 library(gamlr)
