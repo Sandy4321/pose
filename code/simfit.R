@@ -1,38 +1,40 @@
 ## fits
+id <- 0 # debug
+s2n <- 1
+rho <- 0.5
 
 source("code/simdata.R")
 library(gamlr)
 
 ## draw the data
-n <- 1e3
-d <- dgp(id=0, n=n)
+d <- dgp(id=id, s2n=s2n, rho=rho)
 
 ## gamma lasso
-gl0 <- cv.gamlr(d$x, d$y.train, verb=1)
-system.time(gl2 <- cv.gamlr(d$x, d$y.train, gamma=2))
-#  user  system elapsed 
-# 2.066   0.035   2.101 
-# > sum(coef(gl2)!=0)
-# [1] 65
-
-gl10 <- cv.gamlr(d$x, d$y.train, gamma=10, verb=1)
+tgl0 <- system.time(gl0 <- cv.gamlr(d$x, d$y.train))[[3]]
+tgl2 <- system.time(gl2 <- cv.gamlr(d$x, d$y.train, gamma=2))[[3]]
+tgl10 <- system.time(gl10 <- cv.gamlr(d$x, d$y.train, gamma=10))[[3]]
 
 ## marginal adaptive lasso
-wmrg <- 1/abs(cor(as.matrix(d$x),d$y.train))
-mrgal <- cv.gamlr(d$x,d$y.train,varweight=wmrg)
+tmrgal <- system.time({
+	wmrg <- 1/abs(cor(as.matrix(d$x),d$y.train))
+	mrgal <- cv.gamlr(d$x,d$y.train,varweight=wmrg) })[[3]]
 
-## scad (way too slow!!!)
+## scad (way slow!!!)
 library(ncvreg)
-system.time(scad <- cv.ncvreg(X=as.matrix(d$x),y=d$y.train,
-				lambda.min=0.01,penalty="SCAD"))
+tscad <- system.time(scad <- cv.ncvreg(X=as.matrix(d$x),y=d$y.train,
+				lambda.min=0.01,penalty="SCAD")[[3]]
 #    user  system elapsed 
 # 267.589   0.271 267.785 
 
 ## sparsenet 
 library(sparsenet)
-system.time(snet <- cv.sparsenet(as.matrix(d$x),d$y.train,nfolds=5))
+tsnet <- system.time(
+	snet <- cv.sparsenet(as.matrix(d$x),d$y.train,nfolds=5))[[3]]
 #   user  system elapsed 
 # 11.065   0.203  11.265 
+
+# same order as GL, 
+# but GL is parallelizable over both gamma and fold
 
 ## Cp optimal L0 pen
 fitcp <- function(l){

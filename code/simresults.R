@@ -1,10 +1,16 @@
 ## extract results
+OUT <- "0"
+
+## data properties
+write(d$sigma, "results/sigma.txt",append=TRUE)
+times <- paste(round(c(tgl0,tgl2,tgl10,tmrgal,tsnet,tscad),1),collapse="|")
+write(times, "results/times.txt",append=TRUE)
 
 ## prediction
 e0 <- predict(gl0$gamlr,d$x,select=0)-d$y.val
 e2 <- predict(gl2$gamlr,d$x,select=0)-d$y.val
 e10 <- predict(gl2$gamlr,d$x,select=0)-d$y.val
-emrg <- predict(mrgal,d$x,s="min")-d$y.val
+emrg <- predict(mrgal$gamlr,d$x,select=0)-d$y.val
 ecp <- predict(cpbest,as.data.frame(as.matrix(d$x)))-d$y.val
 esnet <- predict(snet,as.matrix(d$x),which="parms.min")-d$y.val
 escad <- predict(mrgal,as.matrix(d$x))-d$y.val
@@ -12,7 +18,7 @@ escad <- predict(mrgal,as.matrix(d$x))-d$y.val
 mse0 <- apply(e0^2,2,mean)
 mse2 <- apply(e2^2,2,mean)
 mse10 <- apply(e10^2,2,mean)
-msemrg <- mean(emrg^2)
+msemrg <- apply(emrg^2,2,mean)
 msecp <- mean(ecp^2)
 msesnet <- mean(esnet^2)
 msescad <- mean(escad^2) # 9.744
@@ -29,22 +35,22 @@ seg10 <- c(onese=gl10$seg.1se,min=gl10$seg.min,
 	aicc=which.min(AICc(gl10$gamlr)),
 	aic=which.min(AIC(gl10$gamlr)),
 	bic=which.min(BIC(gl10$gamlr)))
+segmrg <- c(onese=mrgal$seg.1se,min=mrgal$seg.min,
+	aicc=which.min(AICc(mrgal$gamlr)),
+	aic=which.min(AIC(mrgal$gamlr)),
+	bic=which.min(BIC(mrgal$gamlr)))
+write(paste(c(segmrg,seg0,seg2,seg10),collapse="|"),
+	sprintf("results/%s/seg.txt",OUT),append=TRUE)
 
-MSE <- c(cp=msecp,mrg=msemrg,snet=msesnet,gl0=mse0[seg0],
+MSE <- c(cp=msecp,snet=msesnet,scad=msescad,
+	mrg=msemrg[segmrg],gl0=mse0[seg0],
 	gl2=mse2[seg2],gl10=mse10[seg10])
-names(MSE)[-(1:3)] <- 
-	paste(rep(c("gl0","gl2","gl10"),each=length(seg0)),
-		names(seg0),sep=".")
-#              cp             mrg            snet       gl0.onese   gl0.min.seg47 
-#        7.906584        9.457747        8.913506       10.642369        8.978226 
-#  gl0.aicc.seg41  gl0.aic.seg100   gl0.bic.seg11       gl2.onese   gl2.min.seg47 
-#        9.292775       10.897815       13.529001        9.633760        9.075675 
-#  gl2.aicc.seg41  gl2.aic.seg100   gl2.bic.seg11      gl10.onese  gl10.min.seg47 
-#        8.890019       11.316384       13.521819       10.264028        9.230127 
-# gl10.aicc.seg41 gl10.aic.seg100  gl10.bic.seg11 
-#        9.150046       11.316384       13.601107 
+write(paste(round(MSE,2),collapse="|"),
+	sprintf("results/%s/mse.txt",OUT),append=TRUE)
 
-	R2 <- 1-MSE/mean( (d$y.val-mean(d$y.val))^2 )
+R2 <- 1-MSE/mean( (d$y.val-mean(d$y.val))^2 )
+write(paste(round(R2,2),collapse="|"),
+	sprintf("results/%s/r2.txt",OUT),append=TRUE)
 
 ## support and sign recovery
 getsupport <- function(fit){
@@ -55,35 +61,47 @@ getsupport <- function(fit){
 S0 <- getsupport(gl0)
 S2 <- getsupport(gl2)
 S10 <- getsupport(gl10)
-Smrg <- which(coef(mrgal)[-1,]!=0)
+Smrg <- getsupport(mrgal)
 Ssnet <- which(coef(snet)[-1,]!=0)
 Sscad <- which(coef(scad)[-1]!=0)
 
 s0 <- sapply(S0,length)
 s2 <- sapply(S2,length)
 s10 <- sapply(S10,length)
-smrg <- length(Smrg)
+smrg <- sapply(Smrg,length)
 ssnet <- length(Ssnet) 
 sscad <- length(Sscad) # 137
+
+s <- c(cp=sCp,snet=ssnet,scad=sscad,mrg=smrg[segmrg],
+	gl0=s0[seg0],gl2=s2[seg2],gl10=s10[seg10])
+write(paste(round(s,2),collapse="|"),
+	sprintf("results/%s/s.txt",OUT),append=TRUE)
 
 fp0 <- sapply(S0,function(set) sum(set>sCp))
 fp2 <- sapply(S2,function(set) sum(set>sCp))
 fp10 <- sapply(S10,function(set) sum(set>sCp))
-fpmrg <- sum(Smrg>sCp)
+fpmrg <- sapply(Smrg,function(set) sum(set>sCp))
 fpsnet <- sum(Ssnet>sCp)
 fpscad <- sum(Ssnet>sCp) # 96
+
+fdr <- c(cp=0, snet=fpsnet/ssnet,scad=fpscad/sscad,
+	mrg=fpmrg[segmrg]/smrg,gl0=fp0[seg0]/s0,
+	gl2=fp2[seg2]/s2,gl10=fp10[seg10]/s10)
+write(paste(round(fdr,2),collapse="|"),
+	sprintf("results/%s/fdr.txt",OUT),append=TRUE)
 
 tp0 <- sapply(S0,function(set) sum(set<=sCp))
 tp2 <- sapply(S2,function(set) sum(set<=sCp))
 tp10 <- sapply(S10,function(set) sum(set<=sCp))
-tpmrg <- sum(Smrg<=sCp)
+tpmrg <- sapply(Smrg,function(set) sum(set<=sCp))
 tpsnet <- sum(Ssnet<=sCp)
 tpscad <- sum(Ssnet<=sCp) # 48
 
-# > fpscad/sscad
-# [1] 0.7007299
-# > tpscad/sCp
-# [1] 0.6956522
+sens <- c(cp=1,snet=tpsnet/sCp,scad=tpscad/sCp,
+	mrg=tpmrg[segmrg]/sCp,gl0=tp0[seg0]/sCp,
+	gl2=tp2[seg2]/sCp,gl10=tp10[seg10]/sCp)
+write(paste(round(sens,2),collapse="|"),
+	sprintf("results/%s/sens.txt",OUT),append=TRUE)
 
 getsign <- function(b){
 	b <- as.matrix(b)
@@ -91,19 +109,28 @@ getsign <- function(b){
 	apply(b,2,
 		function(c){
 			cnz <- which(c!=0)
-			mean(sign(c[cnz])==(-1)^cnz) 
+			m <- mean(sign(c[cnz])==(-1)^cnz) 
+			if(is.nan(m)) m <- 1
+			m
 			}
 		)
 	}
 sgn0 <-  getsign( coef(gl0$gamlr,select=0)[-1,] )
 sgn2 <-  getsign( coef(gl2$gamlr,select=0)[-1,] )
 sgn10 <-  getsign( coef(gl10$gamlr,select=0)[-1,] )
-sgnmrg <- getsign( coef(mrgal)[-1,] )
+sgnmrg <- getsign( coef(mrgal$gamlr,select=0)[-1,] )
 sgncp <- getsign( coef(cpbest)[-1] )
 sgnsnet <- getsign( coef(snet)[-1,] )
 sgnscad <- getsign( coef(scad)[-1] ) # 0.6569343
 
+sgn <- c(cp=sgncp,snet=sgnsnet,scad=sgnscad,
+	mrg=sgnmrg[segmrg],gl0=sgn0[seg0],
+	gl2=sgn2[seg2],gl10=sgn10[seg10])
+write(paste(round(sgn,2),collapse="|"),
+	sprintf("results/%s/sgn.txt",OUT),append=TRUE)
+
 ## tracking the weights
+wmrg <- matrix(wmrg,nrow=ncol(d$x),ncol=100)
 
 getw <- function(fit){
 	b <- coef(fit$gamlr,select=0)[-1,]
@@ -112,6 +139,46 @@ getw <- function(fit){
 	if(gam!=0) w[,-1] <- 1/(1+gam*abs(as.matrix(b)[,-ncol(b)]))
 	return(w) }
 
-w0 <- getw(gl0)
+w0 <- matrix(1,nrow=ncol(d$x),ncol=100)
 w2 <- getw(gl2)
 w10 <- getw(gl10)
+
+nu <- d$sigma^2/nrow(d$x)
+
+S <- 1:sCp
+XXXXi <- t(d$x[,-S])%*%d$x[,S]%*%solve(t(d$x[,S])%*%d$x[,S])
+getE <- function(W,lam,f){	
+	wsnorm <- apply(W[S,],2,
+		function(w) sqrt(sum(w^2)))/sqrt(sCp)
+	wmin <- apply(W[-S,],2,min)
+	cpineq <- as.integer(wmin > sqrt(2*nu)/lam)
+	L <- round(wsnorm/(wmin - sqrt(2*nu)/lam),2)
+	R <- XXXXi%*%W[S,] - 1 + sqrt(2*nu)/t(lam*t(W[-S,]))
+	irrep <- round(apply(R,2,function(r) mean(r<0)),2)
+
+	write(paste(L,collapse="|"),
+		sprintf("results/%s/L%s.txt",OUT,f),append=TRUE)
+	write(paste(cpineq,collapse="|"),
+		sprintf("results/%s/cpineq%s.txt",OUT,f),append=TRUE)
+	write(paste(irrep,collapse="|"),
+		sprintf("results/%s/irrep%s.txt",OUT,f),append=TRUE)
+	return(list(L=L,cpineq=cpineq,irrep=irrep))
+}
+
+Emrg <- getE(wmrg,mrgal$gamlr$lambda,"mrg")
+E0 <- getE(w0,gl0$gamlr$lambda,"gl0")
+E2 <- getE(w2,gl2$gamlr$lambda,"gl2")
+E10 <- getE(w10,gl10$gamlr$lambda,"gl10")
+
+
+
+
+
+
+
+
+
+
+
+
+

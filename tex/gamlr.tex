@@ -726,7 +726,7 @@ Dividing each side by $\sqrt{n}\|\bm{X}(\bs{\hat\beta}-\bs{\beta}^\nu)\|/2$ and 
 $\mr{MSE}_S + 2s\sigma^2/n$, Mallows' unbiased estimate of residual variance,
 is optimal for minimizing prediction error on $\bm{y} \sim
 (\bm{f},\sigma^2\bm{I})$ -- that is, for $y_i$ independent with means $f_i$
-and shared variance $\sigma^2$. Theorem (\ref{sparseapprox}) with $\nu = \sigma^2/n$ and $L = \frac{\|\bs{\omega}_S\|}{\sqrt{s}}\left(\omega^{\mr{min}}_{S^c}- \sqrt{2}\sigma/(\lambda/\sqrt{n})\right)^{-1}$ provides a comparison between weighted $L_1$ estimation and $C_p$-optimal prediction.\footnote{We work with
+and shared variance $\sigma^2$. Theorem (\ref{sparseapprox}) with $\nu = \sigma^2/n$ and $L = \frac{\|\bs{\omega}_S\|}{\sqrt{s}}\left(\omega^{\mr{min}}_{S^c}- \sqrt{2}\sigma/(\lambda\sqrt{n})\right)^{-1}$ provides a comparison between weighted $L_1$ estimation and $C_p$-optimal prediction.\footnote{We work with
 $C_p$ here, rather than $AIC$ or $AICc$, since $C_p$ is conveniently defined
 the scale of squared errors.} Note that, since the condition on minimum $S^c$ weights has become
 $\omega^{\mr{min}}_{S^c} > (\sigma/\lambda)\sqrt{2/n}$, comparison to $C_p$ suggests we can use larger $\gamma$ (faster diminishing bias) with large $n$ or small $\sigma$.
@@ -736,7 +736,7 @@ $\omega^{\mr{min}}_{S^c} > (\sigma/\lambda)\sqrt{2/n}$, comparison to $C_p$ sugg
 \noindent $\bullet$~~  Plausibility of the restricted eigenvale assumption $\phi(L,S) > 0$ depends critically upon $L$.  Here, the assumption is less restrictive if we can reduce $\|\bs{\omega}_S\|$ without making $\omega^{\mr{min}}_{S_c}$ small.  For example, the next sub-section suggests using large $\gamma$ so long as $\lambda$ is big enough to avoid false discovery. More generally, \cite{raskutti_restricted_2010} show that similar conditions hold  with very high probability for $\bm{X}$ drawn from a broad class of Gaussian distributions.  \cite{bickel_simultaneous_2009} provide a nice overview of sufficient conditions, and \cite{buhlmann_statistics_2011} have extensive discussion and examples related to restricted eigenvalue assumptions.
 
 
-\subsection{Sign Recovery}
+\subsection{False Discovery Control}
 
 Two related goals in high-dimensional estimation are  support recovery -- having the set $\{j: \hat\beta_j \neq 0\} = \{j: \beta_j \neq 0\}$ for some `true' $\bs{\beta}$ -- and  sign recovery -- in addition, $\mr{sgn}(\bs{\hat\beta}) = \mr{sgn}(\bs{\beta})$.  For standard lasso estimated $\bs{\hat\beta}$, many authors have shown \citep[e.g.,][]{buhlmann_statistics_2011,zou_adaptive_2006} that to get exact support recovery asymptotically or with high probability requires an {\it irrepresentability condition} which limits the size of least-squares projections from `true support' onto spurious covariates.  
 \begin{definition} 
@@ -757,39 +757,7 @@ theory.
 
 Our exposition here will compare $\hat S = \{j: \hat\beta_j \neq 0\}$, for $\bs{\hat\beta}$ from weighted $L_1$ penalized estimation, to $S = \{j: \beta^\nu_j \neq 0\}$ for $\beta^\nu$ from $L_0$ penalized estimation as in Theorem \ref{sparseapprox}.  The result uses an irrepresentable condition with $\bm{v} = \bs{\omega}_S$, an assumption that becomes less restrictive as one is able to shrink weights $\omega_j$ for $j\in S$.
 
-\begin{theorem}\label{signrecov}
-Under the setting of Theorem \ref{sparseapprox}, $\mr{sgn}(\bs{\hat\beta}) = \mr{sgn}(\bs{\beta}^\nu)$ for $\omega_{S^c}^{\mr{min}}\lambda > \sqrt{2\nu}$ if
-\begin{equation}
-\mr{(i)}~~~|\bs{x}_j'\bm{X}_S(\bm{X}_S'\bm{X}_S)^{-1}\bs{\omega}_S| \leq 1 - \frac{\sqrt{2\nu}}{\lambda\omega_j}~~\forall~j ~\in~S^c
-~~~~~~~~~~\mr{(ii)}~~~\frac{1}{n}\bs{x}_j'\bm{y} > \lambda\omega_j ~~\forall~j ~\in~S.
-\end{equation}
-\end{theorem}
-\begin{proof} We adapt results of \cite{wainwright_sharp_2009}.
-From the Karush-Kuhn-Tucker (KKT) conditions, 
-$\bm{x}_j'\bm{X}(\bs{\hat\beta}_S-\bs{\beta}^\nu) + \bm{X}'\bm{e}^S = -n\lambda\zeta_j$ at convergence where $|\zeta_j| = \omega_j$ for $j\in\hat S$ and $|\zeta_j| \leq \omega_j$ for $j\in\hat S^c$.
-Thus we we have no false positives if and only if
-\begin{equation}
-\bm{X}_S'\bm{X}_S(\bs{\hat\beta}_S-\bs{\beta}^\nu_S) + \bm{X}_S'\bm{e}^S =-n\lambda\bs{\zeta}_S ~~\Rightarrow~~ \bs{\hat\beta}_S-\bs{\beta}^\nu_S = -n\lambda(\bm{X}_S'\bm{X}_S)^{-1}\bs{\zeta}_S.
-\end{equation}
-And all of the spurious regressors in $S^c$ will have $\hat \beta_j = 0$
-if and only if
-\begin{equation}
-\bs{x}_j'\bm{X}_S(\bs{\hat\beta}_S-\bs{\beta}^\nu_S) - \bs{x}_j'\bm{e}^S 
-\leq n\lambda\zeta_j ~~\Leftarrow~~
-1 - \left|\frac{x_j'\bm{e}^S}{n}\right| \geq 1 - \frac{\sqrt{2\nu}}{\lambda\omega_j} \geq |\bs{x}_j'\bm{X}_S(\bm{X}_S'\bm{X}_S)^{-1}\bs{\omega}_S|.
-\end{equation}
-Finally, for sign recovery on $j\in S$ we need (with inequalities implied on all elements of the compared vectors)
-\begin{equation}
-|\bs{\beta}_S^\nu| > |\bs{\hat\beta}_S - \bs{\beta}^\nu_S| = n\lambda (\bm{X}_S'\bm{X}_S)^{-1}|\bs{\zeta}_S|.
-\end{equation}
-This holds if $\bm{X}_S'\bm{X}_S|\bs{\beta}^\nu_S| = |\bm{X}_s'\bm{y}| > n\lambda\bs{\omega}_S$.
-
-\end{proof}
-
-\noindent {\bf Remarks}
-
-\vskip .25cm
-\noindent $\bullet$~~ A path-wise interpretation of Theorem \ref{signrecov} is that the gamma lasso achieves exact sign recovery if $(i)$ holds until $(ii)$ occurs.  We can re-state the result in terms of false positives relative to $\bs{\beta}^{\nu}$ along the path, with $\bs{\hat\beta}^t$ and $\hat S_t = \{j: \hat\beta^t_j\neq 0\}$ the  weighted lasso coefficient estimates and support under $\bs{\omega}^t$ and $\lambda_t$ at path segment $t$.
+A path-wise interpretation of Theorem \ref{signrecov} is that the gamma lasso achieves exact sign recovery if $(i)$ holds until $(ii)$ occurs.  We can re-state the result in terms of false positives relative to $\bs{\beta}^{\nu}$ along the path, with $\bs{\hat\beta}^t$ and $\hat S_t = \{j: \hat\beta^t_j\neq 0\}$ the  weighted lasso coefficient estimates and support under $\bs{\omega}^t$ and $\lambda_t$ at path segment $t$.
 \begin{corollary}
 Under the setting of Theorem \ref{signrecov}, if $\hat S_{t-1} \cap S^c = \varnothing$ and $\lambda_t > \sqrt{2\nu}$ then
 \begin{equation}\label{falsepos}
@@ -798,13 +766,14 @@ Under the setting of Theorem \ref{signrecov}, if $\hat S_{t-1} \cap S^c = \varno
 \end{corollary}
 \noindent 
 The results uses $\hat S_{t-1} \cap S^c = \varnothing \Rightarrow \omega_{S^c}^{t~\mr{min}} = 1$ for the GL algorithm.  So long as $\lambda_t$ is large enough, (\ref{falsepos}) suggests that  big $\gamma$ (for fast diminishing $\omega_j$) will help control false discovery.  Of course, the momment $\hat S_{t-1} \cap S^c \neq \varnothing$,  a large $\gamma$ allows spurious covariates to enter with very little shrinkage and can move the fit arbitratily far away from $L_0$-optimal support.
+
 \vskip .25cm
-\noindent $\bullet$~~ Condition $(ii)$ shows that sign recovery relative to the $L_0$-optimal $\bs{\beta}^\nu$ relies upon the strength of  {\it marginal} correlations with the response.  It directly suggests use of the marginal regression coefficient estimates as weights for an adaptive lasso, as proposed in \cite{huang_adaptive_2008} for the $p>n$ setting.  Indeed, since marginal correlations tend to have a lower sampling variance than conditional coefficients, this strategy should also yield low variance weights and stable estimation.  Our simulation study investigates marginal-correlation-based adaptive lasso.
+\noindent {\bf Remarks}
 \vskip .25cm
 \noindent $\bullet$~~ From Theorem 7.4 in \cite{buhlmann_statistics_2011}, 
 the irrepresentability condition holds with 
 $|\bs{x}_j'\bm{X}_S(\bm{X}_S'\bm{X}_S)^{-1}\bs{\omega}_S|
-\leq \frac{\|\bs{\omega}_S\|}{\sqrt{s}}\theta_{\mr{adap}}(S)$ where $\theta_{\mr{adap}}(S)$ is their `adaptive restricted regression' coefficient.  Of direct interest here, they show that $\theta_{\mr{adap}}(S) \leq \sqrt{s}/\Lambda_{\mr{min}}(S)$ where $\Lambda_{\mr{min}}(S) = \mr{min}_{\{\bm{v}:\|\bm{v}\|=1\}}\bm{v}'\left(\frac{\bm{X}_S'\bm{X}_S}{n}\right)^{-1}\bm{v}$ is the minimum eigenvalue of $\bm{X}_S'\bm{X}_S/n$.  Thus, $(i)$ can be replaced by the restriction $\Lambda_{\mr{min}}(S) \geq \|\bs{\omega}_S\|(1 - \sqrt{2\nu}/(\omega_{S^c}^{\mr{min}}\lambda))^{-1} = \sqrt{s}L$, with $L$ from Theorem \ref{sparseapprox}. Small values for $L$ are key in both predictive performance and support recovery.
+\leq \frac{\|\bs{\omega}_S\|}{\sqrt{s}}\theta_{\mr{adap}}(S)$ where $\theta_{\mr{adap}}(S)$ is their `adaptive restricted regression' coefficient.  Of direct interest here, they show that $\theta_{\mr{adap}}(S) \leq \sqrt{s}/\Lambda_{\mr{min}}(S)$ where $\Lambda_{\mr{min}}(S) = \mr{min}_{\{\bm{v}:\|\bm{v}\|=1\}}\bm{v}'\left(\frac{\bm{X}_S'\bm{X}_S}{n}\right)\bm{v}$ is the minimum eigenvalue of $\bm{X}_S'\bm{X}_S/n$.  Thus, $(i)$ can be replaced by the restriction $\Lambda_{\mr{min}}(S) \geq \|\bs{\omega}_S\|(1 - \sqrt{2\nu}/(\omega_{S^c}^{\mr{min}}\lambda))^{-1} = \sqrt{s}L$, with $L$ from Theorem \ref{sparseapprox}. Small values for $L$ are key in both predictive performance and support recovery.
 
 \vskip .25cm
 \noindent $\bullet$~~ Without any irrepresentability condition,  limits on false discovery are more pessimistic.  For example, under the setting of Theorem \ref{sparseapprox},  local optimality
@@ -1158,6 +1127,8 @@ does worse than simple BIC using plug-in $df^t$.
 \section{Simulation}
 \label{sim}
 
+Marginal regression coefficient estimates are often \citep[e.g.,][]{huang_adaptive_2008} suggested as weights for an adaptive lasso in the $p>n$ setting.  Indeed, since marginal correlations tend to have a lower sampling variance than conditional coefficients, this strategy should yield lower variance weights and stable estimation when compared to more complicated weighting schemes.  Our simulation study investigates marginal-correlation-based adaptive lasso.
+
 Our first example uses data simulated independently from the following
 $p$-covariate regression.
 \begin{align}
@@ -1460,69 +1431,101 @@ x_{ij}^2q_i(1-q_i).
 \]
 
 
-\subsection{Extra Proofs}
+% \subsection{Extra Proofs}
 
-It is
-straightforward to show that an appropriately weighted $L_1$ penalized
-deviance estimator will give predictions close to those from any such sparse
-approximation.  Our results are adapted from those in
-\citet{van_de_geer_adaptive_2011}.
+% It is
+% straightforward to show that an appropriately weighted $L_1$ penalized
+% deviance estimator will give predictions close to those from any such sparse
+% approximation.  Our results are adapted from those in
+% \citet{van_de_geer_adaptive_2011}.
 
 
-\begin{prop} Consider the weighted $L_1$ minimization from (\ref{l1pen}) in
-Algorithm 1, under squared-error loss $l(\hat\alpha,\bs{\hat\beta}) =
-\frac{1}{2}\|\bm{\hat y} - \bm{f} - \bs{\varepsilon}\|^2$.   Assume weights
-$\|\bs{\omega}_S\| = c_S\sqrt{s}/2$ and $\omega_j = 1$ $\forall j \in S^c$.
-Then for $\lambda$ large enough that $\max_j |\bs{x}_j'\bs{\varepsilon}| <
-n\lambda/4$, with $\bs{x}_j$ the $j^{th}$ design column, 
-\begin{equation} \frac{\|\bm{\hat y} - \bm{f}\|^2}{2n}\leq
-\frac{\|\bm{f}_S-\bm{f}\|^2}{n} +  \frac{3\lambda^2 (1+c_S)^2 s}{4\phi^2(2(1+c_S), s)}
-\end{equation} 
-where $\phi^2(L,s)$ is the restricted eigenvalue
-$
-\phi^2(L,s) = \min_{\{\bm{v}: |\bm{v}_{S^c}| \leq \sqrt{s}L\|\bm{v}_S\|\}}\bm{v}'\bs{\Sigma}\bm{v}
-$ defined on gram matrix $\bs{\Sigma} = \bm{X}'\bm{X}/n$.
-\end{prop}
+% \begin{prop} Consider the weighted $L_1$ minimization from (\ref{l1pen}) in
+% Algorithm 1, under squared-error loss $l(\hat\alpha,\bs{\hat\beta}) =
+% \frac{1}{2}\|\bm{\hat y} - \bm{f} - \bs{\varepsilon}\|^2$.   Assume weights
+% $\|\bs{\omega}_S\| = c_S\sqrt{s}/2$ and $\omega_j = 1$ $\forall j \in S^c$.
+% Then for $\lambda$ large enough that $\max_j |\bs{x}_j'\bs{\varepsilon}| <
+% n\lambda/4$, with $\bs{x}_j$ the $j^{th}$ design column, 
+% \begin{equation} \frac{\|\bm{\hat y} - \bm{f}\|^2}{2n}\leq
+% \frac{\|\bm{f}_S-\bm{f}\|^2}{n} +  \frac{3\lambda^2 (1+c_S)^2 s}{4\phi^2(2(1+c_S), s)}
+% \end{equation} 
+% where $\phi^2(L,s)$ is the restricted eigenvalue
+% $
+% \phi^2(L,s) = \min_{\{\bm{v}: |\bm{v}_{S^c}| \leq \sqrt{s}L\|\bm{v}_S\|\}}\bm{v}'\bs{\Sigma}\bm{v}
+% $ defined on gram matrix $\bs{\Sigma} = \bm{X}'\bm{X}/n$.
+% \end{prop}
 
-\begin{proof}
-This result is a direct adaptation of those in the book by \cite{buhlmann_statistics_2011}.
+% \begin{proof}
+% This result is a direct adaptation of those in the book by \cite{buhlmann_statistics_2011}.
 
-\noindent We know that at convergence
-\[
-\|\bm{\hat y}-\bm{f}\|^2 - 2\bs{\varepsilon}'\bm{\hat y} + n\lambda\bs{\omega}'|\bs{\hat\beta}| \leq
-\|\bm{f}_S-\bm{f}\|^2 - 2\bs{\varepsilon}'\bm{f}_S + n\lambda\bs{\omega}_S'|\bs{\beta}_S|.
-\]
-By assumption $|\bs{\varepsilon}'\bs{x}_j|\leq n\lambda/4$ $\forall j$, so that $|\bs{\varepsilon}'\bm{\hat y}| = |\bs{\varepsilon}'\bm{X}\bs{\hat\beta}|
-\leq n\lambda|\bs{\hat\beta}_{S^c}|/4 + |\bs{\varepsilon}'\bm{X}_S\bs{\hat\beta}_S|$ and
-\begin{align*}
-\|\bm{\hat y}-\bm{f}\|^2 + \frac{n\lambda}{2}|\bs{\hat\beta}_{S^c}| &\leq 
-\|\bm{f}_S-\bm{f}\|^2 + |2\bs{\varepsilon}'\bm{X}_S (\bs{\hat\beta}_S - \bs{\beta}_S)| + n\lambda\bs{\omega}_S'|\bs{\hat\beta}_S - \bs{\beta}_S|\\
-&\leq \|\bm{f}_S-\bm{f}\|^2 + \frac{n\lambda}{2}|\bs{\hat\beta}_S - \bs{\beta}_S| + n\lambda\|\bs{\omega}_S\|\|\bs{\hat\beta}_S - \bs{\beta}_S\|\\
-&\leq \|\bm{f}_S-\bm{f}\|^2 + \frac{n\lambda\sqrt{s}}{2}\left(1+c_S\right)\|\bs{\hat\beta}_S - \bs{\beta}_S\|
-\end{align*}
-where we recall $c_S = 2\|\bs{\omega}_S\|/\sqrt{s}$.
+% \noindent We know that at convergence
+% \[
+% \|\bm{\hat y}-\bm{f}\|^2 - 2\bs{\varepsilon}'\bm{\hat y} + n\lambda\bs{\omega}'|\bs{\hat\beta}| \leq
+% \|\bm{f}_S-\bm{f}\|^2 - 2\bs{\varepsilon}'\bm{f}_S + n\lambda\bs{\omega}_S'|\bs{\beta}_S|.
+% \]
+% By assumption $|\bs{\varepsilon}'\bs{x}_j|\leq n\lambda/4$ $\forall j$, so that $|\bs{\varepsilon}'\bm{\hat y}| = |\bs{\varepsilon}'\bm{X}\bs{\hat\beta}|
+% \leq n\lambda|\bs{\hat\beta}_{S^c}|/4 + |\bs{\varepsilon}'\bm{X}_S\bs{\hat\beta}_S|$ and
+% \begin{align*}
+% \|\bm{\hat y}-\bm{f}\|^2 + \frac{n\lambda}{2}|\bs{\hat\beta}_{S^c}| &\leq 
+% \|\bm{f}_S-\bm{f}\|^2 + |2\bs{\varepsilon}'\bm{X}_S (\bs{\hat\beta}_S - \bs{\beta}_S)| + n\lambda\bs{\omega}_S'|\bs{\hat\beta}_S - \bs{\beta}_S|\\
+% &\leq \|\bm{f}_S-\bm{f}\|^2 + \frac{n\lambda}{2}|\bs{\hat\beta}_S - \bs{\beta}_S| + n\lambda\|\bs{\omega}_S\|\|\bs{\hat\beta}_S - \bs{\beta}_S\|\\
+% &\leq \|\bm{f}_S-\bm{f}\|^2 + \frac{n\lambda\sqrt{s}}{2}\left(1+c_S\right)\|\bs{\hat\beta}_S - \bs{\beta}_S\|
+% \end{align*}
+% where we recall $c_S = 2\|\bs{\omega}_S\|/\sqrt{s}$.
 
-If $\|\bm{\hat y}-\bm{f}\|^2 + \frac{n\lambda}{2}|\bs{\hat\beta}_{S^c}|\leq2\|\bm{f}_S-\bm{f}\|^2 $ then we are done.  Otherwise,
-$\|\bm{\hat y}-\bm{f}\|^2 + \frac{n\lambda}{2}|\bs{\hat\beta}_{S^c}| <
-n\lambda \sqrt{s}\left(1+c_S\right)\|\bs{\hat\beta}_S - \bs{\beta}_S\|$.  By definition of the restricted eigenvalue, this yields $\|\bs{\hat\beta}_S - \bs{\beta}_S\| < 
-\|\bm{\hat y} - \bm{f}_S\|/[\sqrt{n}\phi(2(1+c_S),S)] < \left[\|\bm{\hat y} - \bm{f}\| + \|\bm{f}_S-\bm{f}\|\right]/[\sqrt{n}\phi(2(1+c_S),S)]$ and thus
-\begin{align*}
-\|\bm{\hat y}-\bm{f}\|^2 &\leq \frac{\sqrt{n}\lambda\sqrt{s}(1+c_S)}{\phi(2(1+c_S),S)}
-\left[\|\bm{\hat y} - \bm{f}\| + \|\bm{f}_S-\bm{f}\|\right] \\
-&\leq  \|\bm{f}_S-\bm{f}\|^2 + \frac{3n\lambda^2(1+c_S)^2s}{4\phi^2(2(1+c_S),S)} +
-\frac{\|\bm{\hat y}-\bm{f}\|^2}{2}
-\end{align*}
-since $0 \leq 2(\frac{a}{2}-c)^2 + (b-c)^2 = \frac{a^2}{2}+b^2+3c^2-2c(a+b)$ for any $a,b,c$.  
+% If $\|\bm{\hat y}-\bm{f}\|^2 + \frac{n\lambda}{2}|\bs{\hat\beta}_{S^c}|\leq2\|\bm{f}_S-\bm{f}\|^2 $ then we are done.  Otherwise,
+% $\|\bm{\hat y}-\bm{f}\|^2 + \frac{n\lambda}{2}|\bs{\hat\beta}_{S^c}| <
+% n\lambda \sqrt{s}\left(1+c_S\right)\|\bs{\hat\beta}_S - \bs{\beta}_S\|$.  By definition of the restricted eigenvalue, this yields $\|\bs{\hat\beta}_S - \bs{\beta}_S\| < 
+% \|\bm{\hat y} - \bm{f}_S\|/[\sqrt{n}\phi(2(1+c_S),S)] < \left[\|\bm{\hat y} - \bm{f}\| + \|\bm{f}_S-\bm{f}\|\right]/[\sqrt{n}\phi(2(1+c_S),S)]$ and thus
+% \begin{align*}
+% \|\bm{\hat y}-\bm{f}\|^2 &\leq \frac{\sqrt{n}\lambda\sqrt{s}(1+c_S)}{\phi(2(1+c_S),S)}
+% \left[\|\bm{\hat y} - \bm{f}\| + \|\bm{f}_S-\bm{f}\|\right] \\
+% &\leq  \|\bm{f}_S-\bm{f}\|^2 + \frac{3n\lambda^2(1+c_S)^2s}{4\phi^2(2(1+c_S),S)} +
+% \frac{\|\bm{\hat y}-\bm{f}\|^2}{2}
+% \end{align*}
+% since $0 \leq 2(\frac{a}{2}-c)^2 + (b-c)^2 = \frac{a^2}{2}+b^2+3c^2-2c(a+b)$ for any $a,b,c$.  
+% \end{proof}
+
+
+% \noindent {\bf Remarks}
+
+% $\bullet$ For $j \in F=\hat S \cup S_\star^c$, the KKT conditions without any assumptions on irrepresentability imply
+% \[
+% 1 = \frac{1+\gamma\beta_j^{t-1}}{n\lambda_t}|\bs{x}_j'(\bm{\hat y} - \bm{f}-\varepsilon)|.
+% \]
+% Thus $n^2\lambda^2|F|^2/\|1+\gamma\beta_F^{t-1}\| < n^2\lambda^2\|\bs{\omega}_F\|$
+
+\subsection{Sign Recovery}
+
+\begin{theorem}\label{signrecov}
+Under the setting of Theorem \ref{sparseapprox}, $\mr{sgn}(\bs{\hat\beta}) = \mr{sgn}(\bs{\beta}^\nu)$ for $\omega_{S^c}^{\mr{min}}\lambda > \sqrt{2\nu}$ if
+\begin{equation}
+\mr{(i)}~~|\bs{x}_j'\bm{X}_S(\bm{X}_S'\bm{X}_S)^{-1}\bs{\omega}_S| \leq 1 - \frac{\sqrt{2\nu}}{\lambda\omega_j}~~\forall~j ~\in~S^c
+~~~
+\mr{(ii)}~~\left|(\bm{X}_S'\bm{X}_S)^{-1}\bm{X}_S'\bm{y}\right|_\infty > n\lambda\left|(\bm{X}_S'\bm{X}_S)^{-1}\bs{\omega}_S\right|_\infty 
+\end{equation}
+\end{theorem}
+\begin{proof} We adapt results of \cite{wainwright_sharp_2009}.
+From the Karush-Kuhn-Tucker (KKT) conditions, 
+$\bm{x}_j'\bm{X}(\bs{\hat\beta}_S-\bs{\beta}^\nu) + \bm{X}'\bm{e}^S = -n\lambda\zeta_j$ at convergence where $|\zeta_j| = \omega_j$ for $j\in\hat S$ and $|\zeta_j| \leq \omega_j$ for $j\in\hat S^c$.
+Thus we we have no false positives if and only if
+\begin{equation}
+\bm{X}_S'\bm{X}_S(\bs{\hat\beta}_S-\bs{\beta}^\nu_S) + \bm{X}_S'\bm{e}^S =-n\lambda\bs{\zeta}_S ~~\Rightarrow~~ \bs{\hat\beta}_S-\bs{\beta}^\nu_S = -n\lambda(\bm{X}_S'\bm{X}_S)^{-1}\bs{\zeta}_S.
+\end{equation}
+And all of the spurious regressors in $S^c$ will have $\hat \beta_j = 0$
+if and only if
+\begin{equation}
+\bs{x}_j'\bm{X}_S(\bs{\hat\beta}_S-\bs{\beta}^\nu_S) - \bs{x}_j'\bm{e}^S 
+\leq n\lambda\zeta_j ~~\Leftarrow~~
+1 - \frac{|x_j'\bm{e}^S|}{n} \geq 1 - \frac{\sqrt{2\nu}}{\lambda\omega_j} \geq |\bs{x}_j'\bm{X}_S(\bm{X}_S'\bm{X}_S)^{-1}\bs{\omega}_S|.
+\end{equation}
+Finally, for sign recovery on $j\in S$ we need 
+\begin{equation}\label{signeq}
+|\beta_j^\nu| - |\beta^\nu_j - \hat\beta_j| > 0 ~~\forall~j~\in~S,
+\end{equation}
+and $(ii)$ follows from  $\bs{\beta^\nu}_S = (\bm{X}_S'\bm{X}_S)^{-1}\bm{X}_S'\bm{y}$ and $ \bs{\beta^\nu}_S- \bs{\hat\beta}_S = n\lambda (\bm{X}_S'\bm{X}_S)^{-1}\bs{\zeta}_S$.
+
 \end{proof}
-
-
-\noindent {\bf Remarks}
-
-$\bullet$ For $j \in F=\hat S \cup S_\star^c$, the KKT conditions without any assumptions on irrepresentability imply
-\[
-1 = \frac{1+\gamma\beta_j^{t-1}}{n\lambda_t}|\bs{x}_j'(\bm{\hat y} - \bm{f}-\varepsilon)|.
-\]
-Thus $n^2\lambda^2|F|^2/\|1+\gamma\beta_F^{t-1}\| < n^2\lambda^2\|\bs{\omega}_F\|$
 
 \subsection{Quasi-Newton acceleration}
 \label{qn}

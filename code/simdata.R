@@ -14,7 +14,7 @@
 # For all, report prediction error on left-out true y,
 # and prediction error on Cp rule, and selection error on Cp.
 
-dgp <- function(id, n, p=n, 
+dgp <- function(id, n=1e3, p=n, 
 		s2n=1, rho=0.9, decay=50){
 
 	## fixed 
