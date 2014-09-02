@@ -1,280 +1,186 @@
+## extract sim var
+args <- commandArgs(TRUE)
+id <- as.integer(args[1])
+rho <- as.numeric(args[2])
+s2n <- as.numeric(args[3])
+OUT <- args[4]
 
-## monte carlo
-metrics <- c("AIC","BIC","CV1se","CVmin","EBF")
-select <- function(fit,x){
-	preds <- predict(fit$g,x,select=NULL)
-	preds <- preds[,c(which.min(AIC(fit$g)),
-					which.min(BIC(fit$g)),
-					fit$seg.1se,
-					fit$seg.min,
-					which.min(ebf(fit,x)) )]
-	colnames(preds) <- metrics
-	as.matrix(preds)
-}
+print(sessionInfo())
 
-eval <- function(y, f){
-	f <- as.matrix(f)
-	sst <- sum( (y-mean(y))^2 )
-	sse <- colSums( (y-f)^2 )
-	r2 <- 1-sse/sst
-	return(r2)
-}
-
-cl <- makeCluster(spec=rep("localhost", NC))
-clusterSetupRNG(cl)
-clusterExport(cl, ls())
-
-dofit <- function(b){
-
-	require(Matrix)
-	require(gamlr)
-
-	d <- dgp(n*2)
-	x <- d$x[1:n,]
-	y <- d$y[1:n]
-
-	## train
-	lasso <- cv.gamlr(x, y)
-	smvar <- cv.gamlr(x, y, gamma=smv)
-	bgvar <- cv.gamlr(x, y, gamma=bgv)
-
-	## test
-	x <- d$x[n + 1:n,]
-	y <- d$y[n + 1:n]
-
-	lassopred <- select(lasso,x)
-	smvarpred <- select(smvar,x)
-	bgvarpred <- select(bgvar,x)
-
-	oos <- c(eval(y, lassopred),
-			eval(y, smvarpred),
-			eval(y, bgvarpred))
-
-	return(oos)
-}
-
-oos <- clusterApplyLB(cl,1:B,dofit)
-stopCluster(cl)
-
-oos <- matrix(unlist(oos),byrow=TRUE,ncol=length(metrics)*3)
-colnames(oos)<- paste(
-	rep(c("lasso","smvar","bgvar"),each=length(metrics)),
-	metrics,sep=".")
-oos <- as.data.frame(oos)
-save(oos,lasso,smvar,bgvar,d,file="../results/sim.rda", compress="xz")
-
-print(lapply(oos,mean))
-
-crit <- c("EBF","AIC","BIC","CV1se","CVmin")
-critcol <- c(rep("dodgerblue",3),rep("lawngreen",2))
-pdf(file="sim_oos.pdf", width=9, height=2.5)
-par(mfrow=c(1,3), 
-	mai=c(.4,.4,.2,.1), 
-	omi=c(0,.2,0,0))
-for(m in c("lasso","smvar","bgvar")){
-	lab=paste(m,crit,sep=".")
-	boxplot(oos[,lab], col=critcol,
-		xaxt="n", xlab="",ylab="",ylim=c(0,.4))# ,main=m)
-	axis(1,at=1:length(crit), labels=crit)
-}
-mtext(side=2, "R2", 
-	font=3, outer=TRUE, cex=.9)
-dev.off()
-## sim X
-
-library(Matrix)
+source("code/simdata.R")
 library(gamlr)
-library(snow)
+source("code/simfit.R")
+print(id)
 
-smv=2
-bgv=10
-n <- 1e3
-p <- 2*n
-s2n <- 3/4
+## data properties
+write(d$sigma, sprintf("results/%s/sigma.txt",OUT),append=TRUE)
+times <- paste(round(c(tgl0,tgl2,tgl10,tmrgal,tsnet,tscad),1),collapse="|")
+write(times, sprintf("results/%s/times.txt",OUT),append=TRUE)
 
-B <- 1e3
-NC <- 16
+## prediction
+e0 <- predict(gl0$gamlr,d$x,select=0)-d$y.val
+e2 <- predict(gl2$gamlr,d$x,select=0)-d$y.val
+e10 <- predict(gl2$gamlr,d$x,select=0)-d$y.val
+emrg <- predict(mrgal$gamlr,d$x,select=0)-d$y.val
+ecp <- predict(cpbest,as.data.frame(as.matrix(d$x)))-d$y.val
+esnet <- predict(snet,as.matrix(d$x),which="parms.min")-d$y.val
+escad <- predict(mrgal,as.matrix(d$x))-d$y.val
 
-## fixed 
-xvar <- matrix(ncol=p,nrow=p)
-for(i in 1:p) 
-	for(j in i:p) 
-		xvar[i,j] <- 0.9^{abs(i-j)}
-C = chol(xvar)
-beta <- matrix( (-1)^(1:p)*exp(-(1:p)/10) )
+mse0 <- apply(e0^2,2,mean)
+mse2 <- apply(e2^2,2,mean)
+mse10 <- apply(e10^2,2,mean)
+msemrg <- apply(emrg^2,2,mean)
+msecp <- mean(ecp^2)
+msesnet <- mean(esnet^2)
+msescad <- mean(escad^2) # 9.744
 
-## random
-dgp <- function(nobs){
-	x <- rnorm(p*nobs)
-	z <- rbinom(nobs*p,size=1,prob=.5)
-	x <- matrix(x, nrow=nobs)%*%C
-	x <- Matrix(x*z, sparse=TRUE)
-	mu = x%*%beta
-	y <- mu + rnorm(nobs,sd=sd(as.vector(mu))/s2n)
-	list(x=x,y=y,mu=mu)
+seg0 <- c(onese=gl0$seg.1se,min=gl0$seg.min,
+	aicc=which.min(AICc(gl0$gamlr)),
+	aic=which.min(AIC(gl0$gamlr)),
+	bic=which.min(BIC(gl0$gamlr)))
+seg2 <- c(onese=gl2$seg.1se,min=gl2$seg.min,
+	aicc=which.min(AICc(gl2$gamlr)),
+	aic=which.min(AIC(gl2$gamlr)),
+	bic=which.min(BIC(gl2$gamlr)))
+seg10 <- c(onese=gl10$seg.1se,min=gl10$seg.min,
+	aicc=which.min(AICc(gl10$gamlr)),
+	aic=which.min(AIC(gl10$gamlr)),
+	bic=which.min(BIC(gl10$gamlr)))
+segmrg <- c(onese=mrgal$seg.1se,min=mrgal$seg.min,
+	aicc=which.min(AICc(mrgal$gamlr)),
+	aic=which.min(AIC(mrgal$gamlr)),
+	bic=which.min(BIC(mrgal$gamlr)))
+write(paste(c(segmrg,seg0,seg2,seg10),collapse="|"),
+	sprintf("results/%s/seg.txt",OUT),append=TRUE)
+
+MSE <- c(cp=msecp,snet=msesnet,scad=msescad,
+	mrg=msemrg[segmrg],gl0=mse0[seg0],
+	gl2=mse2[seg2],gl10=mse10[seg10])
+write(paste(round(MSE,2),collapse="|"),
+	sprintf("results/%s/mse.txt",OUT),append=TRUE)
+
+R2 <- 1-MSE/mean( (d$y.val-mean(d$y.val))^2 )
+write(paste(round(R2,2),collapse="|"),
+	sprintf("results/%s/r2.txt",OUT),append=TRUE)
+
+## support and sign recovery
+getsupport <- function(fit){
+	b <- coef(fit$gamlr,select=0)[-1,]
+	apply(b,2,function(c) which(c!=0))
 }
 
-## one fit
-set.seed(5807)
-d <- dgp(n)
+S0 <- getsupport(gl0)
+S2 <- getsupport(gl2)
+S10 <- getsupport(gl10)
+Smrg <- getsupport(mrgal)
+Ssnet <- which(coef(snet)[-1,]!=0)
+Sscad <- which(coef(scad)[-1]!=0)
 
-lasso <- cv.gamlr(d$x, d$y, verb=1, lambda.min.ratio=0.1)
-smvar <- cv.gamlr(d$x, d$y, gamma=smv, verb=1, lambda.min.ratio=0.1)
-bgvar <- cv.gamlr(d$x, d$y, gamma=bgv, verb=1, lambda.min.ratio=0.1)
+s0 <- sapply(S0,length)
+s2 <- sapply(S2,length)
+s10 <- sapply(S10,length)
+smrg <- sapply(Smrg,length)
+ssnet <- length(Ssnet) 
+sscad <- length(Sscad) # 137
 
-pdf(file="sim_paths.pdf", width=7, height=2.5)
-par(mfrow=c(1,3), 
-	mai=c(.4,.4,.3,.2), 
-	omi=c(.2,.2,0,0))
-for(mod in list(lasso,smvar,bgvar)){
-	plot(mod$g, xlab="", ylab="", select=FALSE, col=rgb(.5,.5,.75,.75))
-	abline(v=log(mod$g$lambda[which.min(BIC(mod$g))]), lty=2, lwd=1.5) }
-mtext(side=1, "log lambda", 
-	font=3, outer=TRUE, cex=.7)
-mtext(side=2, "coefficient", 
-	font=3, outer=TRUE, cex=.7)
-dev.off()
+s <- c(cp=sCp,snet=ssnet,scad=sscad,mrg=smrg[segmrg],
+	gl0=s0[seg0],gl2=s2[seg2],gl10=s10[seg10])
+write(paste(round(s,2),collapse="|"),
+	sprintf("results/%s/s.txt",OUT),append=TRUE)
 
-pdf(file="sim_cv.pdf", width=7, height=2.5)
-ylim<-c(2.65,3.9)
-par(mfrow=c(1,3), 
-	mai=c(.4,.4,.3,.1), 
-	omi=c(.2,.2,0,0))
-for(mod in list(lasso,smvar,bgvar)){
-	plot(mod, xlab="", ylab="", ylim=ylim) 
-}
-mtext(side=1, "log lambda", 
-	font=3, outer=TRUE, cex=.7)
-mtext(side=2, "mean square error", 
-	font=3, outer=TRUE, cex=.7)
-dev.off()
+fp0 <- sapply(S0,function(set) sum(set>sCp))
+fp2 <- sapply(S2,function(set) sum(set>sCp))
+fp10 <- sapply(S10,function(set) sum(set>sCp))
+fpmrg <- sapply(Smrg,function(set) sum(set>sCp))
+fpsnet <- sum(Ssnet>sCp)
+fpscad <- sum(Ssnet>sCp) # 96
 
+fdr <- c(cp=0, snet=fpsnet/ssnet,scad=fpscad/sscad,
+	mrg=fpmrg[segmrg]/smrg,gl0=fp0[seg0]/s0,
+	gl2=fp2[seg2]/s2,gl10=fp10[seg10]/s10)
+write(paste(round(fdr,2),collapse="|"),
+	sprintf("results/%s/fdr.txt",OUT),append=TRUE)
 
-ebf <- function(fit, x){
-	phat <- apply(fit$g$b!=0,2,sum)	
-	ebf <- (n/2+p+1) + 0.5*fit$g$deviance
-	ebf <- ebf - 0.5*phat*log(2*pi)
-	H <- as.matrix(tcrossprod(t(x)))
-	lDH <- apply(fit$g$b!=0,2,
-		function(bi){ 
-			if(!any(bi)){ return(0) }
-			else if(sum(bi)==1){ return(log(H[bi,bi])) }
-			else{ return(determinant(H[bi,bi])$mod) }
-		})
-	ebf <- ebf + 0.5*lDH
-	gam <- fit$g$gamma
-	lam <- fit$g$lam
-	ebf <- ebf - phat*log(n*lam/2)
-	if(gam > 0){ 
-		b <- as.matrix(apply(x,2,sd)*abs(fit$g$b))
-		r <- lam/gam
-		gl <- (n*r*lam+1)*log(1+r*b)
-		ebf <- ebf + colSums(gl)
+tp0 <- sapply(S0,function(set) sum(set<=sCp))
+tp2 <- sapply(S2,function(set) sum(set<=sCp))
+tp10 <- sapply(S10,function(set) sum(set<=sCp))
+tpmrg <- sapply(Smrg,function(set) sum(set<=sCp))
+tpsnet <- sum(Ssnet<=sCp)
+tpscad <- sum(Ssnet<=sCp) # 48
+
+sens <- c(cp=1,snet=tpsnet/sCp,scad=tpscad/sCp,
+	mrg=tpmrg[segmrg]/sCp,gl0=tp0[seg0]/sCp,
+	gl2=tp2[seg2]/sCp,gl10=tp10[seg10]/sCp)
+write(paste(round(sens,2),collapse="|"),
+	sprintf("results/%s/sens.txt",OUT),append=TRUE)
+
+getsign <- function(b){
+	b <- as.matrix(b)
+	p <- nrow(b)
+	apply(b,2,
+		function(c){
+			cnz <- which(c!=0)
+			m <- mean(sign(c[cnz])==(-1)^cnz) 
+			if(is.nan(m)) m <- 1
+			m
+			}
+		)
 	}
-	return(ebf)
+sgn0 <-  getsign( coef(gl0$gamlr,select=0)[-1,] )
+sgn2 <-  getsign( coef(gl2$gamlr,select=0)[-1,] )
+sgn10 <-  getsign( coef(gl10$gamlr,select=0)[-1,] )
+sgnmrg <- getsign( coef(mrgal$gamlr,select=0)[-1,] )
+sgncp <- getsign( coef(cpbest)[-1] )
+sgnsnet <- getsign( coef(snet)[-1,] )
+sgnscad <- getsign( coef(scad)[-1] ) # 0.6569343
+
+sgn <- c(cp=sgncp,snet=sgnsnet,scad=sgnscad,
+	mrg=sgnmrg[segmrg],gl0=sgn0[seg0],
+	gl2=sgn2[seg2],gl10=sgn10[seg10])
+write(paste(round(sgn,2),collapse="|"),
+	sprintf("results/%s/sgn.txt",OUT),append=TRUE)
+
+## tracking the weights
+wmrg <- matrix(wmrg,nrow=ncol(d$x),ncol=100)
+
+getw <- function(fit){
+	b <- coef(fit$gamlr,select=0)[-1,]
+	gam <- fit$gamlr$gamma
+	w <- matrix(1, nrow=nrow(b),ncol=ncol(b))
+	if(gam!=0) w[,-1] <- 1/(1+gam*abs(as.matrix(b)[,-ncol(b)]))
+	return(w) }
+
+w0 <- matrix(1,nrow=ncol(d$x),ncol=100)
+w2 <- getw(gl2)
+w10 <- getw(gl10)
+
+nu <- d$sigma^2/nrow(d$x)
+
+S <- 1:sCp
+XXXXi <- t(d$x[,-S])%*%d$x[,S]%*%solve(t(d$x[,S])%*%d$x[,S])
+getE <- function(W,lam,f){	
+	wsnorm <- apply(W[S,],2,
+		function(w) sqrt(sum(w^2)))/sqrt(sCp)
+	wmin <- apply(W[-S,],2,min)
+	cpineq <- as.integer(wmin > sqrt(2*nu)/lam)
+	L <- round(wsnorm/(wmin - sqrt(2*nu)/lam),2)
+	R <- XXXXi%*%W[S,] - 1 + sqrt(2*nu)/t(lam*t(W[-S,]))
+	irrep <- round(apply(R,2,function(r) mean(r<0)),2)
+
+	write(paste(L,collapse="|"),
+		sprintf("results/%s/L%s.txt",OUT,f),append=TRUE)
+	write(paste(cpineq,collapse="|"),
+		sprintf("results/%s/cpineq%s.txt",OUT,f),append=TRUE)
+	write(paste(irrep,collapse="|"),
+		sprintf("results/%s/irrep%s.txt",OUT,f),append=TRUE)
+	return(list(L=L,cpineq=cpineq,irrep=irrep))
 }
 
-pdf(file="sim_ic.pdf", width=7, height=2.5)
-#ylim<-c(2.65,3.9)
-par(mfrow=c(1,3), 
-	mai=c(.4,.4,.3,.1), 
-	omi=c(.2,.2,0,0))
-for(mod in list(lasso,smvar,bgvar)){
-	plot(log(mod$g$lam), AIC(mod$g)/n, 
-		xlab="", ylab="", pch=20, col="grey75",ylim=c(2.8,3.7))
-	points(log(mod$g$lam), BIC(mod$g)/n, pch=20, col=rgb(.25,.4,.7))
-	if(mod$g$gamma==0) legend("topleft",h=TRUE,pch=20,
-						legend=c("aic","bic"),text.col="grey25",
-						col=c("grey75",rgb(.25,.4,.7)),bty="n")
-	#points(log(mod$g$lam), ebf(mod,d$x)/n, pch=20, col="pink")
-}
-mtext(side=1, "log lambda", 
-	font=3, outer=TRUE, cex=.7)
-mtext(side=2, "BIC / n", 
-	font=3, outer=TRUE, cex=.7)
-dev.off()
+Emrg <- getE(wmrg,mrgal$gamlr$lambda,"mrg")
+E0 <- getE(w0,gl0$gamlr$lambda,"gl0")
+E2 <- getE(w2,gl2$gamlr$lambda,"gl2")
+E10 <- getE(w10,gl10$gamlr$lambda,"gl10")
 
-## monte carlo
-metrics <- c("AIC","BIC","CV1se","CVmin","EBF")
-select <- function(fit,x){
-	preds <- predict(fit$g,x,select=NULL)
-	preds <- preds[,c(which.min(AIC(fit$g)),
-					which.min(BIC(fit$g)),
-					fit$seg.1se,
-					fit$seg.min,
-					which.min(ebf(fit,x)) )]
-	colnames(preds) <- metrics
-	as.matrix(preds)
-}
-
-eval <- function(y, f){
-	f <- as.matrix(f)
-	sst <- sum( (y-mean(y))^2 )
-	sse <- colSums( (y-f)^2 )
-	r2 <- 1-sse/sst
-	return(r2)
-}
-
-cl <- makeCluster(spec=rep("localhost", NC))
-clusterSetupRNG(cl)
-clusterExport(cl, ls())
-
-dofit <- function(b){
-
-	require(Matrix)
-	require(gamlr)
-
-	d <- dgp(n*2)
-	x <- d$x[1:n,]
-	y <- d$y[1:n]
-
-	## train
-	lasso <- cv.gamlr(x, y)
-	smvar <- cv.gamlr(x, y, gamma=smv)
-	bgvar <- cv.gamlr(x, y, gamma=bgv)
-
-	## test
-	x <- d$x[n + 1:n,]
-	y <- d$y[n + 1:n]
-
-	lassopred <- select(lasso,x)
-	smvarpred <- select(smvar,x)
-	bgvarpred <- select(bgvar,x)
-
-	oos <- c(eval(y, lassopred),
-			eval(y, smvarpred),
-			eval(y, bgvarpred))
-
-	return(oos)
-}
-
-oos <- clusterApplyLB(cl,1:B,dofit)
-stopCluster(cl)
-
-oos <- matrix(unlist(oos),byrow=TRUE,ncol=length(metrics)*3)
-colnames(oos)<- paste(
-	rep(c("lasso","smvar","bgvar"),each=length(metrics)),
-	metrics,sep=".")
-oos <- as.data.frame(oos)
-save(oos,lasso,smvar,bgvar,d,file="../results/sim.rda", compress="xz")
-
-print(lapply(oos,mean))
-
-crit <- c("EBF","AIC","BIC","CV1se","CVmin")
-critcol <- c(rep("dodgerblue",3),rep("lawngreen",2))
-pdf(file="sim_oos.pdf", width=9, height=2.5)
-par(mfrow=c(1,3), 
-	mai=c(.4,.4,.2,.1), 
-	omi=c(0,.2,0,0))
-for(m in c("lasso","smvar","bgvar")){
-	lab=paste(m,crit,sep=".")
-	boxplot(oos[,lab], col=critcol,
-		xaxt="n", xlab="",ylab="",ylim=c(0,.4))# ,main=m)
-	axis(1,at=1:length(crit), labels=crit)
-}
-mtext(side=2, "R2", 
-	font=3, outer=TRUE, cex=.9)
-dev.off()
 
 
 

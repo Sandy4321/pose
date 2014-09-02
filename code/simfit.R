@@ -1,10 +1,4 @@
 ## fits
-id <- 0 # debug
-s2n <- 1
-rho <- 0.5
-
-source("code/simdata.R")
-library(gamlr)
 
 ## draw the data
 d <- dgp(id=id, s2n=s2n, rho=rho)
@@ -22,7 +16,7 @@ tmrgal <- system.time({
 ## scad (way slow!!!)
 library(ncvreg)
 tscad <- system.time(scad <- cv.ncvreg(X=as.matrix(d$x),y=d$y.train,
-				lambda.min=0.01,penalty="SCAD")[[3]]
+				lambda.min=0.01,penalty="SCAD"))[[3]]
 #    user  system elapsed 
 # 267.589   0.271 267.785 
 
