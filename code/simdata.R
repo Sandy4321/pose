@@ -21,7 +21,7 @@ dgp <- function(id, n=1e3, p=n,
 	xvar <- matrix(ncol=p,nrow=p)
 	for(i in 1:p) 
 		for(j in i:p) 
-			xvar[i,j] <- 0.9^{abs(i-j)}
+			xvar[i,j] <- rho^{abs(i-j)}
 	C = chol(xvar)
 	beta <- matrix( (-1)^(1:p)*exp(-(1:p)/decay) )
 

@@ -1127,6 +1127,23 @@ does worse than simple BIC using plug-in $df^t$.
 \section{Simulation}
 \label{sim}
 
+\begin{table}
+{\it MSE with $\rho=0$, $s2n=1$}
+\small\sgl
+\begin{center}
+\begin{tabular}{l*{6}{c}|r}
+ & lasso & GL $\gamma=2$ & GL $\gamma=10$ & marginal AL & sparsenet  & SCAD & $C_p$~ 7.3 \\
+\cline{1-7}
+cv1se & 9.4 & 9.2 & 10.1 & 9.1 & & & \\
+cvmin & 8.6 & 8.5 & 9.0 & 8.8 & 8.5 & 9.1 & \\
+aicc & 8.8 & 8.5 & 8.5 & 8.8 & & &  \\
+aic & 11.2 & 11.6 & 11.6 & 9.1 & & & \\
+bic & 12.7 & 12.1 & 12.9 & 11.4 & & & \\
+\end{tabular}
+\end{center}
+\end{table}
+
+
 Marginal regression coefficient estimates are often \citep[e.g.,][]{huang_adaptive_2008} suggested as weights for an adaptive lasso in the $p>n$ setting.  Indeed, since marginal correlations tend to have a lower sampling variance than conditional coefficients, this strategy should yield lower variance weights and stable estimation when compared to more complicated weighting schemes.  Our simulation study investigates marginal-correlation-based adaptive lasso.
 
 Our first example uses data simulated independently from the following

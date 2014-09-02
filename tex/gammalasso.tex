@@ -349,25 +349,21 @@ $\omega^{\mr{min}}_{S^c} > (\sigma/\lambda)\sqrt{2/n}$, \\so $C_p$ suggests we  
 \end{frame}
 
 \begin{frame}
-{sign recovery}
+{False Discovery Control}
 
-A massive amount of effort has gone into showing support and sign recovery for concave penalized estimators.
-
-\vskip .25cm
-You get $L_0$ estimator sign recovery from weighted $L_1$ estimation, but only under a weighted irrepresentable condition (ii below).
+Much effort has gone into showing support recovery.
 
 \vskip .25cm
-{\theme Theorem:} Under same setting as above, $\mr{sgn}(\bs{\hat\beta}) = \mr{sgn}(\bs{\beta}^\nu)$ if
-
-\vskip .2cm
-$\displaystyle ~~~~~~\mr{(i)}~~~\frac{1}{n}\bs{x}_j'\bm{y} > \lambda\omega_j ~~\forall~j \in S$
-
-\vskip .2cm
-$\displaystyle ~~~~~~\mr{(ii)}~~~|\bs{x}_j'\bm{X}_S(\bm{X}_S'\bm{X}_S)^{-1}\bs{\omega}_S| \leq 1 - \frac{\sqrt{2\nu}}{\lambda\omega_j} ~~\forall~j \in S^c.
-$
+My favored result shows False Discovery avoidance w.r.t. $L_0$ solutions, but only under a weighted irrepresentable condition.
 
 \vskip .25cm
-{\gr Things are more pessimistic without (ii), \\unless you can make $\omega_j$ very big for $j\in S^c$.}
+{\theme Corrollary:} If $\hat S_{t-1} \cap S^c = \varnothing$ and $\lambda_t > \sqrt{2\nu}$ then
+\begin{equation}\label{falsepos}
+\|\bm{X}_{S^c}'\bm{X}_S(\bm{X}_S'\bm{X}_S)^{-1}\bs{\omega}^t_S\|_{\infty} \leq 1 - \frac{\sqrt{2\nu}}{\lambda_t} ~~\Rightarrow~~\hat S_{t} \cap S^c = \varnothing.
+\end{equation}
+
+\vskip .25cm
+{\gr Things are more pessimistic without irrepresentability, \\unless you can make $\omega_j$ very big for $j\in S^c$.}
 
 \end{frame}
 

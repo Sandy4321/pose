@@ -1,6 +1,51 @@
 # simplot
+# for f in sim95*; do rename $(echo $f | grep -o "^sim[0-9]*-") "sim-" $f; done
 
+# full results
+rho <- 0
+s2n <- 1
 
+segs <- c("cv1se","cvmin","aicc","aic","bic")
+getit <- function(f, rho, s2n){
+	fname <- sprintf("results/sim-rho%g-s2n%g/%s.txt",
+			rho, s2n, f)
+	print(fname)
+	lines <- readLines(fname)
+	parsed <- sapply(lines, strsplit, split="\\|",USE.NAMES=F)
+	lens <- sapply(parsed,length)
+	parsed <- lapply(parsed, as.numeric)
+	nc<- median(lens)
+	misfits <- which(lens!=nc)
+	if(length(misfits)>0){
+		warning(length(misfits)," overwritten line dropped")
+		parsed <- parsed[-misfits] }
+	mat <- do.call(rbind, parsed)
+	if(nc==23) colnames(mat) <- c(
+		"Cp","snet","scad",
+		paste("mrg",segs,sep="."),
+		paste("gl0",segs,sep="."),
+		paste("gl2",segs,sep="."),
+		paste("gl10",segs,sep="."))
+	else if(nc==6) colnames(mat) <- c(
+		"gl0","gl2","gl10","mrg","snet","scad")
+	mat
+}
+colMeans(times <- getit("times",0,1))
+
+mse <- getit("mse",0.9,1)
+means <- colMeans(getit("mse",0,1))
+#sds <- apply(getit("mse",0,1),2,sd)/sqrt(1000)
+for(s in segs){
+	l <- paste(c(s, sprintf("%.01f", #(%.01f)", 
+		means[paste(c("gl0","gl2","gl10","mrg"),s,sep=".")])),
+		#sds[paste(c("gl0","gl2","gl10","mrg"),s,sep=".")])), 
+	collapse=" & ")
+	cat(l,"& & & \\\\\n")
+}
+print(round(means[1:3],1))
+	
+
+# single examples
 pdf(file="sim_paths.pdf", width=7, height=2.5)
 par(mfrow=c(1,3), 
 	mai=c(.4,.4,.3,.2), 
