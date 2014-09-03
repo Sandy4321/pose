@@ -52,7 +52,7 @@ printit <- function(f, rho, s2n, bf=min){
 	invisible()
 }
 
-for(s2n in c(1,2,0.5))
+for(s2n in c(2,1,0.5))
 	for(rho in c(0,0.5,0.9))
 	 printit("mse", rho=rho, s2n=s2n)
 
