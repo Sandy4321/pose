@@ -1,15 +1,11 @@
 # simplot
 # for f in sim95*; do rename $(echo $f | grep -o "^sim[0-9]*-") "sim-" $f; done
 
-# full results
-rho <- 0
-s2n <- 1
-
-segs <- c("cv1se","cvmin","aicc","aic","bic")
+segs <- c("CV.1se","CV.min","AICc","AIC","BIC")
 getit <- function(f, rho, s2n){
 	fname <- sprintf("results/sim-rho%g-s2n%g/%s.txt",
 			rho, s2n, f)
-	print(fname)
+	#print(fname)
 	lines <- readLines(fname)
 	parsed <- sapply(lines, strsplit, split="\\|",USE.NAMES=F)
 	lens <- sapply(parsed,length)
@@ -30,20 +26,35 @@ getit <- function(f, rho, s2n){
 		"gl0","gl2","gl10","mrg","snet","scad")
 	mat
 }
+
 colMeans(times <- getit("times",0,1))
 
-mse <- getit("mse",0.9,1)
-means <- colMeans(getit("mse",0,1))
-#sds <- apply(getit("mse",0,1),2,sd)/sqrt(1000)
-for(s in segs){
-	l <- paste(c(s, sprintf("%.01f", #(%.01f)", 
-		means[paste(c("gl0","gl2","gl10","mrg"),s,sep=".")])),
-		#sds[paste(c("gl0","gl2","gl10","mrg"),s,sep=".")])), 
-	collapse=" & ")
-	cat(l,"& & & \\\\\n")
+printit <- function(f, rho, s2n, bf=min){
+	means <- round(colMeans(getit(f, rho=rho, s2n=s2n)),1)
+	minm <- paste(bf(means[-1]))
+	means <- sapply(means,as.character)
+	means[means==minm] <- sprintf("{\\bf %s}",minm)
+	for(s in segs){
+		l <- paste(c(s, sprintf("%s",  
+			means[paste(c("gl0","gl2","gl10","mrg"),s,sep=".")])),
+		collapse=" & ")
+		if(s=="CV.1se") cat(l,"& & &\\\\\n")
+		if(s=="CV.min") cat(l,
+			sprintf("& %s & %s & $\\mr{sd}(\\bm{\\mu})/\\sigma=%g$ \\\\\n", 
+				means["snet"], means["scad"], s2n))
+		if(s=="AICc") cat(l,
+			sprintf("& & & $\\rho=%g$ \\\\\n", 
+				rho))
+		if(s=="AIC") cat(l,
+			sprintf("& & & $C_p$ %s = %s \\\\\n", f, means["Cp"]))
+		if(s=="BIC") cat(l,"& & & \\\\\n \\hline \n")
+	}
+	invisible()
 }
-print(round(means[1:3],1))
-	
+
+for(s2n in c(1,2,0.5))
+	for(rho in c(0,0.5,0.9))
+	 printit("mse", rho=rho, s2n=s2n)
 
 # single examples
 pdf(file="sim_paths.pdf", width=7, height=2.5)

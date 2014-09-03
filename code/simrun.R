@@ -81,7 +81,7 @@ s2 <- sapply(S2,length)
 s10 <- sapply(S10,length)
 smrg <- sapply(Smrg,length)
 ssnet <- length(Ssnet) 
-sscad <- length(Sscad) # 137
+sscad <- length(Sscad) 
 
 s <- c(cp=sCp,snet=ssnet,scad=sscad,mrg=smrg[segmrg],
 	gl0=s0[seg0],gl2=s2[seg2],gl10=s10[seg10])
@@ -93,12 +93,13 @@ fp2 <- sapply(S2,function(set) sum(set>sCp))
 fp10 <- sapply(S10,function(set) sum(set>sCp))
 fpmrg <- sapply(Smrg,function(set) sum(set>sCp))
 fpsnet <- sum(Ssnet>sCp)
-fpscad <- sum(Ssnet>sCp) # 96
+fpscad <- sum(Ssnet>sCp) 
 
 fdr <- c(cp=0, snet=fpsnet/ssnet,scad=fpscad/sscad,
-	mrg=fpmrg[segmrg]/smrg,gl0=fp0[seg0]/s0,
-	gl2=fp2[seg2]/s2,gl10=fp10[seg10]/s10)
-write(paste(round(fdr,2),collapse="|"),
+	mrg=(fpmrg/smrg)[segmrg],gl0=(fp0/s0)[seg0],
+	gl2=(fp2/s2)[seg2],gl10=(fp10/s10)[seg10])
+fdr[is.nan(fdr)|is.infinite(fdr)] <- 0
+write(paste(round(fdr*100,2),collapse="|"),
 	sprintf("results/%s/fdr.txt",OUT),append=TRUE)
 
 tp0 <- sapply(S0,function(set) sum(set<=sCp))
@@ -106,12 +107,12 @@ tp2 <- sapply(S2,function(set) sum(set<=sCp))
 tp10 <- sapply(S10,function(set) sum(set<=sCp))
 tpmrg <- sapply(Smrg,function(set) sum(set<=sCp))
 tpsnet <- sum(Ssnet<=sCp)
-tpscad <- sum(Ssnet<=sCp) # 48
+tpscad <- sum(Ssnet<=sCp) 
 
 sens <- c(cp=1,snet=tpsnet/sCp,scad=tpscad/sCp,
 	mrg=tpmrg[segmrg]/sCp,gl0=tp0[seg0]/sCp,
 	gl2=tp2[seg2]/sCp,gl10=tp10[seg10]/sCp)
-write(paste(round(sens,2),collapse="|"),
+write(paste(round(sens*100,2),collapse="|"),
 	sprintf("results/%s/sens.txt",OUT),append=TRUE)
 
 getsign <- function(b){
@@ -132,7 +133,7 @@ sgn10 <-  getsign( coef(gl10$gamlr,select=0)[-1,] )
 sgnmrg <- getsign( coef(mrgal$gamlr,select=0)[-1,] )
 sgncp <- getsign( coef(cpbest)[-1] )
 sgnsnet <- getsign( coef(snet)[-1,] )
-sgnscad <- getsign( coef(scad)[-1] ) # 0.6569343
+sgnscad <- getsign( coef(scad)[-1] ) 
 
 sgn <- c(cp=sgncp,snet=sgnsnet,scad=sgnscad,
 	mrg=sgnmrg[segmrg],gl0=sgn0[seg0],
