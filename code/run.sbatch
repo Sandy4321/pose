@@ -12,7 +12,7 @@ module unload R
 module load R/3.0
 
 RHO=0.9
-S2N=2
+S2N=0.5
 OUT=sim-rho$RHO-s2n$S2N
 mkdir -p results/$OUT
 
