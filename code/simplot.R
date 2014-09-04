@@ -63,14 +63,29 @@ for(s2n in c(2,1,0.5))
 	for(rho in c(0,0.5,0.9))
 	 printmse(rho=rho, s2n=s2n)
 
+
+printr2 <- function(rho, s2n){
+	means <- round(colMeans(getit("r2", rho=rho, s2n=s2n),na.rm=TRUE),2)
+	minm <- paste(max(means[-1]))
+	means <- sapply(means,as.character)
+	means[means==minm] <- sprintf("{\\bf %s}",minm)
+	cpline = sprintf("$C_p ~ R^2$ = %s", means["Cp"])
+	printit(means, rho, s2n, cpline)
+}
+
+for(s2n in c(2,1,0.5))
+	for(rho in c(0,0.5,0.9))
+	 printr2(rho=rho, s2n=s2n)
+
 printfdrsens <- function(rho, s2n){
 	fdr <- round(colMeans(getit("fdr", rho=rho, s2n=s2n),na.rm=TRUE),1)
 	sens <- round(colMeans(getit("sens", rho=rho, s2n=s2n),na.rm=TRUE),1)
 	means <- sprintf( "%.02f $\\mid$ %.02f", fdr/100, sens/100)
 	names(means) <- names(fdr)
 	avg <- fdr+(100-sens)
+	sCp <- mean(getit("s",rho=rho,s2n=s2n)[,1])
 	#means[avg==min(avg[-1])] <- sprintf("{\\bf %s}",means[avg==min(avg[-1])])
-	cpline = ""
+	cpline = sprintf("$s_{C_p}$ = %.01f",sCp)
 	printit(means, rho, s2n, cpline)
 }
 
