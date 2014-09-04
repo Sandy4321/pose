@@ -16,45 +16,70 @@ getit <- function(f, rho, s2n){
 		warning(length(misfits)," overwritten line dropped")
 		parsed <- parsed[-misfits] }
 	mat <- do.call(rbind, parsed)
-	if(nc==23) colnames(mat) <- c(
-		"Cp","snet","scad",
+	if(nc==24){ colnames(mat) <- c(
+		"Cp","snet1se","snetmin","scad",
 		paste("mrg",segs,sep="."),
 		paste("gl0",segs,sep="."),
 		paste("gl2",segs,sep="."),
 		paste("gl10",segs,sep="."))
-	else if(nc==6) colnames(mat) <- c(
+	 	return(mat[,colnames(mat)!="scad"])
+	 }
+	if(nc==6) colnames(mat) <- c(
 		"gl0","gl2","gl10","mrg","snet","scad")
-	mat
+	return(mat)
 }
 
-colMeans(times <- getit("times",0,1))
-
-printit <- function(f, rho, s2n, bf=min){
-	means <- round(colMeans(getit(f, rho=rho, s2n=s2n)),1)
-	minm <- paste(bf(means[-1]))
-	means <- sapply(means,as.character)
-	means[means==minm] <- sprintf("{\\bf %s}",minm)
+printit <- function(means, rho, s2n, cpline){
 	for(s in segs){
 		l <- paste(c(s, sprintf("%s",  
 			means[paste(c("gl0","gl2","gl10","mrg"),s,sep=".")])),
 		collapse=" & ")
-		if(s=="CV.1se") cat(l,"& & &\\\\\n")
+		if(s=="CV.1se") 
+			cat(l,sprintf("& %s &\\\\\n", means["snet1se"]))
 		if(s=="CV.min") cat(l,
-			sprintf("& %s & %s & $\\mr{sd}(\\bm{\\mu})/\\sigma=%g$ \\\\\n", 
-				means["snet"], means["scad"], s2n))
+			sprintf("& %s &  $\\mr{sd}(\\bm{\\mu})/\\sigma=%g$ \\\\\n", 
+				means["snetmin"], s2n))
 		if(s=="AICc") cat(l,
-			sprintf("& & & $\\rho=%g$ \\\\\n", 
+			sprintf("& & $\\rho=%g$ \\\\\n", 
 				rho))
 		if(s=="AIC") cat(l,
-			sprintf("& & & $C_p$ %s = %s \\\\\n", f, means["Cp"]))
-		if(s=="BIC") cat(l,"& & & \\\\\n \\hline \n")
+			sprintf("& & %s \\\\\n", cpline))
+		if(s=="BIC") cat(l,"& & \\\\\n \\hline \n")
 	}
 	invisible()
 }
 
+
+printmse <- function(rho, s2n){
+	means <- round(colMeans(getit("mse", rho=rho, s2n=s2n),na.rm=TRUE),1)
+	minm <- paste(min(means[-1]))
+	means <- sapply(means,as.character)
+	means[means==minm] <- sprintf("{\\bf %s}",minm)
+	cpline = sprintf("$C_p$ mse = %s", means["Cp"])
+	printit(means, rho, s2n, cpline)
+}
+
 for(s2n in c(2,1,0.5))
 	for(rho in c(0,0.5,0.9))
-	 printit("mse", rho=rho, s2n=s2n)
+	 printmse(rho=rho, s2n=s2n)
+
+printfdrsens <- function(rho, s2n){
+	fdr <- round(colMeans(getit("fdr", rho=rho, s2n=s2n),na.rm=TRUE),1)
+	sens <- round(colMeans(getit("sens", rho=rho, s2n=s2n),na.rm=TRUE),1)
+	means <- sprintf( "%.02f $\\mid$ %.02f", fdr/100, sens/100)
+	names(means) <- names(fdr)
+	avg <- fdr+(100-sens)
+	#means[avg==min(avg[-1])] <- sprintf("{\\bf %s}",means[avg==min(avg[-1])])
+	cpline = ""
+	printit(means, rho, s2n, cpline)
+}
+
+for(s2n in c(2,1,0.5))
+	for(rho in c(0,0.5,0.9))
+	 printfdrsens(rho=rho, s2n=s2n)
+
+colMeans(getit("sgn", rho=.5, s2n=1),na.rm=TRUE)
+colMeans(getit("times",0.5,1))
 
 # single examples
 pdf(file="sim_paths.pdf", width=7, height=2.5)
