@@ -55,7 +55,7 @@ printmse <- function(rho, s2n){
 	minm <- paste(min(means[-1]))
 	means <- sapply(means,as.character)
 	means[means==minm] <- sprintf("{\\bf %s}",minm)
-	cpline = sprintf("$C_p$ mse = %s", means["Cp"])
+	cpline = sprintf("\\multirow{2}{*}{$C_p$ mse = %s}", means["Cp"])
 	printit(means, rho, s2n, cpline)
 }
 
@@ -69,7 +69,7 @@ printr2 <- function(rho, s2n){
 	minm <- paste(max(means[-1]))
 	means <- sapply(means,as.character)
 	means[means==minm] <- sprintf("{\\bf %s}",minm)
-	cpline = sprintf("$C_p ~ R^2$ = %s", means["Cp"])
+	cpline = sprintf("\\multirow{2}{*}{$C_p ~ R^2$ = %s}", means["Cp"])
 	printit(means, rho, s2n, cpline)
 }
 
@@ -85,7 +85,7 @@ printfdrsens <- function(rho, s2n){
 	avg <- fdr+(100-sens)
 	sCp <- mean(getit("s",rho=rho,s2n=s2n)[,1])
 	#means[avg==min(avg[-1])] <- sprintf("{\\bf %s}",means[avg==min(avg[-1])])
-	cpline = sprintf("$s_{C_p}$ = %.01f",sCp)
+	cpline = sprintf("\\multirow{2}{*}{$\\bar{s}_{C_p}$ = %.01f}",sCp)
 	printit(means, rho, s2n, cpline)
 }
 
@@ -96,14 +96,31 @@ for(s2n in c(2,1,0.5))
 colMeans(getit("sgn", rho=.5, s2n=1),na.rm=TRUE)
 colMeans(getit("times",0.5,1))
 
-# single examples
+# single run examples
+id <- 0
+rho <- 0.5
+s2n <- 1
+
+source("code/simdata.R")
+library(gamlr)
+
+## draw the data
+d <- dgp(id=id, s2n=s2n, rho=rho)
+
+## gamma lasso
+gl0 <- cv.gamlr(d$x, d$y.train)
+gl2 <- cv.gamlr(d$x, d$y.train, gamma=2)
+gl10 <- cv.gamlr(d$x, d$y.train, gamma=10)
+
+
 pdf(file="sim_paths.pdf", width=7, height=2.5)
 par(mfrow=c(1,3), 
 	mai=c(.4,.4,.3,.2), 
 	omi=c(.2,.2,0,0))
 for(mod in list(gl0,gl2,gl10)){
-	plot(mod$g, xlab="", ylab="", select=FALSE, col=rgb(.5,.5,.75,.75))
-	abline(v=log(mod$g$lambda[which.min(AICc(mod$g))]), lty=2, lwd=1.5) }
+	plot(mod$g, xlab="", ylab="", select=FALSE, 
+		col=rgb(.5,.5,.5,.5), xlim=c(-3.5,-.5))
+	 }
 mtext(side=1, "log lambda", 
 	font=3, outer=TRUE, cex=.7)
 mtext(side=2, "coefficient", 
@@ -111,41 +128,19 @@ mtext(side=2, "coefficient",
 dev.off()
 
 pdf(file="sim_cv.pdf", width=7, height=2.5)
-ylim<-c(10,40)
 par(mfrow=c(1,3), 
 	mai=c(.4,.4,.3,.1), 
-	omi=c(.2,.2,0,0))
+	omi=c(.2,.2,0,.2))
 for(mod in list(gl0,gl2,gl10)){
-	plot(mod, xlab="", ylab="", ylim=ylim) 
+	plot(mod, xlab="", ylab="", col="grey50",
+		ylim=c(11,20), xlim=c(-3.5,-.5), select=FALSE) 
+	lines( log(mod$g$lam), exp(AICc(gl0$g)/nrow(d$x)), lwd=2)
 }
 mtext(side=1, "log lambda", 
 	font=3, outer=TRUE, cex=.7)
-mtext(side=2, "mean square error", 
+mtext(side=2, "error", 
 	font=3, outer=TRUE, cex=.7)
+legend("topright",bty="n", lwd=3,
+	col=c("grey75","black"), 
+	legend=c("CV MSE","exp(AICc/n)"))
 dev.off()
-
-sum(coef(gl0$gamlr)[-1,]!=0)
-sum(coef(gl2$gamlr)[-1,]!=0)
-sum(coef(gl10$gamlr)[-1,]!=0)
-
-
-pdf(file="sim_ic.pdf", width=7, height=2.5)
-#ylim<-c(2.65,3.9)
-par(mfrow=c(1,3), 
-	mai=c(.4,.4,.3,.1), 
-	omi=c(.2,.2,0,0))
-for(mod in list(gl0,gl2,gl10)){
-	plot(log(mod$g$lam), AIC(mod$g)/n, 
-		xlab="", ylab="", pch=20, col="grey75",ylim=c(2.8,3.7))
-	points(log(mod$g$lam), BIC(mod$g)/n, pch=20, col=rgb(.25,.4,.7))
-	if(mod$g$gamma==0) legend("topleft",h=TRUE,pch=20,
-						legend=c("aic","bic"),text.col="grey25",
-						col=c("grey75",rgb(.25,.4,.7)),bty="n")
-	#points(log(mod$g$lam), ebf(mod,d$x)/n, pch=20, col="pink")
-}
-mtext(side=1, "log lambda", 
-	font=3, outer=TRUE, cex=.7)
-mtext(side=2, "BIC / n", 
-	font=3, outer=TRUE, cex=.7)
-dev.off()
-
