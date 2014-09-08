@@ -13,13 +13,6 @@ tmrgal <- system.time({
 	wmrg <- 1/abs(cor(as.matrix(d$x),d$y.train))
 	mrgal <- cv.gamlr(d$x,d$y.train,varweight=wmrg) })[[3]]
 
-## scad (way slow!!!)
-library(ncvreg)
-tscad <- system.time(scad <- cv.ncvreg(X=as.matrix(d$x),y=d$y.train,
-				lambda.min=0.01,penalty="SCAD"))[[3]]
-#    user  system elapsed 
-# 267.589   0.271 267.785 
-
 ## sparsenet 
 library(sparsenet)
 tsnet <- system.time(

@@ -14,7 +14,7 @@ print(id)
 
 ## data properties
 write(d$sigma, sprintf("results/%s/sigma.txt",OUT),append=TRUE)
-times <- paste(round(c(tgl0,tgl2,tgl10,tmrgal,tsnet,tscad),1),collapse="|")
+times <- paste(round(c(tgl0,tgl2,tgl10,tmrgal,tsnet),1),collapse="|")
 write(times, sprintf("results/%s/times.txt",OUT),append=TRUE)
 
 ## prediction
@@ -25,7 +25,6 @@ emrg <- predict(mrgal$gamlr,d$x,select=0)-d$y.val
 ecp <- predict(cpbest,as.data.frame(as.matrix(d$x)))-d$y.val
 esnet1se <- predict(snet,as.matrix(d$x),which="parms.1se")-d$y.val
 esnetmin <- predict(snet,as.matrix(d$x),which="parms.min")-d$y.val
-escad <- coef(scad)[1] + d$x%*%coef(scad)[-1] - d$y.val
 
 mse0 <- apply(e0^2,2,mean)
 mse2 <- apply(e2^2,2,mean)
@@ -34,7 +33,6 @@ msemrg <- apply(emrg^2,2,mean)
 msecp <- mean(ecp^2)
 msesnet1se <- mean(esnet1se^2)
 msesnetmin <- mean(esnetmin^2)
-msescad <- mean(escad^2) 
 
 seg0 <- c(onese=gl0$seg.1se,min=gl0$seg.min,
 	aicc=which.min(AICc(gl0$gamlr)),
@@ -58,15 +56,25 @@ write(paste(c(segmrg,seg0,seg2,seg10),collapse="|"),
 MSE <- c(cp=msecp,
 	snet1se=msesnet1se,
 	snetmin=msesnetmin,
-	scad=msescad,
 	mrg=msemrg[segmrg],gl0=mse0[seg0],
 	gl2=mse2[seg2],gl10=mse10[seg10])
 write(paste(round(MSE,2),collapse="|"),
 	sprintf("results/%s/mse.txt",OUT),append=TRUE)
 
+
 R2 <- 1-MSE/mean( (d$y.val-mean(d$y.val))^2 )
 write(paste(round(R2,2),collapse="|"),
 	sprintf("results/%s/r2.txt",OUT),append=TRUE)
+
+MSElong <- c(
+	mrg=msemrg,gl0=mse0,
+	gl2=mse2,gl10=mse10)
+write(paste(round(MSElong,2),collapse="|"),
+	sprintf("results/%s/mselong.txt",OUT),append=TRUE)
+
+R2long <- 1-MSElong/mean( (d$y.val-mean(d$y.val))^2 )
+write(paste(round(R2long,2),collapse="|"),
+	sprintf("results/%s/r2long.txt",OUT),append=TRUE)
 
 ## support and sign recovery
 getsupport <- function(fit){
@@ -80,7 +88,6 @@ S10 <- getsupport(gl10)
 Smrg <- getsupport(mrgal)
 Ssnet1se <- which(coef(snet, which="parms.1se")[-1,]!=0)
 Ssnetmin <- which(coef(snet, which="parms.min")[-1,]!=0)
-Sscad <- which(coef(scad)[-1]!=0)
 
 s0 <- sapply(S0,length)
 s2 <- sapply(S2,length)
@@ -88,13 +95,17 @@ s10 <- sapply(S10,length)
 smrg <- sapply(Smrg,length)
 ssnet1se <- length(Ssnet1se) 
 ssnetmin <- length(Ssnetmin) 
-sscad <- length(Sscad) 
 
-s <- c(cp=sCp,snet1se=ssnet1se,snetmin=ssnetmin,
-	scad=sscad,mrg=smrg[segmrg],
+s <- c(cp=sCp,snet1se=ssnet1se,
+	snetmin=ssnetmin, mrg=smrg[segmrg],
 	gl0=s0[seg0],gl2=s2[seg2],gl10=s10[seg10])
 write(paste(round(s,2),collapse="|"),
 	sprintf("results/%s/s.txt",OUT),append=TRUE)
+
+slong <- c(mrg=smrg,
+	gl0=s0,gl2=s2,gl10=s10)
+write(paste(round(slong,2),collapse="|"),
+	sprintf("results/%s/slong.txt",OUT),append=TRUE)
 
 fp0 <- sapply(S0,function(set) sum(set>sCp))
 fp2 <- sapply(S2,function(set) sum(set>sCp))
@@ -102,17 +113,21 @@ fp10 <- sapply(S10,function(set) sum(set>sCp))
 fpmrg <- sapply(Smrg,function(set) sum(set>sCp))
 fpsnet1se <- sum(Ssnet1se>sCp)
 fpsnetmin <- sum(Ssnetmin>sCp)
-fpscad <- sum(Sscad>sCp) 
 
 fdr <- c(cp=0, 
 	snet1se=fpsnet1se/ssnet1se,
 	snetmin=fpsnetmin/ssnetmin,
-	scad=fpscad/sscad,
 	mrg=(fpmrg/smrg)[segmrg],gl0=(fp0/s0)[seg0],
 	gl2=(fp2/s2)[seg2],gl10=(fp10/s10)[seg10])
 fdr[is.nan(fdr)|is.infinite(fdr)] <- 0
 write(paste(round(fdr*100,2),collapse="|"),
 	sprintf("results/%s/fdr.txt",OUT),append=TRUE)
+
+fdrlong <- c(mrg=(fpmrg/smrg),gl0=(fp0/s0),
+	gl2=(fp2/s2),gl10=(fp10/s10))
+fdrlong[is.nan(fdrlong)|is.infinite(fdrlong)] <- 0
+write(paste(round(fdrlong*100,2),collapse="|"),
+	sprintf("results/%s/fdrlong.txt",OUT),append=TRUE)
 
 tp0 <- sapply(S0,function(set) sum(set<=sCp))
 tp2 <- sapply(S2,function(set) sum(set<=sCp))
@@ -120,16 +135,20 @@ tp10 <- sapply(S10,function(set) sum(set<=sCp))
 tpmrg <- sapply(Smrg,function(set) sum(set<=sCp))
 tpsnet1se <- sum(Ssnet1se<=sCp)
 tpsnetmin <- sum(Ssnetmin<=sCp)
-tpscad <- sum(Sscad<=sCp) 
 
 sens <- c(cp=1,
 	snet1se=tpsnet1se/sCp,
 	snetmin=tpsnetmin/sCp,
-	scad=tpscad/sCp,
 	mrg=tpmrg[segmrg]/sCp,gl0=tp0[seg0]/sCp,
 	gl2=tp2[seg2]/sCp,gl10=tp10[seg10]/sCp)
 write(paste(round(sens*100,2),collapse="|"),
 	sprintf("results/%s/sens.txt",OUT),append=TRUE)
+
+senslong <- c(
+	mrg=tpmrg/sCp,gl0=tp0/sCp,
+	gl2=tp2/sCp,gl10=tp10/sCp)
+write(paste(round(senslong*100,2),collapse="|"),
+	sprintf("results/%s/senslong.txt",OUT),append=TRUE)
 
 getsign <- function(b){
 	b <- as.matrix(b)
@@ -150,12 +169,10 @@ sgnmrg <- getsign( coef(mrgal$gamlr,select=0)[-1,] )
 sgncp <- getsign( coef(cpbest)[-1] )
 sgnsnet1se <- getsign( coef(snet, which="parms.1se")[-1,] )
 sgnsnetmin <- getsign( coef(snet, which="parms.min")[-1,] )
-sgnscad <- getsign( coef(scad)[-1] ) 
 
 sgn <- c(cp=sgncp,
 	snet1se=sgnsnet1se,
 	snetmin=sgnsnetmin,
-	scad=sgnscad,
 	mrg=sgnmrg[segmrg],gl0=sgn0[seg0],
 	gl2=sgn2[seg2],gl10=sgn10[seg10])
 write(paste(round(sgn,2),collapse="|"),
