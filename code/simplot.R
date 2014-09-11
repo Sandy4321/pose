@@ -16,16 +16,17 @@ getit <- function(f, rho, s2n){
 		warning(length(misfits)," overwritten line dropped")
 		parsed <- parsed[-misfits] }
 	mat <- do.call(rbind, parsed)
-	if(nc==24){ colnames(mat) <- c(
-		"Cp","snet1se","snetmin","scad",
+	if(nc==23){ colnames(mat) <- c(
+		"Cp","snet1se","snetmin",
 		paste("mrg",segs,sep="."),
 		paste("gl0",segs,sep="."),
 		paste("gl2",segs,sep="."),
 		paste("gl10",segs,sep="."))
-	 	return(mat[,colnames(mat)!="scad"])
 	 }
 	if(nc==6) colnames(mat) <- c(
-		"gl0","gl2","gl10","mrg","snet","scad")
+		"gl0","gl2","gl10","mrg","snet")
+	if(nc==400) colnames(mat) <- paste(
+		rep(c("mrg","gl0","gl2","gl10"),each=100), 1:100, sep=".")
 	return(mat)
 }
 
@@ -95,6 +96,41 @@ for(s2n in c(2,1,0.5))
 
 colMeans(getit("sgn", rho=.5, s2n=1),na.rm=TRUE)
 colMeans(getit("times",0.5,1))
+
+## long format
+r2long <- getit("r2long",rho=.5,s2n=1)
+fdrlong <- getit("fdrlong",rho=.5,s2n=1)
+
+printit <- function(means, rho, s2n, cpline){
+	for(s in segs){
+		l <- paste(c(s, sprintf("%s",  
+			means[paste(c("gl0","gl2","gl10","mrg"),s,sep=".")])),
+		collapse=" & ")
+		if(s=="CV.1se") 
+			cat(l,sprintf("& %s &\\\\\n", means["snet1se"]))
+		if(s=="CV.min") cat(l,
+			sprintf("& %s &  $\\mr{sd}(\\bm{\\mu})/\\sigma=%g$ \\\\\n", 
+				means["snetmin"], s2n))
+		if(s=="AICc") cat(l,
+			sprintf("& & $\\rho=%g$ \\\\\n", 
+				rho))
+		if(s=="AIC") cat(l,
+			sprintf("& & %s \\\\\n", cpline))
+		if(s=="BIC") cat(l,"& & \\\\\n \\hline \n")
+	}
+	invisible()
+}
+
+
+printmse <- function(rho, s2n){
+	means <- round(colMeans(getit("mse", rho=rho, s2n=s2n),na.rm=TRUE),1)
+	minm <- paste(min(means[-1]))
+	means <- sapply(means,as.character)
+	means[means==minm] <- sprintf("{\\bf %s}",minm)
+	cpline = sprintf("\\multirow{2}{*}{$C_p$ mse = %s}", means["Cp"])
+	printit(means, rho, s2n, cpline)
+}
+
 
 # single run examples
 id <- 0
