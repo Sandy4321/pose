@@ -14,6 +14,7 @@ getit <- function(f, rho, s2n){
 	misfits <- which(lens!=nc)
 	if(length(misfits)>0){
 		warning(length(misfits)," overwritten line dropped")
+		print(misfits)
 		parsed <- parsed[-misfits] }
 	mat <- do.call(rbind, parsed)
 	if(nc==23){ colnames(mat) <- c(
@@ -27,6 +28,7 @@ getit <- function(f, rho, s2n){
 		"gl0","gl2","gl10","mrg","snet")
 	if(nc==400) colnames(mat) <- paste(
 		rep(c("mrg","gl0","gl2","gl10"),each=100), 1:100, sep=".")
+	if(nc==100) colnames(mat) <- paste("seg",1:100,sep=".")
 	return(mat)
 }
 
@@ -98,41 +100,55 @@ colMeans(getit("sgn", rho=.5, s2n=1),na.rm=TRUE)
 colMeans(getit("times",0.5,1))
 
 ## long format
-r2long <- getit("r2long",rho=.5,s2n=1)
-fdrlong <- getit("fdrlong",rho=.5,s2n=1)
 
-printit <- function(means, rho, s2n, cpline){
-	for(s in segs){
-		l <- paste(c(s, sprintf("%s",  
-			means[paste(c("gl0","gl2","gl10","mrg"),s,sep=".")])),
-		collapse=" & ")
-		if(s=="CV.1se") 
-			cat(l,sprintf("& %s &\\\\\n", means["snet1se"]))
-		if(s=="CV.min") cat(l,
-			sprintf("& %s &  $\\mr{sd}(\\bm{\\mu})/\\sigma=%g$ \\\\\n", 
-				means["snetmin"], s2n))
-		if(s=="AICc") cat(l,
-			sprintf("& & $\\rho=%g$ \\\\\n", 
-				rho))
-		if(s=="AIC") cat(l,
-			sprintf("& & %s \\\\\n", cpline))
-		if(s=="BIC") cat(l,"& & \\\\\n \\hline \n")
-	}
-	invisible()
+
+s2n <- 1
+rho <- 0.5
+fdrlong <- colMeans(getit("fdrlong",rho=rho,s2n=s2n))/100
+senslong <- colMeans(getit("senslong",rho=rho,s2n=s2n))/100
+
+pdf(file="fdr.pdf", width=7, height=2.5)
+par(mfrow=c(1,3), 
+	mai=c(.4,.4,.2,.2), 
+	omi=c(.2,.2,0,0))
+for(mod in c("gl0","gl2","gl10")){
+	irrep <- colMeans(getit(sprintf("irrep%s",mod),rho=rho,s2n=s2n))/100
+	plot(irrep, type="l", ylim=c(0,1), bty="n", ylab="",xlab="",lwd=1.5)
+	lines(fdrlong[grep(mod,names(fdrlong))], col=2,lwd=1.5)
+	lines(senslong[grep(mod,names(senslong))], col="green",lwd=1.5)
 }
+mtext(side=1, "path segment", font=3, outer=TRUE, cex=.7)
+legend("right",lwd=2, col=c(1,2,"green"),bty="n",legend=c("irrep.","fdr","sensitivity"))
+dev.off()
 
-
-printmse <- function(rho, s2n){
-	means <- round(colMeans(getit("mse", rho=rho, s2n=s2n),na.rm=TRUE),1)
-	minm <- paste(min(means[-1]))
-	means <- sapply(means,as.character)
-	means[means==minm] <- sprintf("{\\bf %s}",minm)
-	cpline = sprintf("\\multirow{2}{*}{$C_p$ mse = %s}", means["Cp"])
-	printit(means, rho, s2n, cpline)
+rho <- .5
+r2long <- colMeans(getit("r2long",rho=rho,s2n=s2n))
+pdf(file="r2.pdf", width=7, height=2.5)
+par(mfrow=c(1,3), 
+	mai=c(.4,.4,.2,.2), 
+	omi=c(.2,.2,0,0))
+for(mod in c("gl0","gl2","gl10")){
+	cpi <- getit(sprintf("cpineq%s",mod),rho=rho,s2n=s2n)
+	L <- getit(sprintf("L%s",mod),rho=rho,s2n=s2n)
+	if(mod=="gl2") cpi <- cpi[-c(277,278),]
+	L <- colMeans(L*cpi)
+	lnz <- which(L!=0)
+	plot(lnz,L[lnz]/max,lwd=1.5,col="gold", 
+		xlim=c(1,100), ylim=c(0,1), bty="n", ylab="",xlab="",type="l")
+	lines(r2long[grep(mod,names(r2long))], col=4, lwd=1.5)  
+	lines(colMeans(cpi),lwd=1.5)
 }
+mtext(side=1, "path segment", font=3, outer=TRUE, cex=.7)
+legend("topright",lwd=2, col=c(4,"gold",1),bty="n",
+	legend=c("min.weight ok","L/max(L)","R2"))
+dev.off()
 
 
-# single run examples
+
+lines(mselong[grep(mod,names(r2long))], col="blue")
+
+
+## single run examples
 id <- 0
 rho <- 0.5
 s2n <- 1
