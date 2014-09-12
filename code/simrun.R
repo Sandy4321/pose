@@ -207,7 +207,7 @@ getE <- function(W,lam,f){
 	R <- XXXXi%*%W[S,] - 1 + sqrt(2*nu)/t(lam*t(W[-S,]))
 	irrep <- round(apply(R,2,function(r) 100*mean(r<0)),2)
 
-	write(paste(L,collapse="|"),
+	write(paste(L*cpineq,collapse="|"),
 		sprintf("results/%s/L%s.txt",OUT,f),append=TRUE)
 	write(paste(cpineq,collapse="|"),
 		sprintf("results/%s/cpineq%s.txt",OUT,f),append=TRUE)

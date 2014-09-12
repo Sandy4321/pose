@@ -14,18 +14,21 @@ getit <- function(f, rho, s2n){
 	misfits <- which(lens!=nc)
 	if(length(misfits)>0){
 		warning(length(misfits)," overwritten line dropped")
+		print(misfits)
 		parsed <- parsed[-misfits] }
 	mat <- do.call(rbind, parsed)
-	if(nc==24){ colnames(mat) <- c(
-		"Cp","snet1se","snetmin","scad",
+	if(nc==23){ colnames(mat) <- c(
+		"Cp","snet1se","snetmin",
 		paste("mrg",segs,sep="."),
 		paste("gl0",segs,sep="."),
 		paste("gl2",segs,sep="."),
 		paste("gl10",segs,sep="."))
-	 	return(mat[,colnames(mat)!="scad"])
 	 }
 	if(nc==6) colnames(mat) <- c(
-		"gl0","gl2","gl10","mrg","snet","scad")
+		"gl0","gl2","gl10","mrg","snet")
+	if(nc==400) colnames(mat) <- paste(
+		rep(c("mrg","gl0","gl2","gl10"),each=100), 1:100, sep=".")
+	if(nc==100) colnames(mat) <- paste("seg",1:100,sep=".")
 	return(mat)
 }
 
@@ -96,7 +99,56 @@ for(s2n in c(2,1,0.5))
 colMeans(getit("sgn", rho=.5, s2n=1),na.rm=TRUE)
 colMeans(getit("times",0.5,1))
 
-# single run examples
+## long format
+
+
+s2n <- 0.5
+rho <- 0.5
+fdrlong <- colMeans(getit("fdrlong",rho=rho,s2n=s2n))/100
+senslong <- colMeans(getit("senslong",rho=rho,s2n=s2n))/100
+
+pdf(file="fdr.pdf", width=7, height=2.5)
+par(mfrow=c(1,3), 
+	mai=c(.4,.4,.2,.2), 
+	omi=c(.2,.2,0,0))
+for(mod in c("gl0","gl2","gl10")){
+	irrep <- colMeans(getit(sprintf("irrep%s",mod),rho=rho,s2n=s2n))/100
+	plot(irrep, type="l", ylim=c(0,1), bty="n", ylab="",xlab="",lwd=1.5)
+	lines(fdrlong[grep(mod,names(fdrlong))], col=2,lwd=1.5)
+	lines(senslong[grep(mod,names(senslong))], col="green",lwd=1.5)
+}
+mtext(side=1, "path segment", font=3, outer=TRUE, cex=.7)
+legend("right",lwd=2, col=c(1,2,"green"),bty="n",
+	legend=c("irrep.","FDR","sensitivity"))
+dev.off()
+
+rho <- .5
+r2long <- colMeans(getit("r2long",rho=rho,s2n=s2n))
+pdf(file="r2.pdf", width=7, height=2.5)
+par(mfrow=c(1,3), 
+	mai=c(.4,.4,.2,.2), 
+	omi=c(.2,.2,0,0))
+for(mod in c("gl0","gl2","gl10")){
+	cpi <- getit(sprintf("cpineq%s",mod),rho=rho,s2n=s2n)
+	L <- getit(sprintf("L%s",mod),rho=rho,s2n=s2n)
+	if(mod=="gl2" & s2n==1) cpi <- cpi[-c(277,278),]
+	L <- colMeans(L*cpi)
+	lnz <- which(L!=0)
+	plot(lnz,L[lnz]/max(L),lwd=1.5,col="gold", 
+		xlim=c(1,100), ylim=c(0,1), bty="n", ylab="",xlab="",type="l")
+	lines(r2long[grep(mod,names(r2long))], col=4, lwd=1.5)  
+	lines(colMeans(cpi),lwd=1.5)
+}
+mtext(side=1, "path segment", font=3, outer=TRUE, cex=.7)
+legend("topright",lwd=2, col=c(1,"gold",4),bty="n",
+	legend=c("min.weight ok","L/max(L)","R2"))
+dev.off()
+
+
+
+
+
+## single run examples
 id <- 0
 rho <- 0.5
 s2n <- 1

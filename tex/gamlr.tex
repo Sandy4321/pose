@@ -941,7 +941,7 @@ $b_2$ arbitrarily close but on either side of the discontinuity threshold
 $\lambda$.  For this reason it is clear that Lipschitz continuity {\it does not
 hold} for $\gamma =\infty$.
 
-\subsection{Forward vs Backward Selection}
+\subsection{Forward vs Backward Search}
 
 Most authors looking at weighted $L_1$ estimation start from more complex models to derive the penalty weights -- in our context, use $\bs{\beta}^0$ for $\lambda_0$ to define weights at $\lambda_1 \geq \lambda_0$.  This approach seems to have developed because, with the exception of marginal regression-based weights, it easier to derive oracle inequalities for this `backwards' rather than our `forwards' algorithm.  A quick result here argues that, in any case, the greedy forward algorithm provides lower variance prediction than a backwards algorithm.
 \begin{prop}
@@ -1013,11 +1013,11 @@ our simulations of Section \ref{sim}). Instead we use the most recent $g_j$ at
 which $\hat\beta^t_j=0$, such that the effect of previously in-the-model
 variables has been remove from our plug-in gradient.  This appears to work
 well in practice, requires no extra computation (since we already need these
-values in CD), and has the advantage of maintaining $df = \hat p$ for $\gamma
-= 0$.
+values in CD), and has the advantage of maintaining $df = \hat p$ for $\gamma = 0$.
 
 \section{Selection}
 \label{selection}
+
 
 Penalized estimation does not perform model selection. Rather, its value is as
 a technique to quickly enumerate,  along regularization paths, a set of
@@ -1026,6 +1026,44 @@ by a single penalty size parameter, say $\lambda$. This acts as a {\it
 squelch}: it suppresses noise to focus on the true input signal.  The model
 selection problem is then to choose $\lambda$ so that models estimated under
 that  squelch are neither over nor under fit.
+
+Model selection can be guided by many principals.  The dominant paradigm today
+-- especially with big data and HD models -- is oriented towards predictive
+performance: one chooses the model that performs best in predicting new data.
+Even if one is primarly interest in support recovery, authors such as EFRON
+recommend predictive performance optimization accompanied by a hedge towards
+simplicity (i.e., the 1SE rule).  The focus on predictive performance is due
+to a variety of factors; e.g., hypothesis testing tools do not scale will with
+many tested variables.  In any case, it seems reasonable that one would not
+trust for inference a model that does a poor job in prediction.
+
+`Good prediction' can also be measured in a variety of ways.  A common and coherent framework is to consider minimizing Kullback-Leibler (KL) divergence.  Say $g(\bm{y})$ is the true data generating process, and $f(\bm{y}; \bs{\eta},\sigma)$ is the parametric model under study, which we imagine here as a natural exponential family  with $\ds{E}[\bm{y}]=\bs{\eta}$ and dispersion $\sigma$. Then one minimizes
+\begin{equation}
+\mr{KL}(\bs{\eta},\sigma) = \ds{E}_g \log g(\bm{y}) - \ds{E}_g \log f(\bm{y}; \bs{\eta},\sigma),
+\end{equation}
+the expected difference between log true density and our parametric approximation.  Since $\ds{E}_g \log g(\bm{y})$ is constant, this leads one to minimize 
+$Q(\bs{\eta},\sigma) = -\ds{E}_g \log f(\bm{y}; \bs{\eta},\sigma)$, the expected negative log likelihood.  That is, one seeks to minimize the expectation -- with respect to the true DGP --- of an assumed parametric deviance.  There is no requirement that $g$ is a member of the family defined by $f$.
+
+If parameters are to be estimated as $[\bs{\eta}_{\bm{y}},\sigma_{\bm{y}}]$, functions of random sample $\bm{y} \sim g$, then $Q(\bs{\eta}_{\bm{y}},\sigma_{\bm{y}})$ is itself a random variable and one chooses estimators to minimize its expectation.  {\it Crucially, we imagine a double-sample expectation}, where the minimization objective is
+\begin{equation}\label{dualexpect}
+\ds{E}_{\bm{y}|g} \ds{E}_{\bm{\tilde y}|g} \log f(\bm{\tilde y}; \bs{\eta}_{\bm{y}},\sigma_{\bm{y}}).
+\end{equation}
+The notation here indicates that inner and outer expectations are based on two {\it independent} random samples from $g$: $\bm{y}$ for training, upon which $\bs{\eta}_{\bm{y}},\sigma_{\bm{y}}$ are calculated, and $\bm{\tilde y}$ for validation.  As pointed out by Akaike, without the double samples one would always seek overfit.
+
+The remainder of this section outlines two strategies for minimization of (\ref{dualexpect}).  The first, cross-validation (CV), performs a Monte Carlo experiment that mimics double expectation.  The second set of methods, Information Criterion (IC), attempt to approximate (\ref{dualexpect}) analytically via the observed likelihood and a complexity penalty that depends upon the degrees of freedom.
+In light of our focus on path stability, we note in advance that  both IC and CV depend upon use of `stable'
+models. For IC, Section \ref{dof} outlines how the required $df$ can be
+approximated easily only for models that are Lipschitz continuous.  And
+\citet{breiman_heuristics_1996} argues that CV does a poor job of evaluating
+unstable models: it evaluates  {\it average} performance of given $\lambda$
+as a squelch, but this is a good guess at the
+performance of a single particular fit (which is what we actually have)  only
+if models estimated at this $\lambda$ are not too variable across samples --
+that is, if the model is stable.  Thus a simple argument for stability is as
+follows: regularization paths enumerate candidate models that we must choose
+amongst, and we have good tools for such choice only if the paths are
+continuous.
+
 
 \subsection{Cross validation}
 
@@ -1061,15 +1099,62 @@ experimentation.  Thus there are settings where we'll need to replace CV with
 performance estimates that can be derived from  a single model fit.
 
 
-\subsection{Information Criteria}
+\subsection{Information Criteria: AIC and AICc}
 
-An alternative approach to measuring predictive performance follows \citet[see
-also \citealt{efron_estimation_2004}]{mallows_comments_1973} in estimating
-true OOS error via the `Information Criterion', \begin{equation}\label{cp}
-\text{IC}(k) = 2l(\hat\alpha,\bs{\hat\beta}) + k\times df \end{equation} where
-$k$ is a complexity penalty.  We are able plug-in the $df^t$ degrees of
+
+Information Criteria (IC) are analytic approximations to (\ref{dualexpect}) or related quantities.  These commonly take the form
+\begin{equation}\label{ic}
+ -2\log f(\bm{y}; \bs{\eta}_{\bm{y}},\sigma_{\bm{y}}) + c(df)
+ \end{equation} 
+where $c(df)$ is a complexity penalty that increases with the degrees of freedom used in $\bs{\eta}_{\bm{y}}$.
+ We are able plug-in the $df^t$ degrees of
 freedom heuristic from (\ref{edf}) here, and the IC-selected model is that
-which minimizes the criterion in (\ref{cp}).
+which minimizes the criterion in (\ref{ic}).
+
+A commonly applied IC is the AIC, which uses $c(df)=2df$ and is derived as an asymptotic approximation to (\ref{dualexpect}) in 
+\cite{akaike_information_1973}.  However, our experience (e.g., see Section \ref{sim}) is that AIC selects dramatically overfit models whenever $df$ is large relative to $n$.  This is because the asymptotic approximation upon which it is based is valid only for large $n/df$ CITEP, and thus fails in high dimensions.  An alternative `corrected' AICc for small $n/df$ is derived in CITEORIG, and \citet{flynn_efficiency_2013} study its application to penalized deviance estimation.
+\begin{equation}
+-2\log f(\bm{y}; \bs{\eta}_{\bm{y}},\sigma_{\bm{y}}) + 2df\frac{n}{n-df-1}.
+\end{equation}
+The correction multiplier is thus $n/(n-df-1)$, such that AICc approaches standard AIC if $n\gg df$.  We find massive performance improvement from this correction, and in our simulations (and other experience) AICc can match or exceed the OOS predictive performance of CV-based selection.  
+
+Since the AICc plays a central role in our applied work, we present below an informal derivation in the context of linear regression.  The goal of this simple setup, based on the Mallows $C_p$ formula also referenced in Section \ref{concave}, is to make the result as intuitive as possible.  See CITEHJORT for the more traditional derivation and a full theoretical review of the IC framework, and refer to \citet{flynn_efficiency_2013} for results extending to generalized linear models (which we take for granted in the hockey application of Section \ref{nhl}). 
+
+\subsubsection{Derivation of AIC and AICc}
+
+Suppose $\bs{\eta}_\bm{y}$ is the estimate for $\ds{E}\bm{y}$ using $df$ degrees of freedom, and set $\sigma^2_{\bm{y}} = \sum_i (y_i - \eta_{\bm{y}i})^2/n$.
+We'll derive  
+\begin{equation}\label{aiccapprox}
+df\frac{n}{n-df-1}  \approx \ds{E}_{\bm{y}|g}\left[\log f(\bm{y}; \bs{\eta}_{\bm{y}},\sigma_{\bm{y}}) - \ds{E}_{\bm{\tilde y}|g} \log f(\bm{\tilde y}; \bs{\eta}_{\bm{y}},\sigma_{\bm{y}})
+\right],
+\end{equation}
+such that AICc's complexity penalty is the expected bias that results from taking the fitted log likelihood as an estimate for (\ref{dualexpect}).  First, by cancellation the inner term of (\ref{aiccapprox}) simplifies as 
+\begin{equation}
+\log f(\bm{y}; \bs{\eta}_{\bm{y}},\sigma_{\bm{y}}) - \ds{E}_{\bm{\tilde y}|g} \log f(\bm{\tilde y}; \bs{\eta}_{\bm{y}},\sigma_{\bm{y}}) = 
+\frac{\ds{E}_{\bm{\tilde y}|g} \sum_i (\tilde y_i - \eta_{\bm{y}i})^2}{2 \sigma^2_{\bm{y}}} - \frac{n}{2}.
+\end{equation}
+Now, assume that the {\it true} model is linear and that the data were generated
+from $g = \mr{N}(\bs{\eta}, \sigma^2\bm{I})$.  The \cite{mallows_comments_1973} $C_p$ formula holds that 
+$n\sigma^2_{\bm{y}} + 2 \sigma^2 df$ is an unbiased estimator for  expected 
+sum of square errors $\ds{E}_{\bm{\tilde y}|g} \sum_i (\tilde y_i - \eta_{\bm{y}i})^2/n$, such that
+\begin{equation}
+\frac{\ds{E}_{\bm{\tilde y}|g} \sum_i (\tilde y_i - \eta_{\bm{y}i})^2}{2 \sigma^2_{\bm{y}}} - \frac{n}{2} 
+ ~\approx~ \frac{n\sigma^2_{\bm{y}} + 2 \sigma^2 df}{2 \sigma^2_{\bm{y}}} - \frac{n}{2}
+ ~=~  df\frac{\sigma^2 }{\sigma^2_{\bm{y}}}.
+\end{equation}
+At this point, we see that the standard AIC approximation results from equating $\sigma^2 \approx \ds{E}_{\bm{y}|g}\sigma^2_{\bm{y}}$, so that $df\ds{E}_{\bm{y}|g}[\sigma^2/\sigma^2_{\bm{y}}] \approx df$.  This will underpenalize complexity whenever residual variance $\sigma^2_{\bm{y}}$ tends to be smaller than the true variance $\sigma^2$  -- that is, whenever the model is overfit.  In contrast, AICc applies the chi-squared goodness of fit result $
+{n\sigma^2_{\bm{y}}/\sigma^2} \sim \chi^2_{n-df-1}
+$
+to obtain the corrected finite-sample approximation
+\begin{equation}
+\ds{E}_{\bm{y}|g}\left[\frac{\sigma^2 }{\sigma^2_{\bm{y}}}df\right]= 
+n\ds{E}_{\bm{y}|g}\left[\frac{1}{n\sigma^2_{\bm{y}}/\sigma^2}\right]df = 
+\frac{n}{n-df-1}df.
+\end{equation}
+Multiplying by $-2$ and subtracting from $-2\log f(\bm{y}; \bs{\eta}_{\bm{y}},\sigma_{\bm{y}})$ yields the AICc.
+
+
+\subsection{Marginal likelihood and the BIC}
 
 The two most common information criteria specifications are the AIC's $k=2$
 \citep[derived from information theoretic arguments
@@ -1078,23 +1163,7 @@ approximation to marginal likelihood for a Bayesian model
 in][]{schwarz_estimating_1978}.  Our experience is that the BIC-selected model
 works better  for OOS prediction in big-$p$/small-$n$ applications, but it does tend to yield very simple models and the
 AIC will be preferred if you need to tell a story about weak signals or if $n\gg p$ 
-(e.g., as in Section \ref{nhl}).  See \citet{flynn_efficiency_2013} for discussion of the AIC and its adaptation for selection in high-dimensional penalized regression.
-
-
-Note that with both IC and CV it is best to use `stable'
-models. For IC, Section \ref{dof} outlines how the required $df$ can be
-approximated easily only for models that are Lipschitz continuous.  And
-\citet{breiman_heuristics_1996} argues that CV does a poor job of evaluating
-unstable models: it evaluates  {\it average} performance of given $\lambda$
-as a squelch, but this is a good guess at the
-performance of a single particular fit (which is what we actually have)  only
-if models estimated at this $\lambda$ are not too variable across samples --
-that is, if the model is stable.  Thus a simple argument for stability is as
-follows: regularization paths enumerate candidate models that we must choose
-amongst, and we have good tools for such choice only if the paths are
-continuous.
-
-\subsection{Laplace approximation to the marginal likelihood}
+(e.g., as in Section \ref{nhl}).  
 
 An alternative  interpretation for information criteria is as Laplace
 approximation \citep{de_bruijn_asymptotic_1958} to the negative log of the
@@ -1349,26 +1418,19 @@ Here, $\mr{sd}(\mu)$ is the sample standard deviation over simulated $\mu_1\ldot
 correlated across dimensions and it is useless to estimate the coefficients
 for large $j$.  
 
-\begin{figure}[p]
+\begin{figure}[tbh]
 \vspace{-.25cm}
 { \hskip 2.5cm$\bs{\gamma=0}$\hskip 4cm$\bs{\gamma=2}$\hskip 4cm$\bs{\gamma=10}$}
 
 \vskip .2cm
 \includegraphics[width=6.5in]{../graphs/sim_paths}
 \caption{\label{simpaths} Regularization paths for a single run of our simulated linear regression example, on $\gamma = 0,2,10$ from left.
-Vertical lines mark the BIC selection, and  degrees of freedom $df^t$ are along the top. }
-
+Degrees of freedom $df^t$ are along the top. }
 \vskip .7cm
 { \hskip 2.5cm$\bs{\gamma=0}$\hskip 4cm$\bs{\gamma=2}$\hskip 4cm$\bs{\gamma=10}$}
-\vskip -.25cm
-\includegraphics[width=6.3in]{../graphs/sim_ic}
-\caption{\label{simic} BIC (with AIC in light gray) for our simulated linear regression example, on $\gamma = 0,2,10$. }
-
-\vskip .7cm
-{ \hskip 2.5cm$\bs{\gamma=0}$\hskip 4cm$\bs{\gamma=2}$\hskip 4cm$\bs{\gamma=10}$}
-\includegraphics[width=6.3in]{../graphs/sim_cv}
-\caption{\label{simcv} 5-fold CV results for our simulated data example. 
-Points-and-bars show mean OOS deviance $\pm 1$se. Minimum and 1se selection rules are marked with dotted lines. }
+\includegraphics[width=6.5in]{../graphs/sim_cv}
+\caption{\label{simcv} 5-fold CV and AICc example results for our simulated data example. 
+Points-and-bars show mean OOS MSE $\pm 1$se.  }
 \vspace{-.25cm}
 \end{figure}
 
@@ -1397,7 +1459,7 @@ under more concave penalties.
 \includegraphics[width=6.3in]{../graphs/sim_oos} \caption{\label{simoos}
 Out-of-sample simulation experiment results. } \end{figure}
 
-AIC and BIC values along the paths are plotted in Figure \ref{simic}. Minimum
+AIC and BIC values along the paths are plotted in Figure REWRITE.  Minimum
 AIC models are not marked in Figure \ref{simpaths} because it always selected
 the most complicated model.  The BIC curves resemble the 5-fold CV deviance
 curves in Figure \ref{simcv}, and if one views OOS experiments as a gold-standard
