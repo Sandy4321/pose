@@ -102,7 +102,7 @@ colMeans(getit("times",0.5,1))
 ## long format
 
 
-s2n <- 1
+s2n <- 0.5
 rho <- 0.5
 fdrlong <- colMeans(getit("fdrlong",rho=rho,s2n=s2n))/100
 senslong <- colMeans(getit("senslong",rho=rho,s2n=s2n))/100
@@ -118,7 +118,8 @@ for(mod in c("gl0","gl2","gl10")){
 	lines(senslong[grep(mod,names(senslong))], col="green",lwd=1.5)
 }
 mtext(side=1, "path segment", font=3, outer=TRUE, cex=.7)
-legend("right",lwd=2, col=c(1,2,"green"),bty="n",legend=c("irrep.","fdr","sensitivity"))
+legend("right",lwd=2, col=c(1,2,"green"),bty="n",
+	legend=c("irrep.","FDR","sensitivity"))
 dev.off()
 
 rho <- .5
@@ -130,22 +131,21 @@ par(mfrow=c(1,3),
 for(mod in c("gl0","gl2","gl10")){
 	cpi <- getit(sprintf("cpineq%s",mod),rho=rho,s2n=s2n)
 	L <- getit(sprintf("L%s",mod),rho=rho,s2n=s2n)
-	if(mod=="gl2") cpi <- cpi[-c(277,278),]
+	if(mod=="gl2" & s2n==1) cpi <- cpi[-c(277,278),]
 	L <- colMeans(L*cpi)
 	lnz <- which(L!=0)
-	plot(lnz,L[lnz]/max,lwd=1.5,col="gold", 
+	plot(lnz,L[lnz]/max(L),lwd=1.5,col="gold", 
 		xlim=c(1,100), ylim=c(0,1), bty="n", ylab="",xlab="",type="l")
 	lines(r2long[grep(mod,names(r2long))], col=4, lwd=1.5)  
 	lines(colMeans(cpi),lwd=1.5)
 }
 mtext(side=1, "path segment", font=3, outer=TRUE, cex=.7)
-legend("topright",lwd=2, col=c(4,"gold",1),bty="n",
+legend("topright",lwd=2, col=c(1,"gold",4),bty="n",
 	legend=c("min.weight ok","L/max(L)","R2"))
 dev.off()
 
 
 
-lines(mselong[grep(mod,names(r2long))], col="blue")
 
 
 ## single run examples
