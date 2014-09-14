@@ -12,6 +12,8 @@ library(gamlr)
 source("code/simfit.R")
 print(id)
 
+fill <- function(v){ c(v, rep(tail(v,1),100-length(v)) )}
+
 ## data properties
 write(d$sigma, sprintf("results/%s/sigma.txt",OUT),append=TRUE)
 times <- paste(round(c(tgl0,tgl2,tgl10,tmrgal,tsnet),1),collapse="|")
@@ -66,9 +68,9 @@ R2 <- 1-MSE/mean( (d$y.val-mean(d$y.val))^2 )
 write(paste(round(R2,2),collapse="|"),
 	sprintf("results/%s/r2.txt",OUT),append=TRUE)
 
-MSElong <- c(
-	mrg=msemrg,gl0=mse0,
-	gl2=mse2,gl10=mse10)
+MSElong <- c( 
+	mrg=fill(msemrg),gl0=fill(mse0),
+	gl2=fill(mse2),gl10=fill(mse10))
 write(paste(round(MSElong,2),collapse="|"),
 	sprintf("results/%s/mselong.txt",OUT),append=TRUE)
 
@@ -102,8 +104,8 @@ s <- c(cp=sCp,snet1se=ssnet1se,
 write(paste(round(s,2),collapse="|"),
 	sprintf("results/%s/s.txt",OUT),append=TRUE)
 
-slong <- c(mrg=smrg,
-	gl0=s0,gl2=s2,gl10=s10)
+slong <- c(mrg=fill(smrg),
+	gl0=fill(s0),gl2=fill(s2),gl10=fill(s10))
 write(paste(round(slong,2),collapse="|"),
 	sprintf("results/%s/slong.txt",OUT),append=TRUE)
 
@@ -123,8 +125,8 @@ fdr[is.nan(fdr)|is.infinite(fdr)] <- 0
 write(paste(round(fdr*100,2),collapse="|"),
 	sprintf("results/%s/fdr.txt",OUT),append=TRUE)
 
-fdrlong <- c(mrg=(fpmrg/smrg),gl0=(fp0/s0),
-	gl2=(fp2/s2),gl10=(fp10/s10))
+fdrlong <- c(mrg=fill(fpmrg/smrg),gl0=fill(fp0/s0),
+	gl2=fill(fp2/s2),gl10=fill(fp10/s10))
 fdrlong[is.nan(fdrlong)|is.infinite(fdrlong)] <- 0
 write(paste(round(fdrlong*100,2),collapse="|"),
 	sprintf("results/%s/fdrlong.txt",OUT),append=TRUE)
@@ -145,8 +147,8 @@ write(paste(round(sens*100,2),collapse="|"),
 	sprintf("results/%s/sens.txt",OUT),append=TRUE)
 
 senslong <- c(
-	mrg=tpmrg/sCp,gl0=tp0/sCp,
-	gl2=tp2/sCp,gl10=tp10/sCp)
+	mrg=fill(tpmrg/sCp),gl0=fill(tp0/sCp),
+	gl2=fill(tp2/sCp),gl10=fill(tp10/sCp))
 write(paste(round(senslong*100,2),collapse="|"),
 	sprintf("results/%s/senslong.txt",OUT),append=TRUE)
 
