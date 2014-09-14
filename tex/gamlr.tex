@@ -629,6 +629,11 @@ Zou and Li result on continuity is  more general than our
 simple statement in Section \ref{stability}:  one-step LLA is continuous if
 and only if $c'(\beta)$ is continuous for $|\beta|>0$.  
 
+
+Most authors looking at weighted $L_1$ estimation start from more complex models to derive the penalty weights -- in our context, use $\bs{\beta}^0$ for $\lambda_0$ to define weights at $\lambda_1 \geq \lambda_0$.  This approach seems to have developed because, with the exception of marginal regression-based weights, it easier to derive oracle inequalities for this `backwards' rather than our `forwards' algorithm.  
+We're not certain that, e.g., support recovery has lower probability under the forward rather than backward algorithm.  However, we don't doubt this to be the case, and it would be another example of the stability vs selection trade-off.
+
+
 \section{Comparison to $L_0$ penalized optimization}
 
 In the following two subsections we provide results for weighted $L_1$ estimation in two areas commonly motivating use of diminishing-bias-type penalties: prediction using a sparse basis, and support recovery.  We compare to optimal $L_0$ penalized estimation here, even though in the later section on stability it is clear that $L_0$ penalized estimation may not be the best choice even if it were feasible.
@@ -914,40 +919,19 @@ $0<\delta<1$, such that $\hat\beta^0$ is the lasso estimate under $\tau =
 $\hat\beta^1$ as \begin{equation}\label{twostep} f(b) = \left(b -
 \frac{\delta\lambda}{1+\gamma(b-\lambda)_+}\right)_+  \end{equation} where
 $\gamma,\lambda,\delta >0$, $\lambda < \infty$, $\delta<1$.  We call this the
-gamma-lasso thresholding operator.
+gamma-lasso thresholding operator, and it is straightforward to verify
+directly that it is Lipschitz continuous for $\gamma < \infty$.\footnote{The subset selection procedure implied at
+$\gamma=\infty$ is clearly  {\it
+discontinous} -- consider $b_1$ and $b_2$ arbitrarily close but on
+either side of $\lambda$.}
 
-\begin{prop} For $\gamma<\infty$ the GL thresholding  operator in
-(\ref{twostep}) is Lipschitz continuous. \end{prop} \begin{proof} Take two
-arbitrary MLE $b_1 > b_2 >0$;  other configurations work similarly.   If
-$f(b_1) = f(b_2) =0$ the condition holds trivially.   If $f(b_1) > f(b_2) >
-0$, then  $|f(b_1) - f(b_2)| = b_1 - b_2 + \delta\lambda (A_1 -
-A_2)/[(1+A_1)(1+A_2)] \leq (1+\delta\lambda \gamma)|b_1-b_2|$, where $A_k =
-\gamma(b_k-\lambda)_{+}$. Finally, if $f(b_1)>0, f(b_2)=0$ then w.l.o.g.~write $b_1 = \delta\lambda + \epsilon$, $b_2 = \delta\lambda$, for $\epsilon  = |b_1-b_2| > 0$, so
-that 
-\begin{equation}\label{lipeq}
- |f(b_1) - f(b_2)| =\epsilon  
- + \delta\lambda\left(1 - \frac{1}
- {1 + \gamma(\delta\lambda + \epsilon - \lambda)_+}\right).
- \end{equation} 
-For $\epsilon \leq (1-\delta)\lambda$, (\ref{lipeq}) becomes $ \epsilon$.  Otherwise (\ref{lipeq}) is 
-less than $\epsilon + \delta\lambda
-\left(\gamma\epsilon/(1+\gamma\epsilon)\right) < (1+\delta\gamma\lambda)\epsilon$.
+More generally, since $L_1$ penalized least-squares estimators are Lipschitz continuous \cite[][]{zou_degrees_2007}, versions that use data-dependent penalty weighting will also be continuous so long as the weights are themselves finite and continuous functions of $\bm{y}$.\footnote{Holds also for generalized linear models under conditions that make maximum likelihood estimators continuous.}  This can be used to establish continuity of, e.g., the adaptive lasso with inverse weights set as marginal correlations or through a preliminary lasso run.  It also rules out continuity whenever weights are derived from hard-thresholding, such as in the thresholded lasso studied by \cite{van_de_geer_adaptive_2011}.
+For the gamma lasso, we are able to establish {\it path continuity}.
+
+\begin{prop} For $\gamma<\infty$ the least-squares gamma lasso path is Lipschitz continuous. \end{prop} 
+\begin{proof}
+From the above discussion, we need to establish continuity of the weights.  At $\lambda_1$ and $\lambda_2$, the weights are always all one.  And if $\bs{\beta}^{t}$ are Lipschitz continuous,  then so are $\bs{\omega}^{t+1}$ for all $\gamma<0$ and thus $\bs{\beta}^{t+1}$ is Lipschitz continuous.  By induction the entire path is continuous.
 \end{proof}
-
-Note the connection between path continuity and estimator stability: if there
-are jumps in a solution path as a function of $\lambda$, then Lipschitz
-continuity is impossible. To see this, note that one could choose $b_1$ and
-$b_2$ arbitrarily close but on either side of the discontinuity threshold
-$\lambda$.  For this reason it is clear that Lipschitz continuity {\it does not
-hold} for $\gamma =\infty$.
-
-\subsection{Forward vs Backward Search}
-
-Most authors looking at weighted $L_1$ estimation start from more complex models to derive the penalty weights -- in our context, use $\bs{\beta}^0$ for $\lambda_0$ to define weights at $\lambda_1 \geq \lambda_0$.  This approach seems to have developed because, with the exception of marginal regression-based weights, it easier to derive oracle inequalities for this `backwards' rather than our `forwards' algorithm.  A quick result here argues that, in any case, the greedy forward algorithm provides lower variance prediction than a backwards algorithm.
-\begin{prop}
-forward var $<$ backward var
-\end{prop}
-We're not certain that, e.g., support recovery has lower probability under the forward rather than backward algorithm.  However, we don't doubt this to be the case, and it would be another example of the stability vs selection trade-off.
 
 \section{Degrees of freedom}
 \label{dof}
@@ -1500,22 +1484,15 @@ concavity offered by a gamma lasso with small $\gamma$.
 \label{nhl}
 
 
-\begin{figure}[p]
-\vskip -1cm
-\hskip -.5cm \includegraphics[width=6.5in]{../graphs/nhl_ic}
+\begin{figure}[htf]
+\begin{center}
+\includegraphics[width=6in]{../graphs/nhl_ic}
 \caption{ \label{nhlic} Hockey example AIC and BIC for 
  100 $\log(\lambda)$ from -6 to -10.6 in models with  
  $\log_{10}\gamma = -5 \ldots 5$ and lasso $\gamma=0$.  `X' mark the 
  minima on the images, which have lasso on the bottom edge. Line plots show minimum IC across $\gamma$, with a dashed line for null model IC (with $\alpha$ and $\bs{\phi}$ only).
 }
-
-\vskip 1cm
-\includegraphics[width=6.4in]{../graphs/nhl_paths}
-\caption{\label{nhlpaths} Hockey example regularization paths for 
-$\gamma = 10^{\{-1,0,1\}}$; minimum AIC and BIC are marked with the dashed vertical lines.
-Positions are shaded grey:goalie, blue:defense, green:center, red:winger.}
-
-\vskip 1cm
+\end{center}
 \includegraphics[width=6.4in]{../graphs/nhl_cv}
 \caption{\label{nhlcv} Hockey example 20-fold CV: mean OOS deviance $\pm 1$se, with minimum and 1se selection rules marked with black dotted lines.  
 Dashed (orange) lines show AIC and BIC selections. }
@@ -1594,49 +1571,44 @@ complexity; use your knowledge of the application-at-hand (and OOS experiments
 if possible) to make a final decision.
 
 
-\begin{figure}[ht]
 
-\vskip 1cm
-{\footnotesize\sgl
-\begin{verbatim}
-  PETER_FORSBERG       MARIAN_HOSSA   PAVEL_DATSYUK       HENRIK_SEDIN 
-           0.768              0.276           0.268              0.221 
-NICKLAS_LIDSTROM        ZDENO_CHARA   SIDNEY_CROSBY  DANIEL_ALFREDSSON 
-           0.137              0.134           0.115              0.114 
-       DAN_BOYLE      NATHAN_HORTON    JOE_THORNTON     JONATHAN_TOEWS 
-           0.114              0.097           0.092              0.085 
-   ALEX_OVECHKIN       RYAN_GETZLAF    CHRIS_KUNITZ       JASON_ARNOTT 
-           0.075              0.066           0.052              0.039 
-    ALEX_TANGUAY VINCENT_LECAVALIER  MARIAN_GABORIK        ZACH_PARISE 
-           0.036              0.033           0.019              0.015 
-  ROBERTO_LUONGO 
-           0.002 
-\end{verbatim}}
+\begin{table}\footnotesize\setstretch{1}
+\makebox[\linewidth]{
+\begin{tabular}{l|lcc|lcc|lcc|}
+\multicolumn{1}{c}{} & \multicolumn{3}{l}{\large \it ~~~lasso} & \multicolumn{3}{l}{\large \it ~~~$\gamma=1$} &  \multicolumn{3}{l}{\large \it ~~~$\gamma=10$}\\
+\multicolumn{1}{c}{} & \multicolumn{3}{r|}{} & \multicolumn{3}{r|}{} &  \multicolumn{3}{r|}{}\\
+\multicolumn{1}{c}{}  &     &    PPM & PM &    &   PPM & PM        &   & PPM & PM \\
+\cline{3-4}\cline{6-7}\cline{9-10}
+1 & Ondrej Palat & 33.8 & 14 & Sidney Crosby & 29.2 & -4 & Sidney Crosby & 32.6 & -4 \\
+2 & Sidney Crosby & 31.2 & -4 & Ondrej Palat & 29 & 14 & Jonathan Toews & 22.8 & 5 \\
+3 & Henrik Lundqvist & 25.8 & 49 & Jonathan Toews & 21.4 & 5 & Joe Thornton & 22 & -22 \\
+4 & Jonathan Toews & 24 & 5 & Joe Thornton & 21 & -22 & Anze Kopitar & 22 & 29 \\
+5 & Andrei Markov & 23.1 & -6 & Andrei Markov & 20.9 & -6 & Andrei Markov & 20.7 & -6 \\
+6 & Joe Thornton & 21.4 & -22 & Henrik Lundqvist & 19.8 & 49 & Alex Ovechkin & 18.1 & -14 \\
+7 & Anze Kopitar & 20.6 & 29 & Anze Kopitar & 19.5 & 29 & Pavel Datsyuk & 16.6 & -13 \\
+8 & Tyler Toffoli & 18.9 & 11 & Pavel Datsyuk & 16.1 & -13 & Ryan Getzlaf & 15.8 & -34 \\
+9 & Pavel Datsyuk & 17.7 & -13 & Logan Couture & 15.9 & -27 & Henrik Sedin & 15.2 & -9 \\
+10 & Ryan Nugent & 17.4 & 2 & Alex Ovechkin & 15.8 & -14 & Marian Hossa & 14.9 & 3 \\
+11 & Gabriel Landeskog & 16.6 & 26 & Marian Hossa & 14.4 & 3 & Alexander Semin & 14.7 & 17 \\
+12 & Logan Couture & 16.5 & -27 & Alexander Semin & 14.2 & 17 & Jaromir Jagr & 14.5 & 2 \\
+13 & Alex Ovechkin & 15.8 & -14 & Matt Moulson & 13.9 & 12 & Logan Couture & 14.2 & -27 \\
+14 & Marian Hossa & 15.4 & 3 & Tyler Toffoli & 13.3 & 11 & Matt Moulson & 13.7 & 12 \\
+15 & Alexander Semin & 14.8 & 17 & David Perron & 12.7 & 2 & Mikko Koivu & 13 & -4 \\
+16 & Zach Parise & 14.7 & -9 & Mikko Koivu & 12.5 & -4 & Joe Pavelski & 12.6 & -15 \\
+17 & Frans Nielsen & 13.5 & -16 & Frans Nielsen & 12.3 & -16 & Steven Stamkos & 12.6 & 24 \\
+18 & Mikko Koivu & 13.4 & -4 & Ryan Getzlaf & 12.1 & -34 & Frans Nielsen & 12.5 & -16 \\
+19 & Matt Moulson & 13.4 & 12 & Ryan Nugent & 11.9 & 2 & Marian Gaborik & 12.3 & 5 \\
+20 & David Perron & 13.1 & 2 & Jaromir Jagr & 11.8 & 2 & Zach Parise & 12.2 & -9 \\
+21 & Joe Pavelski & 12.4 & -15 & Joe Pavelski & 11.5 & -15 & Tobias Enstrom & 10.9 & 21 \\
+22 & Jordan Eberle & 12.4 & 9 & Marian Gaborik & 11.4 & 5 & Daniel Alfredsson & 10.7 & -9 \\
+23 & Radim Vrbata & 12.3 & 16 & Zach Parise & 11.2 & -9 & Radim Vrbata & 10.1 & 16 \\
+24 & Jakub Voracek & 12.3 & 12 & Jordan Eberle & 10.8 & 9 & Rick Nash & 9.9 & 16 \\
+25 & Marian Gaborik & 12.1 & 5 & Radim Vrbata & 10.5 & 16 & Vincent Lecavalier & 9.4 & 9 \\
+\multicolumn{1}{c}{} & \multicolumn{3}{r|}{} & \multicolumn{3}{r|}{} &  \multicolumn{3}{r|}{}\\
+ \multicolumn{1}{c}{} & \multicolumn{3}{r|}{\it 305 nonzero effects} & \multicolumn{3}{r|}{\it 204 nonzero effects} &  \multicolumn{3}{r|}{\it 64 nonzero effects}
+\end{tabular}}
+\end{table}
 
-\vskip -.5cm
-\caption{\label{biceffects} All 21 non-zero player effects in the $\gamma = 1$ model at 
-BIC optimal $\log(\lambda) = -6.9$.}
-
-\vskip 1cm
-{\footnotesize\sgl
-\begin{verbatim}
-NINO_NIEDERREITER   PETER_FORSBERG    RAITIS_IVANANS     BRAD_MARCHAND 
-           -0.955            0.873            -0.568             0.560 
-      PATRICK_ROY   MARTIN_GELINAS         ERIC_FEHR       THOMAS_POCK 
-            0.511            0.488             0.486            -0.476 
- KENT_MANDERVILLE   JONATHAN_TOEWS      MARIAN_HOSSA   STEVEN_GOERTZEN 
-           -0.471            0.466             0.453            -0.442 
-    MATHIEU_BIRON    SIDNEY_CROSBY      RYAN_HOLLWEG        TIM_TAYLOR 
-           -0.439            0.433            -0.430            -0.419 
-   SCOTT_LACHANCE    PAVEL_DATSYUK   ALEXANDER_SEMIN      DALTON_PROUT 
-           -0.418            0.416             0.408             0.407 
-\end{verbatim}}
-
-\vskip -.5cm \caption{\label{aiceffects} 20 largest player effects
-(of 904 nonzero) in the lasso model at  AIC optimal $\log(\lambda) = -9.5$.
-}
-
-\end{figure}
 
 \section{Discussion}
 \label{discussion}

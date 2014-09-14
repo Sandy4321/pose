@@ -1,12 +1,37 @@
-library(Matrix)
 library(gamlr)
 
+# load("~/project/hockey/data/nhldesign.rda")
+# team <- XT
+# team <- team[,colSums(team^2)!=0]
+# player <- XP
+# config <- XS
+# goal <- goal[,c("whoscored","season","awayteam","hometeam",
+# 				"period","differential","session")]
+# goal$whoscored <- as.numeric(goal$whoscored=="HOME")
+# goal$session <- as.numeric(goal$session=="Playoffs")
+# names(goal) <- c("homegoal","season",
+# 				"team.away","team.home","period",
+# 				"differential","playoffs")
+# rownames(team) <- rownames(config) <- rownames(player) <- rownames(goal) <- NULL
+# save(goal, config, player, team, 
+# 	file="~/packages/gamlr/data/hockey.rda",compress="xz")
+
+## design 
 data(hockey)
-x <- cBind(config,onice)
-y <- as.numeric(goal$who=="HOME")
+x <- cBind(config,team,player)
+for(s in unique(goal$season)){
+	xps <- player*(goal$season==s)
+	colnames(xps) <- paste(colnames(player),s,sep=".")
+	x <- cBind(x,xps)
+	print(s)
+}
+x <- x[,colSums(x^2)!=0]
+dim(x) #  69449 13007
 
+y <- goal$homegoal
+unpen <- 1:(ncol(config)+ncol(team))
 
-
+####### full study
 times <- list()
 models <- list()
 gamma = c(0,10^(-5:5))
@@ -14,11 +39,8 @@ gamma = c(0,10^(-5:5))
 for(v in gamma){
 	cat(sprintf("\n v=%g: \n",v))
 	vt <- system.time( 
-		vf <- gamlr(x=x, y=y, 
-				free=1:ncol(config), thresh=1e-8, 
-				gamma=v, lambda.min.ratio=0.01,
-				family="binomial", 
-				standardize=FALSE) 
+		vf <- gamlr(x, y, gamma=v, tol=1e-8,
+  				free=unpen, verb=0, standardize=FALSE, family="binomial") 
 		) 
 	times <- c(times, list(vt))
 	models <- c(models, list(vf))
@@ -39,9 +61,10 @@ lambda <- models[[1]]$lambda
 nlambda <- length(lambda)
 mbic <- matrix(nrow=100,ncol=L)
 maic <- matrix(nrow=100,ncol=L)
+fill <- function(v) c(v,rep(tail(v,1),100-length(v)))
 for(l in 1:L){
-	mbic[nlambda:1,l] <- BIC(models[[l]]) 
-	maic[nlambda:1,l] <- AIC(models[[l]]) }
+	mbic[nlambda:1,l] <- fill(BIC(models[[l]]))
+	maic[nlambda:1,l] <- fill(AICc(models[[l]])) }
 
 ## and the winner is...
 data(hockey)
@@ -55,13 +78,13 @@ nullaic <-  models[[1]]$dev[1] + 2*(ncol(config)+1)
 
 pdf(file="nhl_time.pdf",width=6,height=3)
 par(xpd=NA,mai=c(1,.8,.4,.1),mfrow=c(1,1))
-plot(v[-1], tm[-1], 
-	xlim=range(v)*c(0.3,1.2), ylim=c(5,45),
+plot(v[2:9], tm[2:9], 
+	xlim=c(min(v)*0.3,100), ylim=c(10,360),
 	log="xy", type="l", lwd=2, 
     xlab="gamma", ylab="seconds",
     bty="n", xaxt="n",yaxt="n")
-axis(1, at=vaxis)
-axis(2,las=2,at=c(5,15,30,45))
+axis(1, at=c(1e-6,1e-4,1e-2,1,1e2))
+axis(2,las=2,at=c(15,30,60,120,360))
 lines(v[1:2],tm[1:2],lty=3, lwd=2)
 points(v[1],tm[1],pch=20)
 text(v[1]*.975,tm[1]*1.01,sprintf("lasso"),pos=3,font=3)
@@ -69,123 +92,99 @@ dev.off()
 
 
 ## selection
-pdf(file="nhl_ic.pdf",width=8,height=2.75)
-par(xpd=NA,mai=c(.7,.7,.4,.1),mfrow=c(1,4))
+pdf(file="nhl_ic.pdf",width=7,height=3)
+par(mfrow=c(1,2),mai=c(.9,.3,.6,0),omi=c(0,.75,0,1.2))
 
-image(log(lambda[nlambda:1]),log(c(v[2]/2,v[-1])),-log(maic),
-		yaxt="n",col=grey(seq(0,1,length=255)^10),
-		ylab="gamma", xlab="log lambda", cex.lab=1.2)
-axis(2,at=log(vaxis),labels=vaxis, las=2)
-text(x=-10, y=max(log(v))+4, 
-	"log AIC: ", font=3, cex=1.2)
-legend(x=-9.25,y=max(log(v))+6,h=TRUE,bty="n",
-	fill=c(0,1),legend=c("lowest","highest"))
-points(log(lambda[which.min(AIC(models[[am]]))]),
-		log(v[am]),pch=4,lwd=1.5,col=3)
+image(log(lambda[nlambda:1]),log(c(v[2]/2,v[2:9])),-log(maic[,1:9]),
+		yaxt="n",col=grey(seq(0,1,length=255)^20),
+		ylab="", xlab="", main="log AICc")
+axis(2,at=log(vaxis),labels=vaxis,las=2)
 
-par(xpd=FALSE)
-plot(v[-1], amins[-1], 
-	xlim=range(v)*c(0.3,1.2), ylim=c(min(amins),nullaic+100),
-	log="x", type="l", lwd=2, cex.lab=1.2, 
-    xlab="gamma", ylab="minimum AIC", 
-    bty="n", xaxt="n")
-axis(1, at=vaxis)
-abline(h=nullaic,lty=2)
-lines(v[1:2],amins[1:2],lty=3, lwd=2)
-points(v[1],amins[1],pch=20)
+image(log(lambda[nlambda:1]),log(c(v[2]/2,v[2:9])),-log(mbic[,1:9]),
+		yaxt="n",col=grey(seq(0,1,length=255)^20),
+		ylab="", xlab="", main="log BIC")
 
 par(xpd=NA)
-
-image(log(lambda[nlambda:1]),log(c(v[2]/2,v[-1])),-log(mbic),
-		yaxt="n",col=grey(seq(0,1,length=255)^10),
-		ylab="gamma", xlab="log lambda", cex.lab=1.2)
-axis(2,at=log(vaxis),labels=vaxis, las=2)
-text(x=-10, y=max(log(v))+4, 
-	"log BIC: ", font=3, cex=1.2)
-legend(x=-9.25,y=max(log(v))+6,h=TRUE,bty="n",
-	fill=c(0,1),legend=c("lowest","highest"))
-points(log(lambda[which.min(BIC(models[[bm]]))]),
-		log(v[bm]),pch=4,lwd=1.5,col=3)
-
-par(xpd=FALSE)
-plot(v[-1], bmins[-1], 
-	xlim=range(v)*c(0.3,1.2), ylim=c(min(bmins),nullbic+100),
-	log="x", type="l", lwd=2, 
-    xlab="gamma", ylab="minimum BIC", cex.lab=1.2, 
-    bty="n", xaxt="n")
-axis(1, at=vaxis)
-abline(h=nullbic,lty=2)
-lines(v[1:2],bmins[1:2],lty=3, lwd=2)
-points(v[1],bmins[1],pch=20)
-
+legend(x=-6.5, y=4, bty="n", fill=c(0,1), legend=c("lowest","highest"))
+mtext(side=1,"log lambda",font=3,cex=1.2,outer=TRUE,line=-1.5)
+mtext(side=2,"gamma",font=3,cex=1.2,outer=TRUE,line=2.5)
 dev.off()
 
-M <- 6:8
-gr=.5
-poscol <- c(rgb(gr,1,gr),rgb(gr,gr,1),"grey70",rep(rgb(1,gr,gr),2))
-
-pdf(file="nhl_paths.pdf",width=7,height=2.5)
-par(mfrow=c(1,3), 
-	mai=c(.4,.4,.3,.1), 
-	omi=c(.2,.2,0,0))
-for(m in M){
-	models[[m]]$lambda <- models[[m]]$lambda
-	plot(models[[m]],xlab="",ylab="", 
-		col=c(rep(0,ncol(config)),poscol[player$pos]), 
-		select=FALSE,df=FALSE,
-		ylim=c(-3,3), bty="n",
-		main=sprintf("gamma = %g",v[m],
-			font.main=1))
-	abline(v=log(models[[m]]$lambda[which.min(BIC(models[[m]]))]),lwd=1.25,lty=2)
-	abline(v=log(models[[m]]$lambda[which.min(AIC(models[[m]]))]),lwd=1.25,lty=2)
+## look at estimated player [career] effects
+gvec <- c(0,1,10)
+for(gamma in gvec){
+	fit <- gamlr(x, y, gamma=gamma, 
+	  free=unpen, standardize=FALSE, family="binomial")
+	plot(fit)
+	
+	B <- coef(fit)[-c(1,unpen+1),]
+	sum(B!=0) # number of measurable effects (AICc selection)
+	B[order(-B)[1:10]] # 10 biggest
+	
+	## grab current player effects
+	now <- goal$season=="20132014"
+	p1314 <- B[grep("20132014",names(B))]
+	names(p1314) <- sub(".20132014","",names(p1314))
+	Bnow <- B[names(B)%in%colnames(player)[
+		colSums(player[now,]^2)!=0]]
+	Bnow[names(p1314)] <- Bnow[names(p1314)]+p1314
+	Bnow[order(-Bnow)[1:10]] # 10 biggest
+	
+	
+	pm <- colSums(player[now,names(Bnow)]) # traditional plus minus
+	ng <- colSums(abs(player[now,names(Bnow)])) # total number of goals
+	# The individual effect on probability that a
+	# given goal is for vs against that player's team
+	p <- 1/(1+exp(-Bnow)) 
+	# multiply ng*p - ng*(1-p) to get expected plus-minus
+	ppm <- ng*(2*p-1)
+	
+	# organize the data together and print top 20
+	effectg <- data.frame(player= names(Bnow),
+	  beta=round(Bnow,2),ppm=round(ppm,1),pm=pm)
+	rownames(effectg) <- NULL
+	effectg <- effectg[order(-effectg$ppm),]
+	cat("\n\ngamma = ",gamma,"number nz = ",sum(Bnow!=0),"\n")
+	print(effectg[1:5,])
+	if(gamma==0) effect <- effectg[1:50,]
+	else effect <- cbind(effect,effectg[1:50,])
 }
-mtext(side=1, "log lambda", 
-	font=3, outer=TRUE, cex=.8)
-mtext(side=2, "coefficient", 
-	font=3, outer=TRUE, cex=.8)
-dev.off()
-
-
+for(j in c(1,5,9)) effect[,j] <- as.character(effect[,j])
+for(i in 1:25){
+	cat(paste(as.character(effect[i,-c(2,6,10)]),collapse=" & "), "\\\\\n") }
 
 
 n <- nrow(x)
-nfold <- 20
+nfold <- 10
 rando <- sample.int(n)
 chunks <- round(seq.int(0,n,length=nfold+1))
 foldid <- rep.int(1:nfold,times=diff(chunks))[rando]
 
-# system("R CMD SHLIB ~/project/packages/gamlr/src/*.c -o gamlr.so")
-# system("rm ~/project/packages/gamlr/src/*.o")
-# dyn.load("gamlr.so")
-# for(f in Sys.glob("~/project/packages/gamlr/R/*.R")) source(f)
-
 cva <- cv.gamlr(x=x, y=y, family="binomial", foldid=foldid, gamma=0,
-	free=1:ncol(config),standardize=FALSE,verb=TRUE)
+	free=unpen,standardize=FALSE,verb=1)
 
 cvb <- cv.gamlr(x=x, y=y, family="binomial", foldid=foldid, gamma=1,
-	free=1:ncol(config),standardize=FALSE,verb=TRUE)
+	free=unpen,standardize=FALSE,verb=1)
 
 cvc <- cv.gamlr(x=x, y=y, family="binomial", foldid=foldid, gamma=10,
-	free=1:ncol(config),standardize=FALSE,verb=TRUE)
+	free=unpen,standardize=FALSE,verb=1)
 
 lambda <- cva$gamlr$lambda
 
 pdf(file="nhl_cv.pdf",width=7,height=2.5)
 par(mfrow=c(1,3), 
 	mai=c(.4,.4,.3,.1), 
-	omi=c(.2,.2,.2,0))
+	omi=c(.2,.2,.2,0.1))
 
-plot(cva)
+plot(cva,xlim=c(-10,-6.75),ylim=c(1.155,1.2))
+legend("topright", lty=c(2,1), col=c(1,"darkorange"),legend=c("CV","AICc"),bty="n")
 mtext("gamma = 0 (lasso)", line=2, cex=.8,font=2)
-abline(v=log(lambda[which.min(AIC(cva$gamlr))]),lty=2,col="darkorange")
-abline(v=log(lambda[which.min(BIC(cva$gamlr))]),lty=2,col="darkorange")
-plot(cvb)
-abline(v=log(lambda[which.min(AIC(cvb$gamlr))]),lty=2,col="darkorange")
-abline(v=log(lambda[which.min(BIC(cva$gamlr))]),lty=2,col="darkorange")
+abline(v=log(lambda[which.min(AICc(cva$gamlr))]),col="darkorange")
+plot(cvb,xlim=c(-10,-6.75),ylim=c(1.155,1.2))
+abline(v=log(lambda[which.min(AICc(cvb$gamlr))]),col="darkorange")
 mtext("gamma = 1", line=2, cex=.8,font=2)
-plot(cvc)
-abline(v=log(lambda[which.min(AIC(cvc$gamlr))]),lty=2,col="darkorange")
-abline(v=log(lambda[which.min(BIC(cva$gamlr))]),lty=2,col="darkorange")
+plot(cvc,xlim=c(-10,-6.75),ylim=c(1.155,1.2))
+abline(v=log(lambda[which.min(AICc(cvc$gamlr))]),col="darkorange")
 mtext("gamma = 10", line=2, cex=.8,font=2)
 mtext(side=1, "log lambda", 
 	font=3, outer=TRUE, cex=.8)
@@ -193,13 +192,3 @@ mtext(side=2, "binomial deviance",
 	font=3, outer=TRUE, cex=.8)
 
 dev.off()
-
-#B <- coef(cva,select="min")
-B <- coef(cva$gamlr,k=2)
-B <- B[-(1:8),]
-length(B <- B[B!=0])
-print(round(B[order(-abs(B))[1:20]],3))
-
-
-save.image(file="nhl.rda",compress="xz")
-

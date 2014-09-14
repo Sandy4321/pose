@@ -102,7 +102,7 @@ colMeans(getit("times",0.5,1))
 ## long format
 
 
-s2n <- 0.5
+s2n <- 1
 rho <- 0.5
 fdrlong <- colMeans(getit("fdrlong",rho=rho,s2n=s2n))/100
 senslong <- colMeans(getit("senslong",rho=rho,s2n=s2n))/100
@@ -122,16 +122,15 @@ legend("right",lwd=2, col=c(1,2,"green"),bty="n",
 	legend=c("irrep.","FDR","sensitivity"))
 dev.off()
 
-rho <- .5
 r2long <- colMeans(getit("r2long",rho=rho,s2n=s2n))
 pdf(file="r2.pdf", width=7, height=2.5)
 par(mfrow=c(1,3), 
 	mai=c(.4,.4,.2,.2), 
 	omi=c(.2,.2,0,0))
 for(mod in c("gl0","gl2","gl10")){
-	cpi <- getit(sprintf("cpineq%s",mod),rho=rho,s2n=s2n)
 	L <- getit(sprintf("L%s",mod),rho=rho,s2n=s2n)
-	if(mod=="gl2" & s2n==1) cpi <- cpi[-c(277,278),]
+	cpi <- getit(sprintf("cpineq%s",mod),rho=rho,s2n=s2n)
+	if(mod=="gl2" & s2n==1 & rho==.5) cpi <- cpi[-c(277,278),]
 	L <- colMeans(L*cpi)
 	lnz <- which(L!=0)
 	plot(lnz,L[lnz]/max(L),lwd=1.5,col="gold", 
