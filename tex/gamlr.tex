@@ -1484,95 +1484,80 @@ concavity offered by a gamma lasso with small $\gamma$.
 \label{nhl}
 
 
-\begin{figure}[htf]
-\begin{center}
-\includegraphics[width=6in]{../graphs/nhl_ic}
-\caption{ \label{nhlic} Hockey example AIC and BIC for 
- 100 $\log(\lambda)$ from -6 to -10.6 in models with  
- $\log_{10}\gamma = -5 \ldots 5$ and lasso $\gamma=0$.  `X' mark the 
- minima on the images, which have lasso on the bottom edge. Line plots show minimum IC across $\gamma$, with a dashed line for null model IC (with $\alpha$ and $\bs{\phi}$ only).
-}
-\end{center}
-\includegraphics[width=6.4in]{../graphs/nhl_cv}
-\caption{\label{nhlcv} Hockey example 20-fold CV: mean OOS deviance $\pm 1$se, with minimum and 1se selection rules marked with black dotted lines.  
-Dashed (orange) lines show AIC and BIC selections. }
-\end{figure}
-
-
-Our next illustration investigates use of logistic regression to evaluate the
-performance of hockey players.  This is an extension of the analysis in
+This example investigates use of logistic regression to evaluate the
+performance of hockey players.  It is an extension of the analysis in
 \cite{gramacy_estimating_2013}.  The current version includes data about who
 was on the ice for every goal in the National Hockey League (NHL) back to the
 2002-2003 season, including playoffs.  The data
 are in the {\tt gamlr} package for {\sf R}; there are
-64540 goals and 2302 players.
+69449 goals and 2439 players.
 
 
-Our `regression plus-minus' model for
-player contribution is then, for goal $i$, 
+The logistic regression model of player contribution is, for goal $i$ in
+season $s$ with away team $a$ and home team $h$,
 \begin{align}\label{hockeymod}
-\mr{logit}\left[\mr{p}(\text{home~team~scored~goal}~i)\right] = \alpha +
-\bm{u}'\bs{\phi} + \bm{x}'\bs{\beta}, 
-\end{align} 
-where $\bm{u}$ is a length-7
-vector of indicators for various special-teams scenarios (e.g., a home team
-power play) and $\bm{x}$ is a vector of player effects: $x_{ij}=1$ if player
-$j$ was on the home team and on ice for goal $i$, $x_{ij}=-1$ for away player
-$j$ on ice for goal $i$, and $x_{ij}=0$ for everyone not on the ice.  
-Thus the $\beta_j$ coefficients in (\ref{hockeymod}) correspond to the 
-effect of an individual player on the log odds that, given a goal has been
-scored, the goal was scored by their team.  This effect is `partial' in that
-it controls for who else was on the ice (and special-teams
-events)\footnote{Since goalies stay
-on-ice for long periods (often entire games) their $\beta_j$  act as a
-control for overall team quality.  Thus a skater (non-goalie) $\beta_j$ only need be
-nonzero if that player is significantly above or below the team average.}, 
-and since $\beta_j$ do not change from season
-to season these are `career effects'.
+\mr{logit}\left[\mr{p}(\text{home~team~scored~goal}~i)\right] = \alpha_0 +
+\alpha_{sh} - \alpha_{sa} + \bm{u}_i'\bs{\phi} + \bm{x}_i'\bs{\beta}_0 +
+\bm{x}_i'\bs{\beta}_s, \end{align}  Vector $\bm{u}_i$ holds indicators for
+various special-teams scenarios (e.g., a home team power play), and
+$\bs{\alpha}$ provides matchup/season specific intercepts. Vector $\bm{x}_i$
+contains player effects: $x_{ij}=1$ if player $j$ was on the home team and on
+ice for goal $i$, $x_{ij}=-1$ for away player $j$ on ice for goal $i$, and
+$x_{ij}=0$ for everyone not on the ice.   Coefficient $\beta_{0j} +
+\beta_{sj}$ is the season-$s$ effect of player $j$ on the log odds that, given
+a goal has been scored, the goal was scored by their team.  These effects are
+`partial' in that they control for who else was on the ice, special teams
+scenarios, and any confounding information  in the team-season fixed effects.
+From a variable selection perspective, a player's $\beta_{0j}$ or $\beta_{sj}$
+only need be nonzero if that player effects play above or below the team
+average for a given season.
 
 We estimate gamma lasso paths of $\bs{\beta}$ for the model in
-(\ref{hockeymod}), with  $\alpha$ and $\bs{\phi}$ left unpenalized, from  
-$\lambda^1\approx \exp[-6]$ set as in (\ref{maxabsgrad}) down to $\lambda^{100} =
-0.01\lambda^1$.  The penalties were {\it not} scaled by covariate standard
-deviation, since this would have favored players with little ice time.  The
-algorithm was run for $\log_{10}\gamma = -5 \ldots 5$, plus the $\gamma=0$
-lasso.\footnote{On this data, $\gamma=\infty$ subset selection yields perfect separation and infinite likelihood.}
-Joint $[\gamma,\lambda]$ surfaces
-for AIC and BIC are in Figure \ref{nhlic}.  The BIC is minimized at higher $\lambda$
-and $\gamma$ ($10$ and $e^{-6.5}$) than the AIC ($1^{-5}$ and $e^{-9.5}$), implying more sparsity but with less bias on
-nonzero $\beta$.  Figure \ref{nhlic} also contains profiles
-of BIC or AIC minima across $\gamma$: values are low for $\gamma \leq 1$,
-but jump dramatically at 10 for the AIC and at 100 for the BIC (this is also the threshold start of higher compute times in Figure \ref{nhltime}).  
-Figure \ref{nhlpaths}
-shows paths on either side of $\gamma=1$, which appears to exist near a stability threshold: $\gamma\leq 1$ paths are smooth but for $\gamma=10$ the estimates jump from zero.
+(\ref{hockeymod}) {\it with  $\bs{\alpha}$ and $\bs{\phi}$ left unpenalized}.
+The `squelch' $\lambda$ ranges from  $\lambda^1\approx \exp[-6.6]$, set as in
+(\ref{maxabsgrad}), down to $\lambda^{100} = 0.01\lambda^1$.  In contrast to
+the default for most analyses, our coefficient costs are {\it not} scaled by
+covariate standard deviation.  Doing the usual standardization would have
+favored players with little ice time.  The algorithm is run for
+$\log_{10}\gamma = -5 \ldots 2$, plus the $\gamma=0$ lasso.\footnote{On this
+data, $\gamma=\infty$ subset selection yields perfect separation and infinite
+likelihood.} 
 
-The low-BIC models for this data are very sparse.  At $\gamma=1$,
-the BIC optimal
-$\log(\lambda)=-6.9$
-yields only 21 players with nonzero $\hat\beta_j$; these stars (all effects are positive) are shown in Figure
-\ref{biceffects}.  This is due in large part to design multicollinearity:
-since hockey players work on lines and are often matched against lines from
-the opposing team, it is tough to isolate the performance of individuals.
-With concave penalties imposing little bias on large signals, a few stars are assigned the
-aggregate effect of their team-mates and common opponents.
-
-The AIC  favors denser models with more bias.  The minimum-AIC lasso
-($\gamma=0$) model identifies 904 nonzero player effects; the 20 largest (in
-absolute value) are in Figure \ref{aiceffects}. Such estimates will be useful
-to hockey analysts who wish to evaluate more than just a few key players.  The
-increased bias also conforms to our prior expectation that single players
-cannot have an overly large effect on the game. Indeed, the 20-fold CV results
-in Figure \ref{nhlcv} support lower $\lambda$:  AIC selections are near the
-minimum OOS deviance, and BIC selections are well to the right of the 1se OOS
-deviance rule.  Comparing these results to those of Section \ref{sim}, where
-the BIC was clearly superior, illustrates that no single model selection rule
-is uniformly best.  Rather, AIC and BIC   provide informal bounds on model
-complexity; use your knowledge of the application-at-hand (and OOS experiments
-if possible) to make a final decision.
+Joint $[\gamma,\lambda]$ surfaces for AICc and BIC are in Figure \ref{nhlic}.
+AICc favors denser models with low $\lambda$ models but not-to-big $\gamma$,
+while the BIC  prefers very sparse but relatively unbiased  models with large
+$\lambda$ and small $\gamma$.  Both criteria are strongly adverse to any model
+at $\gamma=100$, which is also the point at which timings explode in Figure
+\ref{nhltime}.  Cross validation results, using ten folds, are shown in Figure
+\ref{nhlcv} for $\gamma$ of 0, 1, and 10.  The OOS error minima are around the
+same in each case -- average deviance slightly above 1.16 -- but the errors
+increase much faster away from optimality with larger $\gamma$.  The AICc
+selections are also marked.  We see that AICc selection is always between the
+CV minimum-error and 1SE rule selctions:  at $\gamma=0$ AICc matches the CV
+minimum-error rule selection, while at $\gamma=10$ it has moved right to the
+1SE rule selection.  Our heuristic from Section \ref{dof} might 
+over-estimate $df$ for large-$\gamma$ models (especially under this very collinear design), but
+one would also suspect that CV estimates of minimum
+deviance are biased downward more dramatically for larger $\gamma$ than for low-variance
+small-$\gamma$ estimators.
 
 
 
-\begin{table}\footnotesize\setstretch{1}
+\begin{figure}[htb]
+\begin{center}
+\includegraphics[width=6in]{../graphs/nhl_ic}
+\caption{ \label{nhlic} Hockey example AICc and BIC surfaces, rising from white to black.
+}
+\end{center}
+\end{figure}
+
+\begin{figure}[htb]
+\includegraphics[width=6.4in]{../graphs/nhl_cv}
+\caption{\label{nhlcv} Hockey example 10-fold CV: mean OOS deviance $\pm 1$se, with minimum-error and 1SE selection rules marked with black dotted lines, and solid orange line showing AICc selection. }
+\end{figure}
+
+
+\begin{table}[tb]\footnotesize\setstretch{1}
 \makebox[\linewidth]{
 \begin{tabular}{l|lcc|lcc|lcc|}
 \multicolumn{1}{c}{} & \multicolumn{3}{l}{\large \it ~~~lasso} & \multicolumn{3}{l}{\large \it ~~~$\gamma=1$} &  \multicolumn{3}{l}{\large \it ~~~$\gamma=10$}\\
@@ -1599,16 +1584,41 @@ if possible) to make a final decision.
 18 & Mikko Koivu & 13.4 & -4 & Ryan Getzlaf & 12.1 & -34 & Frans Nielsen & 12.5 & -16 \\
 19 & Matt Moulson & 13.4 & 12 & Ryan Nugent & 11.9 & 2 & Marian Gaborik & 12.3 & 5 \\
 20 & David Perron & 13.1 & 2 & Jaromir Jagr & 11.8 & 2 & Zach Parise & 12.2 & -9 \\
-21 & Joe Pavelski & 12.4 & -15 & Joe Pavelski & 11.5 & -15 & Tobias Enstrom & 10.9 & 21 \\
-22 & Jordan Eberle & 12.4 & 9 & Marian Gaborik & 11.4 & 5 & Daniel Alfredsson & 10.7 & -9 \\
-23 & Radim Vrbata & 12.3 & 16 & Zach Parise & 11.2 & -9 & Radim Vrbata & 10.1 & 16 \\
-24 & Jakub Voracek & 12.3 & 12 & Jordan Eberle & 10.8 & 9 & Rick Nash & 9.9 & 16 \\
-25 & Marian Gaborik & 12.1 & 5 & Radim Vrbata & 10.5 & 16 & Vincent Lecavalier & 9.4 & 9 \\
+% 21 & Joe Pavelski & 12.4 & -15 & Joe Pavelski & 11.5 & -15 & Tobias Enstrom & 10.9 & 21 \\
+% 22 & Jordan Eberle & 12.4 & 9 & Marian Gaborik & 11.4 & 5 & Daniel Alfredsson & 10.7 & -9 \\
+% 23 & Radim Vrbata & 12.3 & 16 & Zach Parise & 11.2 & -9 & Radim Vrbata & 10.1 & 16 \\
+% 24 & Jakub Voracek & 12.3 & 12 & Jordan Eberle & 10.8 & 9 & Rick Nash & 9.9 & 16 \\
+% 25 & Marian Gaborik & 12.1 & 5 & Radim Vrbata & 10.5 & 16 & Vincent Lecavalier & 9.4 & 9 \\
 \multicolumn{1}{c}{} & \multicolumn{3}{r|}{} & \multicolumn{3}{r|}{} &  \multicolumn{3}{r|}{}\\
  \multicolumn{1}{c}{} & \multicolumn{3}{r|}{\it 305 nonzero effects} & \multicolumn{3}{r|}{\it 204 nonzero effects} &  \multicolumn{3}{r|}{\it 64 nonzero effects}
 \end{tabular}}
+\caption{\label{nhleffects} Top 20 AICc selected player `partial plus-minus' (PPM) values for the 2013-2014 season, under $\gamma = 0,1,10$.  The number of nonzero player effects for each $\gamma$ are noted along the bottom.}
 \end{table}
 
+The motivating application for this example was to devise a better versions of
+hockey's `plus-minus' (PM) statistic: number of goals for minus against each
+player's team while he is on the ice. To convert from player effects
+$\beta_{0j} + \beta_{sj}$ to the scale of `plus/minus', we first state that in
+absence of any other relevant information about each goal (not team,
+home/away, etc), the probability a goal was scored by his team given player
+$j$ is on ice becomes $p_j = e^{\beta_j}/(1+e^{\beta_j})$ and our `partial
+plus/minus' (PPM) is \[ \mr{ppm}_j = N_j(p_j - (1-p_j)) = N_j(2p_j-1) \] where
+$N_j$ is the total number of goals he was on-ice for.  This measures both quality
+and quantity of contribution for an individual player, controlling for
+confounding information, and it lives on the same scale as classic PM.
+
+Table \ref{nhleffects} contains the estimated PPM values for the 2013-2014
+season under various $\gamma$ levels.  We see that, even if changing concavity
+($\gamma$) has little effect on minimum CV errors, larger $\gamma$  yield more
+sparse models and different conclusions about player contribution. At the
+$\gamma=0$ lasso, there are 305 nonzero player effects (individuals measurably
+different from their team's average ability) and the list includes young
+players who have had very strong starts to their careers.  For example, Ondrej
+Palat and Tyler Toffoli both played their first (near) full seasons in the NHL
+in 2013-2014.  As $\gamma$ increases to 1, these young guys  drop in
+rank while more proven stars (e.g., Sidney Crosby and Jonathan Toews) move
+up the list.  Finally, at $\gamma=10$ only big-name stars remain amongst the
+64 nonzero player effects.
 
 \section{Discussion}
 \label{discussion}
@@ -1671,70 +1681,6 @@ h_j(\bs{\beta}) = \frac{\partial^2 l}{\partial \beta_j^2} = \sum_i
 x_{ij}^2q_i(1-q_i).
 \]
 
-
-% \subsection{Extra Proofs}
-
-% It is
-% straightforward to show that an appropriately weighted $L_1$ penalized
-% deviance estimator will give predictions close to those from any such sparse
-% approximation.  Our results are adapted from those in
-% \citet{van_de_geer_adaptive_2011}.
-
-
-% \begin{prop} Consider the weighted $L_1$ minimization from (\ref{l1pen}) in
-% Algorithm 1, under squared-error loss $l(\hat\alpha,\bs{\hat\beta}) =
-% \frac{1}{2}\|\bm{\hat y} - \bm{f} - \bs{\varepsilon}\|^2$.   Assume weights
-% $\|\bs{\omega}_S\| = c_S\sqrt{s}/2$ and $\omega_j = 1$ $\forall j \in S^c$.
-% Then for $\lambda$ large enough that $\max_j |\bs{x}_j'\bs{\varepsilon}| <
-% n\lambda/4$, with $\bs{x}_j$ the $j^{th}$ design column, 
-% \begin{equation} \frac{\|\bm{\hat y} - \bm{f}\|^2}{2n}\leq
-% \frac{\|\bm{f}_S-\bm{f}\|^2}{n} +  \frac{3\lambda^2 (1+c_S)^2 s}{4\phi^2(2(1+c_S), s)}
-% \end{equation} 
-% where $\phi^2(L,s)$ is the restricted eigenvalue
-% $
-% \phi^2(L,s) = \min_{\{\bm{v}: |\bm{v}_{S^c}| \leq \sqrt{s}L\|\bm{v}_S\|\}}\bm{v}'\bs{\Sigma}\bm{v}
-% $ defined on gram matrix $\bs{\Sigma} = \bm{X}'\bm{X}/n$.
-% \end{prop}
-
-% \begin{proof}
-% This result is a direct adaptation of those in the book by \cite{buhlmann_statistics_2011}.
-
-% \noindent We know that at convergence
-% \[
-% \|\bm{\hat y}-\bm{f}\|^2 - 2\bs{\varepsilon}'\bm{\hat y} + n\lambda\bs{\omega}'|\bs{\hat\beta}| \leq
-% \|\bm{f}_S-\bm{f}\|^2 - 2\bs{\varepsilon}'\bm{f}_S + n\lambda\bs{\omega}_S'|\bs{\beta}_S|.
-% \]
-% By assumption $|\bs{\varepsilon}'\bs{x}_j|\leq n\lambda/4$ $\forall j$, so that $|\bs{\varepsilon}'\bm{\hat y}| = |\bs{\varepsilon}'\bm{X}\bs{\hat\beta}|
-% \leq n\lambda|\bs{\hat\beta}_{S^c}|/4 + |\bs{\varepsilon}'\bm{X}_S\bs{\hat\beta}_S|$ and
-% \begin{align*}
-% \|\bm{\hat y}-\bm{f}\|^2 + \frac{n\lambda}{2}|\bs{\hat\beta}_{S^c}| &\leq 
-% \|\bm{f}_S-\bm{f}\|^2 + |2\bs{\varepsilon}'\bm{X}_S (\bs{\hat\beta}_S - \bs{\beta}_S)| + n\lambda\bs{\omega}_S'|\bs{\hat\beta}_S - \bs{\beta}_S|\\
-% &\leq \|\bm{f}_S-\bm{f}\|^2 + \frac{n\lambda}{2}|\bs{\hat\beta}_S - \bs{\beta}_S| + n\lambda\|\bs{\omega}_S\|\|\bs{\hat\beta}_S - \bs{\beta}_S\|\\
-% &\leq \|\bm{f}_S-\bm{f}\|^2 + \frac{n\lambda\sqrt{s}}{2}\left(1+c_S\right)\|\bs{\hat\beta}_S - \bs{\beta}_S\|
-% \end{align*}
-% where we recall $c_S = 2\|\bs{\omega}_S\|/\sqrt{s}$.
-
-% If $\|\bm{\hat y}-\bm{f}\|^2 + \frac{n\lambda}{2}|\bs{\hat\beta}_{S^c}|\leq2\|\bm{f}_S-\bm{f}\|^2 $ then we are done.  Otherwise,
-% $\|\bm{\hat y}-\bm{f}\|^2 + \frac{n\lambda}{2}|\bs{\hat\beta}_{S^c}| <
-% n\lambda \sqrt{s}\left(1+c_S\right)\|\bs{\hat\beta}_S - \bs{\beta}_S\|$.  By definition of the restricted eigenvalue, this yields $\|\bs{\hat\beta}_S - \bs{\beta}_S\| < 
-% \|\bm{\hat y} - \bm{f}_S\|/[\sqrt{n}\phi(2(1+c_S),S)] < \left[\|\bm{\hat y} - \bm{f}\| + \|\bm{f}_S-\bm{f}\|\right]/[\sqrt{n}\phi(2(1+c_S),S)]$ and thus
-% \begin{align*}
-% \|\bm{\hat y}-\bm{f}\|^2 &\leq \frac{\sqrt{n}\lambda\sqrt{s}(1+c_S)}{\phi(2(1+c_S),S)}
-% \left[\|\bm{\hat y} - \bm{f}\| + \|\bm{f}_S-\bm{f}\|\right] \\
-% &\leq  \|\bm{f}_S-\bm{f}\|^2 + \frac{3n\lambda^2(1+c_S)^2s}{4\phi^2(2(1+c_S),S)} +
-% \frac{\|\bm{\hat y}-\bm{f}\|^2}{2}
-% \end{align*}
-% since $0 \leq 2(\frac{a}{2}-c)^2 + (b-c)^2 = \frac{a^2}{2}+b^2+3c^2-2c(a+b)$ for any $a,b,c$.  
-% \end{proof}
-
-
-% \noindent {\bf Remarks}
-
-% $\bullet$ For $j \in F=\hat S \cup S_\star^c$, the KKT conditions without any assumptions on irrepresentability imply
-% \[
-% 1 = \frac{1+\gamma\beta_j^{t-1}}{n\lambda_t}|\bs{x}_j'(\bm{\hat y} - \bm{f}-\varepsilon)|.
-% \]
-% Thus $n^2\lambda^2|F|^2/\|1+\gamma\beta_F^{t-1}\| < n^2\lambda^2\|\bs{\omega}_F\|$
 
 \subsection{Sign Recovery}
 
