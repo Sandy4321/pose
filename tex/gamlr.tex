@@ -121,12 +121,12 @@ $L_0$ penalized oracle (rather than  some assumed sparse truth), and the
 simulation study of Section \ref{sim} provides an empirical investigation of
 this comparison.
 
-Another central view of this work holds that the GL algorithm and related
+Another central view of this work is that GL and related
 techniques from sparse regularization do not actually {\it do} model
 selection; rather, the paths of estimators corresponding to different levels
 of penalization provide a set of candidates from which one must choose. It is
-essential that these paths are evaluated as a whole, and that are good platforms for model selection. Section
-\ref{stability} is a study of path stability, focusing on its implications for
+essential that these paths are evaluated as a whole, and that they are good platforms for model selection. Section
+\ref{stability} is a study of path stability, focusing on implications for
 algorithm speed and for predictor
 variance.  Section \ref{dof} describes a heuristic for model
 degrees of freedom, and Section \ref{selection} details cross validation and
@@ -207,7 +207,13 @@ a single $\lambda$ from cold-start initialization.
 \subsection{The gamma lasso}
 \label{glsec}
 
-The key behind efficient path estimation -- having $\bs{\hat\beta}^{t-1}$  close to $\bs{\hat\beta}^t$ -- also motivates our gamma lasso.  One way to decrease the penalty on large signals (for diminishing bias) is to use weighted $L_1$ costs $c_j(\beta_j) = \omega_j |\beta_j|$ with $\omega_j>0$ small for large $|\beta_j|$.  In particular,  we specify the penalty weights on $\bs{\hat\beta}^t$ at segment $t$, $\bs{\omega}^t$, as decreasing functions of the previous estimates $\bs{\hat\beta}^{t-1}$.
+The key behind efficient path estimation -- having $\bs{\hat\beta}^{t-1}$
+close to $\bs{\hat\beta}^t$ -- also motivates our gamma lasso.  One way to
+decrease the penalty on large signals (for diminishing bias) is to use
+weighted $L_1$ costs $c_j(\beta_j) = \omega_j |\beta_j|$ with $\omega_j>0$
+small for large $|\beta_j|$.  In particular,  we specify the penalty weights
+on $\bs{\hat\beta}^t$ at segment $t$, $\bs{\omega}^t$, as decreasing functions
+of the previous estimates $\bs{\hat\beta}^{t-1}$.
 
 The gamma lasso in Algorithm \ref{gammalasso}, for `scale' $\gamma \geq 0$,
 yields paths of penalized coefficient estimates $\bs{\hat\beta}^1 \ldots
@@ -236,13 +242,13 @@ l(\alpha,\bs{\beta}) + n\sum_j \lambda^t\omega^t_j|\beta_j| \label{l1pen}\\
 \end{algorithm}}
 
 
-Behavior of the GL paths  is governed by
-$\gamma$, which we refer to as the penalty scale (see Section
-\ref{bayes}).  Under $\gamma=0$ Algorithm \ref{gammalasso} is just the usual lasso. Bias diminishes faster for larger $\gamma$ and, at the  extreme,
+Behavior of the GL paths  is governed by $\gamma$, which we refer to as the
+penalty scale (see Section
+\ref{bayes}).  Under $\gamma=0$ Algorithm \ref{gammalasso} is just the usual lasso.
+ Bias diminishes faster for larger $\gamma$ and, at the  extreme,
 $\gamma=\infty$ yields a subset selection routine where a coefficient is
 unpenalized in all segments after it first becomes nonzero. Figure
-\ref{gamlr_eg} shows solutions in a simple
-problem. 
+\ref{gamlr_eg} shows solutions in a simple problem.
 
 \begin{figure}[hbt]
 \hskip -.2cm\includegraphics[width=6.5in]{../graphs/gamlr_eg}
@@ -288,10 +294,10 @@ maximization under the prior in (\ref{blasso}) is then lasso estimation.  In a
 fully Bayesian analysis, $\lambda$ is assigned a hyperprior and coefficient
 estimates are integrated over its posterior.
 
-Instead of working from shared scale, assume an independent gamma $\mr{Ga}(s,1/\gamma)$
-hyperprior with `shape' $s$ and `scale' $\gamma$ for each $\tau_j$, such that
-$\ds{E}[\tau_j] = s\gamma$ and $\mr{var}(\tau_j) = s\gamma^2$.  Then the
-{\it joint} prior for both coefficient and scale is
+Instead of working from shared scale, assume an independent gamma
+$\mr{Ga}(s,1/\gamma)$ hyperprior with `shape' $s$ and `scale' $\gamma$ for
+each $\tau_j$, such that $\ds{E}[\tau_j] = s\gamma$ and $\mr{var}(\tau_j) =
+s\gamma^2$.  Then the {\it joint} prior for both coefficient and scale is
 \begin{equation}\label{glprior}
 \pi(\beta_j,\tau_j) = \mr{La}\left(\beta_j ;~ \tau_j\right)
 \mr{Ga}\left(\tau_j;~ s,\gamma^{-1}\right) = \frac{ 1}{2\Gamma({s})} 
@@ -305,16 +311,16 @@ posterior mode (MAP) at $\hat\tau_j = \gamma s/(1 + \gamma |\beta_j|)$.
 Write $s = n\lambda/(\gamma\phi)$, such that
 $\ds{E}[\tau_j] = n\lambda/\phi$ and $\mr{var}(\tau_j) =
 \gamma\ds{E}[\tau_j]$. Then the MAP scale estimate is $\hat\tau_j =
-\omega_j(n\lambda/\phi)$ with $\omega_j = (1+\gamma|\beta_j|)^{-1}$,
-and the gamma lasso of Algorithm \ref{gammalasso} appears through a sequence of MAP estimates
- under the joint prior in (\ref{glprior}).  
+\omega_j(n\lambda/\phi)$ with $\omega_j = (1+\gamma|\beta_j|)^{-1}$, and the
+gamma lasso of Algorithm \ref{gammalasso} appears through a sequence of MAP
+estimates under the joint prior in (\ref{glprior}).
 
  \vskip .1cm
 At each $\lambda^t$:
  \begin{itemize}
  \item \vskip -.25cm
-use the most recent coefficient estimate to fix 
- $\hat\tau^t_j = (n\lambda^t/\phi)/(1+\gamma|\beta^{t-1}_j|)$.
+use the most recent coefficient estimate to fix $\hat\tau^t_j =
+ (n\lambda^t/\phi)/(1+\gamma|\beta^{t-1}_j|)$.
  \item\vskip -.25cm
 find $\bs{\hat\beta}^t$ to maximize the posterior under $\mr{La}(\hat\tau^t_j)$
 coefficient priors. 
@@ -323,20 +329,18 @@ coefficient priors.
 \noindent While clearly easier to compute, this sequential `greedy' MAP seems
 a poor cousin to an actual joint MAP estimate
 -- i.e., that which maximizes the posterior for both $\bs{\tau}$ and
-   $\bs{\beta}$. For example, our estimates
-   are  sensitive  to  path step-size: as $\delta \rightarrow 1$
-    GL approaches the joint MAP, and it gets further from this solution as
-   $\delta$ decreases. However, we'll see later that hedging away from joint
-   optimality has useful stabilization effects in addition to making for much
-   faster analysis. 
+   $\bs{\beta}$. For example, our estimates are  sensitive  to  path
+   step-size: as $\delta \rightarrow 1$ GL approaches the joint MAP, and it
+   gets further from this solution as $\delta$ decreases. However, we'll see
+   later that hedging away from joint optimality has useful stabilization
+   effects in addition to making for much faster analysis.
 
 \subsection{Log penalization}
 \label{logpen}
 
-Consider joint MAP estimation of $[\bs{\tau},\bs{\beta}]$ 
-   under the prior in (\ref{glprior}), where we've suppressed $\alpha$ for simplicity.
-By taking negative logs and removing constants, this is equivalent
-to solving
+Consider joint MAP estimation of $[\bs{\tau},\bs{\beta}]$ under the prior in
+   (\ref{glprior}), where we've suppressed $\alpha$ for simplicity. By taking
+   negative logs and removing constants, this is equivalent to solving
 \begin{equation}\label{gljoint}
 \min_{\beta_j\in\ds{R},~\tau_j \in \ds{R}^{+}}~~
 \phi^{-1}l(\bs{\beta}) + \sum_j \left[\tau_j(\gamma^{-1}+|\beta_j|) - s\log(\tau_j)\right].
@@ -366,11 +370,12 @@ to the objective
   \tau(\hat\beta_{j})$ that is lower than its minimum.
 \end{proof}
 
-Cost function  $c(\beta_j) = s\log(1+\gamma|\beta_j|)$, where $s,\gamma>0$, is referred
-to as the log penalty; it is concave with curvature $-s/(\gamma^{-1}+|\beta_j|)^2$ and
-spans the range from $L_0$ ($\gamma\rightarrow \infty$) to $L_1$ ($\gamma\rightarrow 0$)
-costs.  It appears under a variety of parameterizations and names in the
-literature; see \citet{mazumder_sparsenet_2011} and applications in
+Cost function  $c(\beta_j) = s\log(1+\gamma|\beta_j|)$, where $s,\gamma>0$, is
+referred to as the log penalty; it is concave with curvature
+$-s/(\gamma^{-1}+|\beta_j|)^2$ and spans the range from $L_0$
+($\gamma\rightarrow \infty$) to $L_1$ ($\gamma\rightarrow 0$) costs.  It
+appears under a variety of parameterizations and names in the literature; see
+\citet{mazumder_sparsenet_2011} and applications in
 \citet{friedman_fast_2008}, \citet{candes_enhancing_2008},
 \citet{cevher_learning_2009}, \citet{taddy_multinomial_2013} and \citet{armagan_generalized_2013}. 
 The penalty is illustrated in Figure \ref{solution}.
@@ -394,31 +399,26 @@ $\bs{\beta}$ under $\mr{Ga}(s-1,1/\gamma)$ hyperpriors on each $\tau_j$.
 \section{Diminishing bias and concave penalization}
 \label{concave}
 
-The defining distinction between the gamma lasso and the standard lasso is
-that cost gradient for each $\beta_j$ is decreasing as a function of the size
-of its effect  on the likelihood. This occurs algorithmically: if the signal
-is strong enough that $\hat \beta^t_j$ is nonzero at $\lambda_t$,  the penalty
-at segment $t+1$ is deflated by the factor $1/(1+ \gamma|\beta^t_j|)$ at the
-next path segment (see also (\ref{twostep}), the GL two-step thresholding
-operator). Consider the log penalty that occurs as $\lambda^t \rightarrow
-\lambda^{t-1}$. Under our GL parametrization, the log penalty curvature is
-$-n\lambda\gamma/(1+\gamma|\beta_j|)^2$: it is strictly decreasing with
-$|\beta_j|$ and goes to zero as $|\beta_j| \rightarrow \infty$. This can be
-observed in the left panel of Figure \ref{solution}, and larger $\gamma$
-causes the penalty to flatten faster.
+Gamma lasso coefficient penalties decrease with the strength of signal
+associated with each covariate. This occurs algorithmically: if the signal is
+strong enough that $\hat \beta^t_j$ is nonzero at $\lambda_t$,  the penalty at
+segment $t+1$ is deflated by the factor $1/(1+ \gamma|\beta^t_j|)$ at the next
+path segment. Similarly, consider the log penalties of Figure \ref{solution}
+that occur as $\lambda^t
+\rightarrow
+\lambda^{t-1}$, with strictly negative curvature
+$-n\lambda\gamma/(1+\gamma|\beta_j|)^2$. Larger $\gamma$ causes the penalty to
+flatten faster.
 
-This unbiasedness for large signals is the `diminishing bias' property
+This small cost gradient for large signals is the `diminishing bias' property
 discussed in the introduction. It is {\it the} reason why one would use
 concave penalization instead of $L_1$ or convex alternatives.  Theoretically,
-it is a necessary condition for a penalized estimator to have oracle
+it is a necessary condition for oracle
 properties: a class of results showing that coefficient estimates under large
 $n$ will be the same as if you knew which should be zero.
 \citet{fan_variable_2001} introduce the framework, \citet{fan_nonconcave_2004}
 allow $p$ to grow slowly with $n$,  and \citet{armagan_posterior_2013} provide
-results specific to log penalization. Oracle properties tend to make strong
-assumptions about near-sparsity of true $\bs{\beta}$, but they form a popular
-approximation framework for evaluating   high-dimensional estimators and have
-motivated an explosion of interest in concave penalties over the past decade.
+results specific to log penalization. 
 
 There is good reason to seek diminishing bias even
 if you think it impossible to recover true support or if you don't believe the
@@ -431,134 +431,140 @@ tend to yield lower false discovery rates -- fewer of the nonzero coefficients w
 be spurious with respect to a theoretically optimal $L_0$ oracle.
 
 The remainder of this section will survey the literature on concave penalty
-estimation, with a focus on implementations of these ideas and their relationship to weighted $L_1$ penalization.
+estimation, with a focus on implementations of these ideas and their
+relationship to weighted $L_1$ penalization.
 
 \begin{figure}[tbh]
-\vskip -.25cm
+%\vskip -.25cm
 \includegraphics[width=6.4in]{../graphs/solution}
 \caption{\label{solution} Log penalties $c(\beta) = s\log(1 + \gamma|\beta|)$ 
 and penalized objectives $(\beta-B)^2 + c(\beta)$.}
 \end{figure}
 
-
 \subsection{Concave cost functions and their implementation}
 \label{concavecosts}
 
-The log cost function is a simple concave penalty.  Another  straightforward
-option is the bridge of \cite{frank_statistical_1993}, where $c_j(\beta_j) =
+Log cost is a simple concave penalty.  Another  straightforward option is the
+bridge of \cite{frank_statistical_1993}, where $c_j(\beta_j) =
 |\bs{\beta}_1|^{q}$ for $q \in (0,1)$.  However, both of these penalties can
-lead to discontinuous solution paths:  e.g., consider how the minimizer of the solid line 
-of the right panel in Figure \ref{solution} will jump from 0 to
-3.5 depending upon small jitter to $B$. \cite{fan_variable_2001} devised their
-SCAD penalty as an alternative concave cost function that avoids such solution
-discontinuity while retaining the desirable diminishing bias of log and bridge
-penalization.  The MCP penalty of \citet{zhang_nearly_2010} is another popular
-concave cost function that avoids discontinuity. Both SCAD and MCP are {\it
+lead to discontinuous solution paths:  e.g., the minimizer of the solid line
+of the right panel in Figure \ref{solution} will jump from 0 to 3.5 depending
+upon small jitter to $B$. The SCAD penalty of \cite{fan_variable_2001} and the
+MCP of \citet{zhang_nearly_2010} are concave cost functions that avoid
+solution discontinuity while retaining diminishing bias. Both are popular {\it
 folded concave penalties}
-\citep{fan_strong_2014}:
-piecewise functions specifically constructed to satisfy oracle
+\citep[e.g.][]{fan_strong_2014}: piecewise functions constructed to satisfy oracle
  requirements.
 
-Many solvers have been contributed to accompany the literature on concave
+Much software has been contributed to accompany the literature on concave
 regularization. SCAD and MCP penalties are implemented  in the {\tt ncvreg}
-{\sf R} package \citep{breheny_coordinate_2011}, and this appears to be a
-commonly used software for these methods. Unfortunately, the solvers require
+{\sf R} package \citep{breheny_coordinate_2011}. Unfortunately, the solvers require
 much more compute time than, e.g., a standard lasso.  A single run of SCAD via
 {\tt ncvreg} for the simulation in Section \ref{sim} requires around 10
-minutes, limiting the technology to small data analysis problems. This slowness is due to the difficulty of concave minimization:
-despite the solution-continuity property SCAD and MCP, their penalized
-objective surfaces can be concave and contain multiple minor modes. Finding
-global, or even good local, minima in concave functions is an extremely tough
-task.  Similarly,
-\cite{taddy_multinomial_2013} estimates log penalized objectives through a series
-of quadratic approximations, but the method prohibitively expensive for $p$ and $n$
-above a few thousand.
+minutes, limiting the technology to small data analysis problems. This
+slowness is due to the difficulty of concave minimization: despite the
+solution-continuity property SCAD and MCP, their penalized objective surfaces
+can be concave and contain multiple minor modes. Finding global, or even good
+local, minima in concave functions is an extremely tough task.  
 
 One approach that manages to quickly find good solutions under concave
-penalization is the SparseNet framework of \citet{mazumder_sparsenet_2011}, a
-fast class of coordinate descent routines for generic concave penalized path
-estimation. Their algorithm uses coordinate descent to first fit a lasso path
-and, for each $\lambda$ on this path, adapts coefficient estimates along a
-second grid of increasing concavity specifications (analogous to increasing
-values of our $\gamma$). The authors show that moving through a grid of both
-$\lambda$ and $\gamma$ in this way helps to avoid minor modes and leads to
-faster convergence. An implementation of the MCP penalty is in the {\tt
-sparsenet} package for {\sf R}, and it is the best  software we've
-found for folded concave penalization. Indeed,  runtimes for {\tt sparsenet} and
-roughly equivalent loops of {\tt gamlr} over multiple $\gamma$ are similar.
-The (significant) advantage of {\tt gamlr} is that each different $\gamma$
-specification can be run in parallel, while {\tt sparsenet} is inherently serial over
-both $\gamma$ and $\lambda$ sequences.
+penalization is the SparseNet of \citet{mazumder_sparsenet_2011}. Their
+algorithm first fits a lasso path and, for each $\lambda$ on this path, adapts
+coefficient estimates along a second grid of increasing concavity
+specifications (analogous to increasing values of our $\gamma$). The authors
+show that moving through a grid of both $\lambda$ and $\gamma$ in this way
+helps to avoid minor modes and leads to faster convergence. An implementation
+for the MCP penalty is in the {\tt sparsenet} package for {\sf R}, and it is
+the best  software we've found for folded concave penalization. Indeed,
+runtimes for {\tt sparsenet} and roughly equivalent loops of {\tt gamlr} over
+multiple $\gamma$ are similar. The (significant) advantage of {\tt gamlr} is
+that each different $\gamma$ specification can be run in parallel, while {\tt
+sparsenet} is inherently serial over both $\gamma$ and $\lambda$ sequences.
 
 
-\subsection{Local linear approximation and one-step estimators}
+\subsection{Concave penalization and weighted $L_1$ costs}
 \label{lla}
 
 Another relatively fast class of solvers for concave penalized estimators use
-local linear approximation \cite[LLA; e.g.,][]{candes_enhancing_2008}.
+local linear approximation \cite[LLA; e.g.,][]{candes_enhancing_2008}. LLA
+replaces the concave cost function $c_j$ in a penalized deviance with its
+tangent at the current estimate, $c_j'(\hat\beta_j)\beta_j$.  The approximate
+objective is then just a weighted $L_1$ penalized loss (solvable by, say, the
+CD of Section \ref{implement}), and one iterates between updating
+$c'(\hat\beta)$ and solving the implied $L_1$ penalized minimization problem.
+For example, LLA under the log penalty parametrized as in Section \ref{bayes}
+has $c'(\beta) = s \gamma / (1 + \gamma |\beta|) = n\lambda/(1 + \gamma
+|\beta|)$, exactly our gamma lasso cost in \ref{l1pen}.
 
-They also argue that this tends to obtain lower local
-minima than will be found using common linear approximation tools
-, although Section \ref{lla} details how
-striving for the best possible minimum is often not worth the effort.  
 
- Weighted $L_1$ minimization only ever attempts to solve convex
-optimization problems along the path, so convergence to minor modes and slow-to-solve concave objectives are non-issues.  In any case, it seems reasonable to
-not worry too much about global solutions under a fixed penalty when
-the optimal specification of that penalty is itself unknown:  properties of the
-entire path (e.g. stability) are more important than a single point being
-optimal under a fixed specification. 
-
-A local linear approximation replaces the concave cost function $c$ in a
-penalized deviance with its tangent at the current estimate,
-$c'(\hat\beta)\beta$.  The approximate objective is then  a standard lasso
-(solvable by, say, the CD of Section \ref{implement}), and one iterates
-between updating $c'(\hat\beta)$ and solving the implied $L_1$ penalized
-minimization problem. \citet{candes_enhancing_2008} apply LLA to the log
-penalty, in which case $c'(\beta) = s \gamma / (1 + \gamma |\beta|)$.  The
-method  is simple and locally convergent, but  it is especially sensitive to
-initial starting location.  Consider approximating the log penalized
-objectives of Figure \ref{solution} with LLA $l(\beta) + c'(0)|\beta|$:  the
-approximation will minimize at $\beta=0$  until $|l'(\beta)| > c'(0)$, even
-when the true objective $\beta\neq 0 $ local minimum is much lower. Thus in a
-path estimation algorithm, LLA sticks at zero until it jumps all the way out
-to near the MLE.
+The LLA method  is simple and locally convergent, but  it can be
+sensitive to initial starting location.  Consider approximating the log
+penalized objectives of Figure \ref{solution} with LLA $l(\beta) +
+c'(0)|\beta|$:  the approximation will minimize at $\beta=0$  until
+$|l'(\beta)| > c'(0)$, even when the true objective $\beta\neq 0 $ local
+minimum is much lower. Thus in a path estimation algorithm, LLA sticks at zero
+until it jumps all the way out to near the MLE.
 
 Despite this issue, \citet{zou_one-step_2008} present numerical and
-theoretical evidence that simple LLA does well in practice. For us, the
-relevant contribution of Zou and Li is their one-step implementation of LLA
-and its analysis: each GL path segment executes a version of this one-step LLA
-algorithm. One-step estimation is a general technique
-\citep[e.g.,][]{bickel_one-step_1975} which amounts to taking as your estimator
-the first step of an iterative approximation to some objective function.   In
-general, one-step estimators are usually accompanied by results claiming that
-they can be `as good' asymptotically as the full-step solution {\it if} the
-initial estimates are `good enough'.  Since the efficiency of regularization
-paths depends upon segment solutions being good starts for the next segment,
-they form a natural setting for such techniques.
+theoretical evidence that simple LLA does well in practice. Importantly, they
+show that LLA does well even (or especially!) if you {\it stop it after one
+iteration}. This is an example of one-step estimation (OSE), a general
+technique inspired by \cite{bickel_one-step_1975} that amounts to taking as
+your estimator the first step of an iterative approximation to some objective.
+Applications are usually accompanied by results claiming that they can be `as
+good' asymptotically as the full-step solution {\it if} the initial estimates
+are `good enough'.  
+OSE and similar ideas have had a resurgence in the concave penalization
+literature recently, motivated by the need for faster estimation algorithms.
+Indeed, in OSE LLA you end up with simple convex weighted $L_1$ minimization.
+Zou and Li also argue that OSE yields more stable estimates, with a result
+that parallels our simple statement in Section \ref{stability}: one-step LLA
+solutions are continuous if and only if $c'(\beta)$ is continuous for
+$|\beta|>0$, regardless of whether solutions would be continuous for the
+approximated objective.  
 
-In the context of LLA for the log penalty, one-step estimation implies solving
-$\bs{\hat\beta}$ to minimize deviance under  penalties $\lambda|\beta_j|/(1 +
-\gamma \hat\beta_j^0)$, where $\bs{\hat\beta}^0$ are some initial estimates of
-the coefficients.  For Zou and Li, $\bs{\beta}^0$ is set to the
-MLE (or left unspecified), whereas in  the gamma lasso we set it to the
-previous path segment's estimate. The theoretical framework of one-step
-estimation, and results from  Zou and Li in particular, apply
-directly to our GL estimator (note that the adaptive lasso of
-\citet{zou_adaptive_2006} can also be cast as a one-step LLA). This includes
-oracle properties if the regularization parameter is appropriately chosen. The
-Zou and Li result on continuity is  more general than our
-simple statement in Section \ref{stability}:  one-step LLA is continuous if
-and only if $c'(\beta)$ is continuous for $|\beta|>0$.  
+\cite{fan_strong_2014} consider early-stopping of LLA
+for folded concave penalization (e.g., SCAD) and provide finite sample results
+showing that, under strong sparsity assumptions about true $\bs{\beta}$ and
+given appropriate initial values, OSE LLA is consistent to an oracle estimator
+and after two steps the solution will have converged.   Work by Zhang
+(2010,2013)
+\nocite{zhang_analysis_2010,zhang_multi-stage_2013} investigates  
+`convex relaxation' iterations, where estimates from an earlier convex
+regularized objectives as the basis for weights in a subsequent objective
+function.  He shows that just one or two steps here is sufficient for
+obtaining oracle support recovery properties under much weaker conditions than
+required by a standard lasso.  \cite{wang_calibrating_2013} propose a two step
+algorithm that feeds lasso coefficients into a linear approximation to folded
+concave penalization.  They derive properties of entire regularization paths
+(e.g., guarantees that an oracle estimator is {\it on the path}) and construct
+a version of the BIC for selection along these paths.
 
 
-Most authors looking at weighted $L_1$ estimation start from more complex models to derive the penalty weights -- in our context, use $\bs{\beta}^0$ for $\lambda_0$ to define weights at $\lambda_1 \geq \lambda_0$.  This approach seems to have developed because, with the exception of marginal regression-based weights, it easier to derive oracle inequalities for this `backwards' rather than our `forwards' algorithm.  
-We're not certain that, e.g., support recovery has lower probability under the forward rather than backward algorithm.  However, we don't doubt this to be the case, and it would be another example of the stability vs selection trade-off.
+If one uses a one-step LLA estimator, or a two-step estimator starting from
+$\bs{\hat\beta}=0$ as suggested in \cite{fan_strong_2014} and
+\cite{wang_calibrating_2013}, the result {\it is just weighted $L_1$
+minimization}. Thus OSE methods are very closely related to versions of the
+adaptive lasso \citep{zou_adaptive_2006}, which does weighted $L_1$
+minimization under weights like $\omega_j = 1/|\hat\beta^0_j|$, where
+$\hat\beta^0_j$ is an initial guess at the coefficient value.  The original paper
+advocates using MLE estimates for initial values, while
+\cite{huang_adaptive_2008} suggest using marginal regression coefficients as
+initial values and show that this can provide oracle properties in the  $p>n$
+setting (we include such marginal adaptive lasso in the simulation study of
+Section \ref{sim}).  Like the gamma lasso, the adaptive lasso provides
+diminishing bias penalization without solving for an explicit concave penalty.
 
-
-
-
-
+Of course our gamma lasso algorithm is again just a scheme for weighted $L_1$
+minimization.  Each GL segment is a one-step estimator under log penalization,
+starting the estimates from the previous path segment.  And since path
+estimation relies on $\bs{\hat\beta}^{t-1}$ being close to
+$\bs{\hat\beta}^{t}$, it seems a natural partner for OSE. In any case, all of
+these methods -- GL, LLA OSE, adaptive lassos -- differ only in how the
+weights are constructed.  Thus, regardless of which method you prefer,
+weighted $L_1$ penalties are likely to play a central role in diminishing bias
+penalization if you are working with applications too large for use of exact
+concave penalty solvers.
 
 \section{Comparison to $L_0$ penalized optimization}
 \label{theory}
@@ -1321,9 +1327,9 @@ BIC & 0.01 $\mid$ 0.00 & 0.00 $\mid$ 0.00 & 0.00 $\mid$ 0.00 & 0.08 $\mid$ 0.01 
 \vspace{-1cm}
 \end{table}
 
-On an Intel Xeon E5-2670 processor, average time for 5-fold CV with $\mr{sd}(\bm{\mu})/\sigma=1$ and $\rho=1/2$ was around 2 seconds for lasso and marginal regression AL, 3 and 4 seconds for GL with $\gamma=2$ and $\gamma=10$ respectively, and 15-20 seconds for Sparsenet. Sparsenet computation is comparable to a set of {\tt gamlr} runs over a grid of 9 $\gamma$ values.  However, as a path following algorithm and unlike {\tt gamlr}, sparsenet cannot run in parallel over the $\gamma$ grid.  \footnote{As mentioned earlier, {\tt scvreg} SCAD takes ten minutes for a single run and is thus impractical for the applications under consideration.  But, in a small study, we found that the CV.min selected SCAD performs quite well in prediction --  similarly to the best CV.min methods for each data configuration -- with relatively high values for both false discovery and sensitivity. }
+On an Intel Xeon E5-2670 processor, average time for 5-fold CV with $\mr{sd}(\bm{\mu})/\sigma=1$ and $\rho=1/2$ was around 2 seconds for lasso and marginal regression AL, 3 and 4 seconds for GL with $\gamma=2$ and $\gamma=10$ respectively, and 15-20 seconds for Sparsenet. Sparsenet computation is comparable to a set of {\tt gamlr} runs over a grid of 9 $\gamma$ values.  However, as a path following algorithm and unlike {\tt gamlr}, sparsenet cannot run in parallel over the $\gamma$ grid.  \footnote{As mentioned earlier, {\tt ncvreg} SCAD takes ten minutes for a single run and is thus impractical for the applications under consideration.  But, in a small study, we found that the CV.min selected SCAD performs quite well in prediction --  similarly to the best CV.min methods for each data configuration -- with relatively high values for both false discovery and sensitivity. }
 
-Marginal regression coefficient estimates are often \citep[e.g.,][]{huang_adaptive_2008} suggested as weights for an adaptive lasso in the $p>n$ setting.  Indeed, since marginal correlations tend to have a lower sampling variance than conditional coefficients, this strategy should yield lower variance weights and stable estimation when compared to more complicated weighting schemes.  Our simulation study investigates marginal-correlation-based adaptive lasso.
+ Indeed, since marginal correlations tend to have a lower sampling variance than conditional coefficients, this strategy should yield lower variance weights and stable estimation when compared to more complicated weighting schemes.  Our simulation study investigates marginal-correlation-based adaptive lasso.
 
 Our first example uses data simulated independently from the following
 $p$-covariate regression.
@@ -1558,34 +1564,34 @@ up the list.  Finally, at $\gamma=10$ only big-name stars remain amongst the
 \section{Discussion}
 \label{discussion}
 
- We have found the gamma lasso
-algorithm to be  useful and effective in application.  
-Despite an abundance of theoretical and  empirical evidence showing that
-concave penalties are superior to $L_1$ costs (for example,
-see the references in Section \ref{lla}), our experience is that it is tough to do
-{\it much} better than the simple lasso.  And it is easy to do worse.  The stable and fast gamma lasso algorithm provides an appealing middle
-ground.
+Diminishing bias estimation in Big Data, where exact concave solvers are too
+computationally expensive, reduces largely to weighted $L_1$ penalization.
+This review has covered a number of topics that we think relevant for any
+$L_1$ weighting scheme: relationship to a Bayesian model, theoretical distance
+to $L_0$ minimization, and stability, degrees of freedom, and estimates of
+predictive performance along entire regularization paths. We have described a
+world where model selection is considered throughout construction of candidate
+models, not an afterthought, and where one seeks sparse representations even
+for non-sparse truth.
+ 
+Apart from the simulation study, we have not performed extensive
+comparison on properties of the many available weighting mechanisms. Although
+our gamma lasso performs as well as or better than adaptive lasso and MCP penalized
+alternatives in simulation, we are not arguing that its path-based weights are
+theoretically optimal. For example,
+\citep{van_de_geer_adaptive_2011} argue for weights based on estimates under a
+lower (smaller $\lambda$) $L_1$ penalty than will be used in the final
+weighted objective.  This will be computationally more expensive (because you
+can't use already fitted models as inputs to the weight function) and probably
+lead to higher variance estimation (because coefficient estimates under lower
+penalty will have higher variance), but we are happy to believe that it can
+lead to better support recovery properties.
 
-Despite our advocacy of the GL algorithm, this article was designed to be more of a review than an outline of new methods.  Our discussion finds that
-the GL is very closely related to many different techniques in the dense
-literature on concave regularization: it approximates MAP estimation of a
-Bayesian model, or deviance minimization under log penalties, and is really
-`just' a pathwise implementation of one-step LLA (or the adaptive lasso). A
-central point of our review is that it is important to understand 
-the entire regularization path (especially its continuity). This is especially
-true under concave penalties, where due to multi-modality the solutions depend
-(through hot-starts) on the route the path takes.  The point is made even
-more explicit in GL estimation, where the size of the gap $\lambda^{t-1} -
-\lambda^{t}$ changes the solution at $\lambda^t$.
-
-Finally, any regularization path algorithm merely builds a set of candidate
-models. Selection amongst these models is an essential extra step.  In our
-case, we are selecting the `stopping point' $t$ and corresponding
-$\bs{\hat\beta}^t$. Heuristic degrees of freedom for GL paths, and
-resulting AIC/BIC metrics,  allow such selection through an intuitive
-extension of lasso methods. CV is great, and easiest to
-explain to non-statisticians, but it nice to have a fast analytic alternative.
-
+The gamma lasso does have the advantage that using the regularization path to
+supply penalty weights is computationally efficient. To scale for truly Big
+Data, $L_1$ weights need be constructed at practically no cost on top of a
+standard lasso run. Beyond {\tt gamlr} and marginal regression adaptive lasso,
+we have found no other software for which this standard is met.
 
 \appendix
 \vskip 1cm
