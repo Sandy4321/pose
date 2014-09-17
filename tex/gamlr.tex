@@ -74,9 +74,9 @@ range of concavity between $L_0$ and $L_1$ norms.  The `gamma lasso' heuristic
 does $L_1$ (lasso) penalized regression estimation on a grid of decreasing
 penalties, but adapts coefficient-specific weights to decrease as a function
 of the estimated coefficient in the previous path segment.  This  simple
-recipe is used to review the literature on concave penalty regularization,
+recipe is used to review the literature on diminishing bias penalty regularization,
 emphasizing connections to weighted $L_1$ penalties, the role of regularization paths and model selection, and the distance from a weighted lasso
-solution to optimal $L_0$ penalized estimation. The work is illustrated in
+solution to an $L_0$ penalized oracle. The work is illustrated in
 extensive linear regression simulations and in application of logistic
 regression to evaluate the performance of hockey players.}
  
@@ -94,8 +94,7 @@ through a penalty on coefficient size.   This article introduces a very fast
 algorithm, the {\it gamma lasso}, for $L_1$ penalty regularization with a
 data-dependent weight on the cost of each coefficient. The algorithm  serves
 as a basis for exploring the world of sparse {\it diminishing bias}
-regularization, where penalties are spiked at zero (so the solution can be
-sparse) but have costs diminish so as to remove bias from estimation of large
+regularization, where penalties are spiked at zero  but have costs diminish so as to remove bias from estimation of large
 signals.
 
 We begin with the notation and general framework of regularization path
@@ -114,24 +113,24 @@ compression  perspective -- e.g., in Big Data settings such as
 \cite{taddy_distributed_2013}, where many sets of results need to be quickly
 communicated across multiple machines -- or from a desire to minimize
 complexity  and focus decision making, which we've observed repeatedly in
-business and economic collaborations.   Thus Section \ref{theory} presents a
-set of novel results on the distance between weighted $L_1$ estimation and an $L_0$ penalized oracle solution (rather than  some assumed
-sparse truth), and the simulation study of Section \ref{sim} provides an
-empirical investigation of this comparison.
-
+business and economic collaborations.   In these cases, diminishing bias
+penalization is employed to get fits that are {\it as sparse as possible}
+while still being useful for prediction. Section \ref{theory} presents a set
+of novel results on the distance between weighted $L_1$ estimation and an
+$L_0$ penalized oracle (rather than  some assumed sparse truth), and the
+simulation study of Section \ref{sim} provides an empirical investigation of
+this comparison.
 
 Another central view of this work holds that the GL algorithm and related
 techniques from sparse regularization do not actually {\it do} model
 selection; rather, the paths of estimators corresponding to different levels
 of penalization provide a set of candidates from which one must choose. It is
-essential that these paths are evaluated as a whole, and that they have
-properties to make them good platforms for model selection. Section
+essential that these paths are evaluated as a whole, and that are good platforms for model selection. Section
 \ref{stability} is a study of path stability, focusing on its implications for
-algorithm speed (so that entire paths are easy to obtain) and for predictor
-variance under jitter in $\bm{y}$ (so that we have good tools for model
-selection).  Section \ref{dof} describes a heuristic for model
+algorithm speed and for predictor
+variance.  Section \ref{dof} describes a heuristic for model
 degrees of freedom, and Section \ref{selection} details cross validation and
-information criteria as tools available for model selection whenever the paths are stable.
+information criteria as tools for model selection.
 
 Finally, the application of Section \ref{nhl} explores all of these ideas in a messy high-dimensional inference problem: given all goals in the past decade of NHL hockey, and information about who was on the ice, what can we say about individual player contributions?  We'll explore how the various path regularization and model selection tools lead to different conclusions, ranging from a world where rookies are among the best in the league and another where only established stars have any measurable effect.
 
@@ -158,6 +157,7 @@ where $\lambda>0$ controls overall penalty magnitude and are $c_j()$ are coeffic
 
 \begin{figure}[htb]
 \includegraphics[width=6.25in]{../graphs/penalties}
+\vskip -.5cm
 \caption{\label{costs} Some cost functions commonly used in penalized estimation.  
 From left to right, 
 $L_2$ \citep[ridge,][]{hoerl_ridge_1970}, $L_1$ \citep[lasso,][]{tibshirani_regression_1996}, the `elastic net' mixture of $L_1$ and $L_2$ \citep{zou_regularization_2005}, and the log penalty \citep{candes_enhancing_2008}.
@@ -173,22 +173,21 @@ penalty has zero curvature and imposes constant shrinkage, and as curvature
 goes towards $-\infty$ one approaches the $L_0$ penalty of subset selection.
 In this article we are primarily interested in {\it concave} cost functions,
 like the log penalty, which span the range between $L_1$ and $L_0$ penalties.
-These penalties provide the property of diminishing bias: the cost of
-increasing $|\hat\beta|$ decreases with magnitude, such that large signals are
-estimated with less shrinkage.
+% These penalties provide the property of diminishing bias: the cost of
+% increasing $|\hat\beta|$ decreases with magnitude, such that large signals are
+% estimated with less shrinkage.
 
 The penalty size, $\lambda$, acts as a {\it squelch}: it suppresses noise to
-focus on the true input signal. Large $\lambda$ lead to very simple and sparse
+focus on the true input signal. Large $\lambda$ lead to very simple 
 model estimates, while as $\lambda \rightarrow 0$ we approach maximum
-likelihood estimation (MLE). Since you don't know optimal $\lambda$ a priori,
+likelihood estimation (MLE). Since you don't know optimal $\lambda$,
 practical application of penalized estimation requires a {\it regularization
 path}: a $p \times T$ field of $\bs{\hat\beta}$ estimates obtained while
 moving from high to low penalization along $\lambda^1 > \lambda^2 \ldots >
 \lambda^T$ \citep[e.g., LARS in][is a well known example]{efron_least_2004}.
 These paths begin at $\lambda^1$ set to infimum $\lambda$ such that
 (\ref{pendev}) is minimized at $\bs{\hat\beta} = \bm{0}$ (see Appendix
-\ref{models}), and proceed as $\lambda^t = \delta \lambda^{t-1}$ for $\delta
-\in (0,1)$ down to some pre-specified $\lambda^T$ (e.g., $\lambda^T=
+\ref{models}), and proceed down to some pre-specified $\lambda^T$ (e.g., $\lambda^T=
 0.01\lambda^1$).
 
 Given a regularization path, the selection problem is to choose $\lambda$
@@ -208,7 +207,7 @@ a single $\lambda$ from cold-start initialization.
 \subsection{The gamma lasso}
 \label{glsec}
 
-The key behind efficient path estimation -- that $\bs{\beta}^{t-1}$ is close to $\bs{\beta}^t$ -- also motivates our gamma lasso.  One way to decrease the penalty on large signals (for diminishing bias) is to use weighted $L_1$ costs $c_j(\beta_j) = \omega_j |\beta_j|$ with $\omega_j$ small for large $|\beta_j|$.  In particular,  we specify the penalty weights on $\bs{\hat\beta}^t$ at segment $t$, $\bs{\omega}^t$, as decreasing functions of the previous estimates $\bs{\hat\beta}^{t-1}$.
+The key behind efficient path estimation -- having $\bs{\hat\beta}^{t-1}$  close to $\bs{\hat\beta}^t$ -- also motivates our gamma lasso.  One way to decrease the penalty on large signals (for diminishing bias) is to use weighted $L_1$ costs $c_j(\beta_j) = \omega_j |\beta_j|$ with $\omega_j>0$ small for large $|\beta_j|$.  In particular,  we specify the penalty weights on $\bs{\hat\beta}^t$ at segment $t$, $\bs{\omega}^t$, as decreasing functions of the previous estimates $\bs{\hat\beta}^{t-1}$.
 
 The gamma lasso in Algorithm \ref{gammalasso}, for `scale' $\gamma \geq 0$,
 yields paths of penalized coefficient estimates $\bs{\hat\beta}^1 \ldots
@@ -217,10 +216,10 @@ corresponding to $L_1$ penalties $\lambda^1 > \lambda^2 \ldots > \lambda^T$
 multiplied against adaptive coefficient-specific weight adjustments
 $\bs{\omega}^1 \ldots \bs{\omega}^T$.
 
-\vskip .25cm
+{\sgl
 \begin{algorithm}[ht]
 \caption{\label{gammalasso} The gamma lasso }
-\vskip .25cm
+\vskip .2cm
 Initialize $\bs{\omega}^1 = \bf{1}$ and $\lambda^1 >
 0$ with step size
 $0 < \delta < 1$.
@@ -233,21 +232,19 @@ l(\alpha,\bs{\beta}) + n\sum_j \lambda^t\omega^t_j|\beta_j| \label{l1pen}\\
 \omega^{t+1}_j  &= \left(1 + \gamma |\hat\beta^t_j|\right)^{-1} ~~j=1\ldots p \label{adjweight}\\
 \lambda^{t+1} &= \delta \lambda^t\notag
 \end{align}
-\end{algorithm}
+\vskip -.3cm
+\end{algorithm}}
 
 
-Behavior of the GL paths along a given $\bs{\lambda}$ sequence is governed by
+Behavior of the GL paths  is governed by
 $\gamma$, which we refer to as the penalty scale (see Section
-\ref{bayes}).  Under $\gamma=0$ the weights are $\omega_j^t = 1$ for all $j,t$
-and Algorithm \ref{gammalasso} is just the usual lasso.  At the other extreme,
+\ref{bayes}).  Under $\gamma=0$ Algorithm \ref{gammalasso} is just the usual lasso. Bias diminishes faster for larger $\gamma$ and, at the  extreme,
 $\gamma=\infty$ yields a subset selection routine where a coefficient is
 unpenalized in all segments after it first becomes nonzero. Figure
-\ref{gamlr_eg} shows solutions as a function of $\lambda^t$ in a simple
-problem. Moving from the lasso ($\gamma=0$) to faster diminishing bias (larger
-$\gamma$), we get see that $\bs{\hat\beta}$ moves more quickly as a function of $\lambda$.
+\ref{gamlr_eg} shows solutions in a simple
+problem. 
 
 \begin{figure}[hbt]
-\vskip .25cm
 \hskip -.2cm\includegraphics[width=6.5in]{../graphs/gamlr_eg}
 \vskip -.25cm
 \caption{\label{gamlr_eg} Gamma lasso estimation on $n=10^3$ 
@@ -261,6 +258,17 @@ BIC selected models (see Sections \ref{dof}-\ref{selection}).}
 \vskip -.25cm
 \end{figure}
 
+
+\subsection{Implementation}
+
+Each  gamma lasso path segment is solved through coordinate descent,
+as detailed in Appendix \ref{implement}.  The algorithm is implemented in {\tt
+c} as part of the {\tt gamlr} package for {\sf R}. This software is available
+with documentation on {\tt cran.r-project.org} and versioned source code is at
+{\tt github.com/mataddy/gamlr}.  Usage of {\tt gamlr} mirrors that of its
+convex penalty analogue {\tt glmnet} \citep{friedman_regularization_2010}, the
+fantastic and widely used package for costs between $L_1$ and $L_2$ norms. In
+the lasso case ($\gamma=0$), the two algorithms are essentially equivalent.
 
 
 \section{Bayesian motivation}
@@ -321,9 +329,6 @@ a poor cousin to an actual joint MAP estimate
    $\delta$ decreases. However, we'll see later that hedging away from joint
    optimality has useful stabilization effects in addition to making for much
    faster analysis. 
-   First, we need to look a bit deeper at
-   MAP estimation under our Bayesian model.
-
 
 \subsection{Log penalization}
 \label{logpen}
@@ -371,14 +376,6 @@ literature; see \citet{mazumder_sparsenet_2011} and applications in
 The penalty is illustrated in Figure \ref{solution}.
 
 
-\begin{figure}[tbh]
-\vskip -.25cm
-\includegraphics[width=6.4in]{../graphs/solution}
-\caption{\label{solution} Log penalties $c(\beta) = s\log(1 + \gamma|\beta|)$ 
-and penalized objectives $(\beta-B)^2 + c(\beta)$.}
-\end{figure}
-
-
 
 \subsection{Generalized double Pareto priors}
 
@@ -394,7 +391,7 @@ density, as in  \citet{armagan_generalized_2013}. Since $-\log \pi(\beta_j)
 $\bs{\beta}$ under $\mr{Ga}(s-1,1/\gamma)$ hyperpriors on each $\tau_j$.
 
 
-\section{Diminishing bias}
+\section{Diminishing bias and concave penalization}
 \label{concave}
 
 The defining distinction between the gamma lasso and the standard lasso is
@@ -410,86 +407,107 @@ $|\beta_j|$ and goes to zero as $|\beta_j| \rightarrow \infty$. This can be
 observed in the left panel of Figure \ref{solution}, and larger $\gamma$
 causes the penalty to flatten faster.
 
+This unbiasedness for large signals is the `diminishing bias' property
+discussed in the introduction. It is {\it the} reason why one would use
+concave penalization instead of $L_1$ or convex alternatives.  Theoretically,
+it is a necessary condition for a penalized estimator to have oracle
+properties: a class of results showing that coefficient estimates under large
+$n$ will be the same as if you knew which should be zero.
+\citet{fan_variable_2001} introduce the framework, \citet{fan_nonconcave_2004}
+allow $p$ to grow slowly with $n$,  and \citet{armagan_posterior_2013} provide
+results specific to log penalization. Oracle properties tend to make strong
+assumptions about near-sparsity of true $\bs{\beta}$, but they form a popular
+approximation framework for evaluating   high-dimensional estimators and have
+motivated an explosion of interest in concave penalties over the past decade.
 
-We refer to this property of diminishing penalty curvature as `unbiasedness
-for large signals'. It is {\it the} reason why one would use concave
-penalization instead of $L_1$ or convex alternatives.  Theoretically, it is
-the primary necessary condition for a penalized estimator to have
-oracle properties: a class of results showing that coefficient
-estimates under large $n$ will be the same as if you knew which
-should be zero.  \citet{fan_variable_2001} introduce the framework,
-\citet{fan_nonconcave_2004} allow $p$ to grow slowly with $n$, 
-and \citet{armagan_posterior_2013} provide results specific to log penalization.
-Oracle properties make strong assumptions
-about near-sparsity of true $\bs{\beta}$, but they form a popular
- approximation framework for evaluating  
-high-dimensional estimators. 
+There is good reason to seek diminishing bias even
+if you think it impossible to recover true support or if you don't believe the
+truth to be sparse. Having large signals estimated without attenuation can
+lead to sparse models that do as well in prediction as their denser
+counterparts.   As mentioned in the introduction, this extra sparsity is
+useful for information compression and for easier model interpretation.  We'll
+also see in simulation and in theory that sparser diminishing bias estimators
+tend to yield lower false discovery rates -- fewer of the nonzero coefficients will
+be spurious with respect to a theoretically optimal $L_0$ oracle.
 
-There are also a variety of practical reasons for seeking diminishing bias.
-First, having large signals estimated without attenuation can increase model
-sparsity. This is useful from a purely computational perspective whenever
-storage is an issue, say, with distributed massive data analysis
-\citep{taddy_distributed_2013}. In causal inference procedures, where
-penalized projection from $\bm{x}$ on $y$ is intended to control for
-confounding variables rather than for pure prediction,
-\citet{belloni_inference_2012} advocate use of unbiased coefficient estimates.
-Finally, many
-practitioners familiar with classical methods (and versions of subset
-selection) will seek out low-bias estimates, regardless of the application.
+The remainder of this section will survey the literature on concave penalty
+estimation, with a focus on implementations of these ideas and their relationship to weighted $L_1$ penalization.
 
-
-\subsection{Related estimators}
-\label{lla}
-
-
-Many algorithms have been contributed to accompany the literature on concave
-regularization. For example, aforementioned SCAD and MC+ penalties are
-implemented for least-squares  in {\tt SIS} and {\tt plus} {\sf R} packages,
-respectively.  This software is more prototypical than the industrial
-strength tools (like {\tt glmnet}) available for convex regularization.
-
-The recent SparseNet framework of \citet{mazumder_sparsenet_2011} contributes
-a  fast class of coordinate descent routines for generic concave penalized
-path estimation. The algorithm uses CD to first fit a lasso path and, for each
-$\lambda$ on this path, adapts coefficient estimates along a second grid of
-increasing concavity specifications (analogous to increasing values of our
-$\gamma$). An  implementation for Zhang's MC+ penalty is in the {\tt
-sparsenet} package for {\sf R}, and it is the best available software we've
-found.  Indeed, we find very similar runtimes for {\tt sparsenet} and roughly
-equivalent loops of {\tt gamlr} over multiple $\gamma$; neither is
-consistently faster across problems.  The advantage of {\tt gamlr} is that
-each different $\gamma$ specification can be run in parallel (and you only
-need use one $\gamma$ if you wish), whereas the {\tt sparsenet}
-algorithm moves through a grid of both $\lambda$ and $\gamma$ in order to
-avoid minor modes in the nonconvex penalized objective.
+\begin{figure}[tbh]
+\vskip -.25cm
+\includegraphics[width=6.4in]{../graphs/solution}
+\caption{\label{solution} Log penalties $c(\beta) = s\log(1 + \gamma|\beta|)$ 
+and penalized objectives $(\beta-B)^2 + c(\beta)$.}
+\end{figure}
 
 
-The SparseNet authors argue that it is important in CD  to solve exactly the
-coordinate-wise objective at each update.  This will make the solution less
-sensitive (but not insensitive) to initial values.  Thus if the bimodal
-objective in the right-most panel of Figure \ref{solution} represents a
-coordinate update, one should make sure to find the major mode out near
-$\beta=4$. For log penalization, \cite{taddy_multinomial_2013} finds these
-exact solutions by solving a simple quadratic equation.  Unfortunately, even
-this simple exact method becomes prohibitively expensive for $p$ and $n$ above
-a few thousand (unless, like in SparseNet, you 
-derive good hot-starts from a joint $[\gamma,\lambda]$ grid).   The gamma lasso only ever attempts to solve convex
-optimization problems along the path, so convergence to minor modes is a non-issue.
+\subsection{Concave cost functions and their implementation}
+\label{concavecosts}
 
- It turns out that the GL algorithm is quite closely related to the `local
-linear approximation' (LLA) routines that are criticized as sub-optimal in
-\cite{mazumder_sparsenet_2011}.  Of course, when the objective itself is
-uncertain (and needs to be chosen via model selection) the properties of the
-entire path (e.g. stability) are more important than a single point being
-optimal under a fixed specification.  Indeed,  a new literature
-\citep{loh_regularized_2013,wang_optimal_2013}  holds that, under limited
-penalty concavity, all local solutions  should be within {\it statistical}
-precision of the global solution.  These papers are technically difficult and
-the ideas are early in development, but they support the simple point that one
-should not worry too much about global solutions under a fixed penalty when
-the optimal specification of that penalty is itself unknown.
+The log cost function is a simple concave penalty.  Another  straightforward
+option is the bridge of \cite{frank_statistical_1993}, where $c_j(\beta_j) =
+|\bs{\beta}_1|^{q}$ for $q \in (0,1)$.  However, both of these penalties can
+lead to discontinuous solution paths:  e.g., consider how the minimizer of the solid line 
+of the right panel in Figure \ref{solution} will jump from 0 to
+3.5 depending upon small jitter to $B$. \cite{fan_variable_2001} devised their
+SCAD penalty as an alternative concave cost function that avoids such solution
+discontinuity while retaining the desirable diminishing bias of log and bridge
+penalization.  The MCP penalty of \citet{zhang_nearly_2010} is another popular
+concave cost function that avoids discontinuity. Both SCAD and MCP are {\it
+folded concave penalties}
+\citep{fan_strong_2014}:
+piecewise functions specifically constructed to satisfy oracle
+ requirements.
+
+Many solvers have been contributed to accompany the literature on concave
+regularization. SCAD and MCP penalties are implemented  in the {\tt ncvreg}
+{\sf R} package \citep{breheny_coordinate_2011}, and this appears to be a
+commonly used software for these methods. Unfortunately, the solvers require
+much more compute time than, e.g., a standard lasso.  A single run of SCAD via
+{\tt ncvreg} for the simulation in Section \ref{sim} requires around 10
+minutes, limiting the technology to small data analysis problems. This slowness is due to the difficulty of concave minimization:
+despite the solution-continuity property SCAD and MCP, their penalized
+objective surfaces can be concave and contain multiple minor modes. Finding
+global, or even good local, minima in concave functions is an extremely tough
+task.  Similarly,
+\cite{taddy_multinomial_2013} estimates log penalized objectives through a series
+of quadratic approximations, but the method prohibitively expensive for $p$ and $n$
+above a few thousand.
+
+One approach that manages to quickly find good solutions under concave
+penalization is the SparseNet framework of \citet{mazumder_sparsenet_2011}, a
+fast class of coordinate descent routines for generic concave penalized path
+estimation. Their algorithm uses coordinate descent to first fit a lasso path
+and, for each $\lambda$ on this path, adapts coefficient estimates along a
+second grid of increasing concavity specifications (analogous to increasing
+values of our $\gamma$). The authors show that moving through a grid of both
+$\lambda$ and $\gamma$ in this way helps to avoid minor modes and leads to
+faster convergence. An implementation of the MCP penalty is in the {\tt
+sparsenet} package for {\sf R}, and it is the best  software we've
+found for folded concave penalization. Indeed,  runtimes for {\tt sparsenet} and
+roughly equivalent loops of {\tt gamlr} over multiple $\gamma$ are similar.
+The (significant) advantage of {\tt gamlr} is that each different $\gamma$
+specification can be run in parallel, while {\tt sparsenet} is inherently serial over
+both $\gamma$ and $\lambda$ sequences.
+
 
 \subsection{Local linear approximation and one-step estimators}
+\label{lla}
+
+Another relatively fast class of solvers for concave penalized estimators use
+local linear approximation \cite[LLA; e.g.,][]{candes_enhancing_2008}.
+
+They also argue that this tends to obtain lower local
+minima than will be found using common linear approximation tools
+, although Section \ref{lla} details how
+striving for the best possible minimum is often not worth the effort.  
+
+ Weighted $L_1$ minimization only ever attempts to solve convex
+optimization problems along the path, so convergence to minor modes and slow-to-solve concave objectives are non-issues.  In any case, it seems reasonable to
+not worry too much about global solutions under a fixed penalty when
+the optimal specification of that penalty is itself unknown:  properties of the
+entire path (e.g. stability) are more important than a single point being
+optimal under a fixed specification. 
 
 A local linear approximation replaces the concave cost function $c$ in a
 penalized deviance with its tangent at the current estimate,
@@ -539,118 +557,6 @@ We're not certain that, e.g., support recovery has lower probability under the f
 
 
 
-\section{Implementation via coordinate descent}
-\label{implement}
-
-We use Coordinate descent \citep[CD; e.g.,][]{luenberger_linear_2008} to minimize
-(\ref{l1pen}) at each step along the path. CD is a local optimization
-algorithm that cycles through minimization of the conditional objective for
-individual parameters when the remaining parameters are fixed.  It is
-conceptually simple, easy to code, and well-suited to optimizations with
-hot-start initialization. Algorithms of this type have have become dominant in
-$L_1$ penalized estimation since the work by \citet{friedman_pathwise_2007} and
-\citet{wu_coordinate_2008}.
-
-Our CD routine, outlined in Algorithm \ref{bmove}, is a solver for penalized
-weighted least squares problems as defined in equation (\ref{newton}) below.
-This applies directly in Gaussian regression, and for non-Gaussian models  we
-follow \citet{friedman_regularization_2010} and apply CD inside an outer loop
-of iteratively re-weighted least-squares \citep[IRLS;
-e.g.,][]{green_iteratively_1984}. Given current parameter values
-$\bs{\hat\beta}$, the Newton-Raphson update for maximum likelihood estimation
-is $\bs{\beta} = \bs{\hat\beta} - \bm{H}^{-1}\bm{g}$, where $\bm{H}$ is the
-information matrix with elements $h_{jk} = \partial^2 l/\partial
-\beta_j\partial \beta_k |_{\bs{\hat\beta}}$ and $\bm{g}$ is coefficient
-gradient (see Appendix \ref{models}). For exponential family linear models we
-can write $\bm{H} = \bm{X}'\bm{V}\bm{X}$ and $\bm{g} = \bm{X}'\bm{V}(\bm{z} -
-\bs{\hat\eta})$, where $\bm{V} = \mr{diag}(\bm{v})$, $\bm{v} = [v_1\ldots
-v_n]$ are `weights', $\bm{z} = [z_1\ldots z_n]$ are transformed `response',
-and $\hat\eta_i = \hat\alpha + \bm{x}_i\bs{\hat\beta}$.  In Gaussian
-regression,  $v_i = 1$, $z_i=\hat\eta_i - y_i$, and the update is an exact
-solution. For binomial regression, $v_i = q_i(1-q_i)$ and $z_i = \hat\eta_i -
-(y_i-q_i)/v_i$, where $q_i = (1 + \exp[-\hat\eta_i])^{-1}$ is the  estimated
-probability of success.
-
-This yields $\bs{\beta} = (\bm{X}'\bm{V}\bm{X})^{-1}\bm{X}'\bm{V}\bm{z}$, such
-that the Newton update solves a weighted least-squares problem.   Adding $L_1$
-costs,  the minimization objective from (\ref{l1pen}) becomes
-\begin{equation} \label{newton}  \argmin_{\alpha,\beta_1 \ldots \beta_p \in
-\ds{R}} \sum_i \frac{v_i}{2}(\alpha + \bm{x}_i'\bs{\beta} - z_i)^2  + n\sum_j \omega_j
-\lambda |\beta_j|. \end{equation} Our solver iterates between CD on
-(\ref{newton}) and,  for non-Gaussian models, updates to $\bm{v}$ and
-$\bm{z}$. Each $t^{th}$ segment IRLS routine initializes $[\hat \alpha,
-\bs{\hat \beta}]$ at solutions for $\lambda^{t-1}$, or at $[\hat \alpha,
-\bm{0}]$ for $t=1$.  In the {\tt gamlr} implementation, a full pass update of
-all parameters is done only at the first CD iteration; otherwise coordinates
-with currently inactive (zero) $\hat\beta_j$ are not updated. Once the descent
-converges for this {\it active set}, IRLS $\bm{v}$ and $\bm{z}$ are updated
-and we begin a new CD loop with a full pass update.  The routine stops when
-maximum squared change in $\beta_j$ scaled by its information over one of
-these full pass updates is less than some tolerance threshold, ${\tt thresh}$.
-The default in {\tt gamlr} uses a relative tolerance of $10^{-7}$ times null
-model deviance.  \footnote{Under high collinearity one can accelerate convergence via a
-quasi-Newton step \citep[e.g.,][]{lange_numerical_2010} as in Appendix
-\ref{qn}, but given path hot starts this is usually not
-worth the extra computational overhead.}
-
-\vspace{.25cm}
-\begin{algorithm}[ht]
-\vspace{.25cm}
-\caption{Coordinate descent\label{bmove}}
-
-\vskip .15cm
-\hskip .5cm Set ${\tt vh_j} = \sum_i v_i(x_{ij} - \bar x_j)^2$ 
-and ${\tt vx_j} = \sum_i v_ix_{ij}$ for $j=1\ldots p$.
-
-\vskip .15cm
-\hskip .5cm while $\displaystyle \max_{j = 1\ldots p} {\tt vh_j}\Delta_j^2 > {\tt thresh}$:
-
-\vskip .15cm
-\hskip 1.5cm for {j=1\ldots p}:
-
-
-\vskip .15cm
-\hskip 2.5cm set ${\tt vg_j} = -\sum_i x_{ij}v_i(z_i-\hat\eta_i)$ and ${\tt ghb} = {\tt vg_j} - {\tt vh_j}\hat\beta_j$
-
-
-\vskip .25cm
-\hskip 2.5cm if $|{\tt ghb}| < n\lambda^t\omega^t_j$:~ $\Delta_j = -\hat\beta_j$
-
-\vskip .1cm
-\hskip 2.5cm else:~ $\Delta_j = -({\tt vg_j} - \mr{sign}({\tt ghb}) n\lambda^t\omega^t_j)/{\tt vh_j}$.
-
-\vskip .25cm
-\hskip 2.5cm  update $\hat\beta_j \stackrel{+}{=} \Delta_j$,
-$\hat\alpha \stackrel{+}{=} -{\tt vx_j}\Delta_j$, 
-and $\bs{\hat\eta} = \hat\alpha + \bm{X}'\bs{\hat\beta}$.
-
-\vskip .25cm
-
-\end{algorithm}
-
-
-\subsection{Descent convergence}
-
- Despite the non-differentiability of $|\beta_j|$ at zero,
-\citet{tseng_convergence_2001} establishes local convergence for CD on
-(\ref{newton}) as a consequence of penalty separability: the 
-non-differentiable part of our objective is a sum of functions on only a single
-coordinate.  Thus CD solves each weighted least squares problem, and  the full
-algorithm converges if IRLS does.  For non-Gaussian models this is not always
-guaranteed, but divergence is rare and we find the algorithm reliable in
-practice.
-
-
-\subsection{Software}
-
-The algorithm is implemented in {\tt c} as part of the {\tt gamlr} package for
-{\sf R}. This software is available with documentation on {\tt
-cran.r-project.org} and versioned source code is at {\tt
-github.com/mataddy/gamlr}.  Usage of {\tt gamlr} mirrors that of its convex
-penalty analogue {\tt glmnet} \citep{friedman_regularization_2010}, the
-fantastic and widely used package for costs between $L_1$ and $L_2$
-norms. In the lasso case ($\gamma=0$), the two algorithms are essentially
-equivalent.
 
 
 
@@ -941,8 +847,7 @@ of  estimators as a function of $\bm{y}$, the observed response.  In
 particular, Lipschitz continuity of such functions is of primary importance in
 estimation; e.g., for unbiased risk assessment as in
 \cite{stein_estimation_1981}.  Many popular concave cost functions, such as
-the SCAD penalty of \cite{fan_variable_2001} and the MC+ penalty of
-\citet{zhang_nearly_2010}, have been engineered to be Lipschitz continuous (at
+the SCAD and MC+, have been engineered to be Lipschitz continuous (at
 least under certain parameterizations).  It turns out that gamma lasso
 estimators have this property.
 
@@ -1416,7 +1321,7 @@ BIC & 0.01 $\mid$ 0.00 & 0.00 $\mid$ 0.00 & 0.00 $\mid$ 0.00 & 0.08 $\mid$ 0.01 
 \vspace{-1cm}
 \end{table}
 
-On an Intel Xeon E5-2670 processor, average time for 5-fold CV with $\mr{sd}(\bm{\mu})/\sigma=1$ and $\rho=1/2$ was around 2 seconds for lasso and marginal regression AL, 3 and 4 seconds for GL with $\gamma=2$ and $\gamma=10$ respectively, and 15-20 seconds for Sparsenet. Sparsenet computation is comparable to a set of {\tt gamlr} runs over a grid of 9 $\gamma$ values.  However, as a path following algorithm and unlike {\tt gamlr}, sparsenet cannot run in parallel over the $\gamma$ grid.   For comparison,  a single run of SCAD on this configuration, using the {\tt ncvreg} R package, took 10 minutes -- clearly limiting the technology to a much smaller set of  applications.\footnote{In a small study, we found that the CV.min selected SCAD performs quite well in prediction --  similarly to the best CV.min methods for each data configuration -- with relatively high values for both false discovery and sensitivity. }
+On an Intel Xeon E5-2670 processor, average time for 5-fold CV with $\mr{sd}(\bm{\mu})/\sigma=1$ and $\rho=1/2$ was around 2 seconds for lasso and marginal regression AL, 3 and 4 seconds for GL with $\gamma=2$ and $\gamma=10$ respectively, and 15-20 seconds for Sparsenet. Sparsenet computation is comparable to a set of {\tt gamlr} runs over a grid of 9 $\gamma$ values.  However, as a path following algorithm and unlike {\tt gamlr}, sparsenet cannot run in parallel over the $\gamma$ grid.  \footnote{As mentioned earlier, {\tt scvreg} SCAD takes ten minutes for a single run and is thus impractical for the applications under consideration.  But, in a small study, we found that the CV.min selected SCAD performs quite well in prediction --  similarly to the best CV.min methods for each data configuration -- with relatively high values for both false discovery and sensitivity. }
 
 Marginal regression coefficient estimates are often \citep[e.g.,][]{huang_adaptive_2008} suggested as weights for an adaptive lasso in the $p>n$ setting.  Indeed, since marginal correlations tend to have a lower sampling variance than conditional coefficients, this strategy should yield lower variance weights and stable estimation when compared to more complicated weighting schemes.  Our simulation study investigates marginal-correlation-based adaptive lasso.
 
@@ -1683,10 +1588,10 @@ explain to non-statisticians, but it nice to have a fast analytic alternative.
 
 
 \appendix
+\vskip 1cm
+\noindent{\bf\Large Appendices}
 
-\section{Appendix}
-
-\subsection{Gradient, curvature, and path starts}
+\section{Gradient, curvature, and path starts}
 \label{models}
 
 The
@@ -1720,9 +1625,132 @@ n^{-1}\max\{|g_j(\bm{0})|,~j=1\ldots p\}, \end{equation} the maximum mean
 absolute gradient for the null model with $\bs{\beta} = \bm{0}$.  This formula
 is used to obtain our starting values for the path algorithms.
 
+\section{Implementation via coordinate descent}
+\label{implement}
+
+We use Coordinate descent \citep[CD; e.g.,][]{luenberger_linear_2008} to minimize
+(\ref{l1pen}) at each step along the path. CD is a local optimization
+algorithm that cycles through minimization of the conditional objective for
+individual parameters when the remaining parameters are fixed.  It is
+conceptually simple, easy to code, and well-suited to optimizations with
+hot-start initialization. Algorithms of this type have have become dominant in
+$L_1$ penalized estimation since the work by \citet{friedman_pathwise_2007} and
+\citet{wu_coordinate_2008}.
+
+Our CD routine, outlined in Algorithm \ref{bmove}, is a solver for penalized
+weighted least squares problems as defined in equation (\ref{newton}) below.
+This applies directly in Gaussian regression, and for non-Gaussian models  we
+follow \citet{friedman_regularization_2010} and apply CD inside an outer loop
+of iteratively re-weighted least-squares \citep[IRLS;
+e.g.,][]{green_iteratively_1984}. Given current parameter values
+$\bs{\hat\beta}$, the Newton-Raphson update for maximum likelihood estimation
+is $\bs{\beta} = \bs{\hat\beta} - \bm{H}^{-1}\bm{g}$, where $\bm{H}$ is the
+information matrix with elements $h_{jk} = \partial^2 l/\partial
+\beta_j\partial \beta_k |_{\bs{\hat\beta}}$ and $\bm{g}$ is coefficient
+gradient (see Appendix \ref{models}). For exponential family linear models we
+can write $\bm{H} = \bm{X}'\bm{V}\bm{X}$ and $\bm{g} = \bm{X}'\bm{V}(\bm{z} -
+\bs{\hat\eta})$, where $\bm{V} = \mr{diag}(\bm{v})$, $\bm{v} = [v_1\ldots
+v_n]$ are `weights', $\bm{z} = [z_1\ldots z_n]$ are transformed `response',
+and $\hat\eta_i = \hat\alpha + \bm{x}_i\bs{\hat\beta}$.  In Gaussian
+regression,  $v_i = 1$, $z_i=\hat\eta_i - y_i$, and the update is an exact
+solution. For binomial regression, $v_i = q_i(1-q_i)$ and $z_i = \hat\eta_i -
+(y_i-q_i)/v_i$, where $q_i = (1 + \exp[-\hat\eta_i])^{-1}$ is the  estimated
+probability of success.
+
+This yields $\bs{\beta} = (\bm{X}'\bm{V}\bm{X})^{-1}\bm{X}'\bm{V}\bm{z}$, such
+that the Newton update solves a weighted least-squares problem.   Adding $L_1$
+costs,  the minimization objective from (\ref{l1pen}) becomes
+\begin{equation} \label{newton}  \argmin_{\alpha,\beta_1 \ldots \beta_p \in
+\ds{R}} \sum_i \frac{v_i}{2}(\alpha + \bm{x}_i'\bs{\beta} - z_i)^2  + n\sum_j \omega_j
+\lambda |\beta_j|. \end{equation} Our solver iterates between CD on
+(\ref{newton}) and,  for non-Gaussian models, updates to $\bm{v}$ and
+$\bm{z}$. Each $t^{th}$ segment IRLS routine initializes $[\hat \alpha,
+\bs{\hat \beta}]$ at solutions for $\lambda^{t-1}$, or at $[\hat \alpha,
+\bm{0}]$ for $t=1$.  In the {\tt gamlr} implementation, a full pass update of
+all parameters is done only at the first CD iteration; otherwise coordinates
+with currently inactive (zero) $\hat\beta_j$ are not updated. Once the descent
+converges for this {\it active set}, IRLS $\bm{v}$ and $\bm{z}$ are updated
+and we begin a new CD loop with a full pass update.  The routine stops when
+maximum squared change in $\beta_j$ scaled by its information over one of
+these full pass updates is less than some tolerance threshold, ${\tt thresh}$.
+The default in {\tt gamlr} uses a relative tolerance of $10^{-7}$ times null
+model deviance.  
+
+\vspace{.25cm}
+\begin{algorithm}[ht]
+\vspace{.25cm}
+\caption{Coordinate descent\label{bmove}}
+
+\vskip .15cm
+\hskip .5cm Set ${\tt vh_j} = \sum_i v_i(x_{ij} - \bar x_j)^2$ 
+and ${\tt vx_j} = \sum_i v_ix_{ij}$ for $j=1\ldots p$.
+
+\vskip .15cm
+\hskip .5cm while $\displaystyle \max_{j = 1\ldots p} {\tt vh_j}\Delta_j^2 > {\tt thresh}$:
+
+\vskip .15cm
+\hskip 1.5cm for {j=1\ldots p}:
 
 
-\subsection{Sign Recovery}
+\vskip .15cm
+\hskip 2.5cm set ${\tt vg_j} = -\sum_i x_{ij}v_i(z_i-\hat\eta_i)$ and ${\tt ghb} = {\tt vg_j} - {\tt vh_j}\hat\beta_j$
+
+
+\vskip .25cm
+\hskip 2.5cm if $|{\tt ghb}| < n\lambda^t\omega^t_j$:~ $\Delta_j = -\hat\beta_j$
+
+\vskip .1cm
+\hskip 2.5cm else:~ $\Delta_j = -({\tt vg_j} - \mr{sign}({\tt ghb}) n\lambda^t\omega^t_j)/{\tt vh_j}$.
+
+\vskip .25cm
+\hskip 2.5cm  update $\hat\beta_j \stackrel{+}{=} \Delta_j$,
+$\hat\alpha \stackrel{+}{=} -{\tt vx_j}\Delta_j$, 
+and $\bs{\hat\eta} = \hat\alpha + \bm{X}'\bs{\hat\beta}$.
+
+\vskip .25cm
+
+\end{algorithm}
+
+
+\subsection{Descent convergence}
+
+ Despite the non-differentiability of $|\beta_j|$ at zero,
+\citet{tseng_convergence_2001} establishes local convergence for CD on
+(\ref{newton}) as a consequence of penalty separability: the 
+non-differentiable part of our objective is a sum of functions on only a single
+coordinate.  Thus CD solves each weighted least squares problem, and  the full
+algorithm converges if IRLS does.  For non-Gaussian models this is not always
+guaranteed, but divergence is rare and we find the algorithm reliable in
+practice.
+
+\subsection{Quasi-Newton acceleration}
+\label{qn}
+
+Under high collinearity one can accelerate convergence via a quasi-Newton step
+\citep[e.g.,][]{lange_numerical_2010}.  This is sometimes useful with large $\gamma$, where the path hot-starts are not very
+good. 
+
+Acceleration is applied to $\bs{\theta} = [\alpha,\bs{\beta}]$, the
+set of both penalized and unpenalized parameters.  This move is accepted only
+if it leads to a decrease in the objective, such that there is no effect on
+algorithm convergence. Suppose that $\bs{\hat\theta}^{(0)}$,
+$\bs{\hat\theta}^{(-1)}$, and $\bs{\hat\theta}^{(-2)}$ are the current,
+previous, and previous-to-previous parameter estimates.  Write
+$M(\bs{\hat\theta}^{(t)})$ as the implied CD update map $\bs{\hat\theta}^{(t)}
+\rightarrow \bs{\hat\theta}^{(t+1)}$, such that the algorithm converges at
+$\bs{\hat\theta} - M(\bs{\hat\theta}) = \bm{0}$.  With $\bm{u} =
+\bs{\hat\theta}^{(-1)} - \bs{\hat\theta}^{(-2)}$ and $\bm{v} =
+\bs{\hat\theta}^{(0)} - \bs{\hat\theta}^{(-1)}$, a secant approximation to the
+gradient of $M$ is $\partial M/\partial \hat\theta_l \approx
+\mr{v}_l/\mr{u}_l$.  An approximate Newton-Raphson step to solve for the root
+of $\bs{\hat\theta} - M(\bs{\hat\theta}) $  updates each coordinate \[ \hat
+\theta_l \gets \hat\theta_l^{(-1)} - (\hat\theta_l^{(-1)} -
+\hat\theta_l^{(0)})/(1-\mr{v}_l/\mr{u}_l) \] which can be re-written as
+$\hat\theta_l = (1-\mr{w}_l)\hat\theta_l^{(-1)} + \mr{w}_l\hat\theta_l^{(0)} $
+where $\mr{w}_l = \mr{u}_l/(\mr{u}_l - \mr{v}_l)$.
+
+
+\section{Sign Recovery}
 
 \begin{theorem}\label{signrecov}
 Under the setting of Theorem \ref{sparseapprox}, $\mr{sgn}(\bs{\hat\beta}) = \mr{sgn}(\bs{\beta}^\nu)$ for $\omega_{S^c}^{\mr{min}}\lambda > \sqrt{2\nu}$ if
@@ -1753,35 +1781,6 @@ Finally, for sign recovery on $j\in S$ we need
 and $(ii)$ follows from  $\bs{\beta^\nu}_S = (\bm{X}_S'\bm{X}_S)^{-1}\bm{X}_S'\bm{y}$ and $ \bs{\beta^\nu}_S- \bs{\hat\beta}_S = n\lambda (\bm{X}_S'\bm{X}_S)^{-1}\bs{\zeta}_S$.
 
 \end{proof}
-
-\subsection{Quasi-Newton acceleration}
-\label{qn}
-
-Acceleration is applied to $\bs{\theta} = [\alpha,\bs{\beta}]$, the
-set of both penalized and unpenalized parameters.  This move is
-accepted only if it leads to a decrease in the objective,
-such that there is no effect on algorithm convergence.
-Suppose that $\bs{\hat\theta}^{(0)}$, $\bs{\hat\theta}^{(-1)}$, and
-$\bs{\hat\theta}^{(-2)}$ are the current, previous, and
-previous-to-previous parameter estimates.  Write
-$M(\bs{\hat\theta}^{(t)})$ as the implied CD update map
-$\bs{\hat\theta}^{(t)} \rightarrow \bs{\hat\theta}^{(t+1)}$, such that
-the algorithm converges at $\bs{\hat\theta} - M(\bs{\hat\theta}) =
-\bm{0}$.  With $\bm{u} = \bs{\hat\theta}^{(-1)} -
-\bs{\hat\theta}^{(-2)}$ and $\bm{v} = \bs{\hat\theta}^{(0)} -
-\bs{\hat\theta}^{(-1)}$, a secant approximation to the gradient of $M$
-is $\partial M/\partial \hat\theta_l \approx \mr{v}_l/\mr{u}_l$.  An
-approximate Newton-Raphson step to solve for the root of
-$\bs{\hat\theta} - M(\bs{\hat\theta}) $  updates each
-coordinate
-\[
-\hat \theta_l \gets
-\hat\theta_l^{(-1)} - (\hat\theta_l^{(-1)} -
-\hat\theta_l^{(0)})/(1-\mr{v}_l/\mr{u}_l)
-\] which can be re-written as $\hat\theta_l =
-(1-\mr{w}_l)\hat\theta_l^{(-1)} + \mr{w}_l\hat\theta_l^{(0)} $ where
-$\mr{w}_l = \mr{u}_l/(\mr{u}_l - \mr{v}_l)$.
-
 
 \sgl\small
 \bibliographystyle{chicago}
