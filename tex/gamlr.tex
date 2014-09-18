@@ -537,7 +537,7 @@ obtaining oracle support recovery properties under much weaker conditions than
 required by a standard lasso.  \cite{wang_calibrating_2013} propose a two step
 algorithm that feeds lasso coefficients into a linear approximation to folded
 concave penalization.  They derive properties of entire regularization paths
-(e.g., guarantees that an oracle estimator is {\it on the path}) and construct
+(e.g., guarantees that an oracle estimator is on the path) and construct
 a version of the BIC for selection along these paths.
 
 
@@ -555,30 +555,43 @@ setting (we include such marginal adaptive lasso in the simulation study of
 Section \ref{sim}).  Like the gamma lasso, the adaptive lasso provides
 diminishing bias penalization without solving for an explicit concave penalty.
 
-Of course our gamma lasso algorithm is again just a scheme for weighted $L_1$
-minimization.  Each GL segment is a one-step estimator under log penalization,
-starting the estimates from the previous path segment.  And since path
-estimation relies on $\bs{\hat\beta}^{t-1}$ being close to
-$\bs{\hat\beta}^{t}$, it seems a natural partner for OSE. In any case, all of
-these methods -- GL, LLA OSE, adaptive lassos -- differ only in how the
-weights are constructed.  Thus, regardless of which method you prefer,
-weighted $L_1$ penalties are likely to play a central role in diminishing bias
-penalization if you are working with applications too large for use of exact
-concave penalty solvers.
+Each segment of our gamma lasso path is also a one-step estimator, for log
+penalized objectives starting from the estimates at the previous segment.  And
+since path estimation relies on $\bs{\hat\beta}^{t-1}$ being close to
+$\bs{\hat\beta}^{t}$, it seems a natural partner for OSE. All of these methods
+-- GL, LLA OSE, adaptive lassos -- differ only in how the weights are
+constructed.  Regardless of which you prefer, weighted $L_1$ penalties are
+likely to play a central role in diminishing bias penalization whenever the
+dataset is too large for use of exact concave penalty solvers.
 
-\section{Comparison to $L_0$ penalized optimization}
+\section{Comparison to $L_0$ penalized estimation}
 \label{theory}
 
-In the following two subsections we provide results for weighted $L_1$ estimation in two areas commonly motivating use of diminishing-bias-type penalties: prediction using a sparse basis, and support recovery.  We compare to optimal $L_0$ penalized estimation here, even though in the later section on stability it is clear that $L_0$ penalized estimation may not be the best choice even if it were feasible.
+We are interested in $L_1$ penalization with data-dependent weights as a way
+to obtain fits that are as sparse as possible without compromising predictive
+ability.  We do not assume a true sparse model, so that our
+benchmark is estimation under $L_0$ costs $c_j(\beta_j) = \ds{1}_{\{\beta_j\neq0\}}$.   Since $L_0$ penalized minimization
+is an NP-hard problem, it is practically impossible to find a
+global solution.  However, in this section we present finite sample bounds on
+the distances -- in prediction and on coefficients -- between  $L_0$  and weighted
+$L_1$ penalized estimation.  This comparison yields simple
+relationships that make no assumptions about the underlying data model.
+Moreover, when we do make standard assumptions about the data generating
+process, we are able to quantify distance between weighted $L_1$ estimates and
+a theoretically optimal $L_0$ penalized estimator.
 
 
 \subsection{Sparse Approximation for Prediction}
 
-One advantage of diminishing bias is that you can reduce the difference between estimated $\hat y$ and prediction from an optimal sparse approximation to
-$\bs{\beta}$ (e.g., the MLE restriced to large coefficients).  For any support subset $S \subset 1\ldots p$ with cardinality $|S|=s$ and complement $S^c = \{1\ldots p\}\setminus S$, denote vectors
-restricted to $S$ as $\bm{\beta}_S = [\beta_j:j\in S]'$, matrices as $\bm{X}_S$, etc.  Use superscripted $\bs{\beta}^S$ to denote the coefficient vector for OLS restricted to $S$: that is, $\bs{\beta}^S_S = (\bm{X}_S'\bm{X}_S)^{-1}\bm{X}_S'\bm{y}$ and $\beta^{S}_j = 0~\forall~j\notin S$.  Moreover, 
-$\bm{e}^S = \bm{y}-\bm{X}\bs{\beta}^\nu = (\bm{I}-\bm{H}^S)\bm{y}$ and 
-$\bm{H}^S = \bm{X}_S(\bm{X}_S'\bm{X}_S)^{-1}\bm{X}_S'$ are the residuals and hat (projection) matrix respectively from OLS restricted to $S$.
+ For any support subset $S \subset \{1\ldots p\}$ with cardinality $|S|=s$ and
+complement $S^c = \{1\ldots p\}\setminus S$, denote vectors restricted to $S$
+as $\bm{\beta}_S = [\beta_j:j\in S]'$, matrices as $\bm{X}_S$, etc.  Use
+superscripted $\bs{\beta}^S$ to denote the coefficient vector for OLS
+restricted to $S$: that is, $\bs{\beta}^S_S =
+(\bm{X}_S'\bm{X}_S)^{-1}\bm{X}_S'\bm{y}$ and $\beta^{S}_j = 0~\forall~j\notin
+S$.  Moreover, $\bm{e}^S = \bm{y}-\bm{X}\bs{\beta}^S =
+(\bm{I}-\bm{H}^S)\bm{y}$ are residuals and $\bm{H}^S =
+\bm{X}_S(\bm{X}_S'\bm{X}_S)^{-1}\bm{X}_S'$ the hat (projection) matrix from OLS restricted to $S$.  We suppress intercepts throughout, and use $|\cdot|$ and $\|\cdot\|$ applied to vectors as the $L_1$ and $L_2$ norms, respectively.
 
 We'll use the following simple result for stagewise regression -- iterative fitting of new covariates to the residuals of an existing linear model (as in, e.g., \citealt{goldberger_stepwise_1961}). It bounds the reduction in variance due to a new stagewise-estimated coefficient.
 \begin{lemma}\label{SSElemma}
@@ -600,7 +613,7 @@ where $\tilde\beta_j = \bs{x}_j'\bm{e}^S/(\bs{x}_j'\bs{x}_j)$ is the stagewise c
 The last inequality holds because $\bm{e}^{S\cup j}$, residuals from OLS on $\bm{X}_{S\cup j}$, have the smallest-possible sum of squares for that set of covariates.  With $\mr{var}(\bm{e}^S) = \mr{MSE}_S$, etc, we are done.
 \end{proof}
 
-In addition, we need to define {\it restricted eigenvalues} (RE) on the observed gram matrix.  
+In addition, we need to define {\it restricted eigenvalues} (RE) on the gram matrix $\bm{X}'\bm{X}/n$.  
 \begin{definition}\label{redef}
 The restricted eigenvalue is
 $
@@ -608,10 +621,10 @@ $
 \end{definition}
 \noindent The specific RE in Definition (\ref{redef}) matches the `adaptive restricted eigenvalues' of \cite{buhlmann_statistics_2011}.  These and related RE quantities are common in prediction and estimation results for both $L_1$ and concave penalization schemes.  See the remarks for more detail.
 
-Finally, our result derives a bound on the distance between prediction rules based on $L_0$ and weighted $L_1$ penalized estimation.
+Finally, our result derives a bound on the distance between prediction rules based on $L_0$ and weighted $L_1$ penalized estimation.  Intercepts are suppressed for simplicity.
 \begin{theorem} \label{sparseapprox}  Consider squared-error loss $l(\bs{\beta}) =
 \frac{1}{2}\|\bm{X}\bs{\beta}-\bm{y}\|^2$, and suppose $\bs{\beta}^{\nu}$ minimizes the $L_0$ penalized objective $l(\bs{\beta}) + n\nu\sum_{j=1}^p\ds{1}_{\{\beta_j\neq0\}}$ with $\bs{\beta}^\nu = \bs{\beta}^S$ and $|S|=s<n$.   
-Write $\bs{\hat\beta}$ as solution to the weighted $L_1$ minimization $l(\bs{\beta}) + n\lambda\bs{\omega}'|\bs{\beta}|$. 
+Write $\bs{\hat\beta}$ as solution to the weighted $L_1$ minimization $l(\bs{\beta}) + n\lambda\sum_j\omega_j|\beta_j|$. 
 
 Then  
 $\omega^{\mr{min}}_{S^c}\lambda > \sqrt{2\nu}$ while $\phi^2(L,S) > 0$ implies
@@ -626,8 +639,8 @@ with the restricted eigenvalue defined for
 \begin{proof}
 From the definitions of $\bs{\hat\beta}$ and $\bs{\beta}^\nu = \bs{\beta}^S$, 
 \begin{align}\label{predconv}
-\frac{1}{2}\|\bm{X}\bs{\hat \beta}-\bm{y}\|^2 + n\lambda\bs{\omega}'|\bs{\hat\beta}| & ~~=~~ \frac{1}{2}\|\bm{X}(\bs{\hat\beta}-\bs{\beta}^\nu)\|^2 + \frac{1}{2}\|\bm{e}^S\|^2 - \bm{\hat y}'\bm{e}^S+ n\lambda\bs{\omega}'|\bs{\hat\beta}|\\
-& ~~~~~~~~~\leq~~ \frac{1}{2}\|\bm{X}\bs{\beta}^\nu-\bm{y}\|^2 + n\lambda\bs{\omega}'|\bs{\beta}^\nu| ~~=~~ \frac{1}{2}\|\bm{e}^S\|^2 + n\lambda\bs{\omega}_S'|\bs{\beta}^\nu_S|\notag
+\frac{1}{2}\|\bm{X}\bs{\hat \beta}-\bm{y}\|^2 + & n\lambda\sum_j\omega_j|\hat\beta_j|  ~~=~~ \frac{1}{2}\|\bm{X}(\bs{\hat\beta}-\bs{\beta}^\nu)\|^2 + \frac{1}{2}\|\bm{e}^S\|^2 - \bm{\hat y}'\bm{e}^S+ n\lambda\sum_j\omega_j|\hat\beta_j|\\
+&~~~~~~~~~~~~~~~~~~~ \leq~~ \frac{1}{2}\|\bm{X}\bs{\beta}^\nu-\bm{y}\|^2 + n\lambda\sum_j\omega_j|\beta^\nu_j| ~~=~~ \frac{1}{2}\|\bm{e}^S\|^2 + n\lambda\sum_{j\in S}\omega_j|\beta^S_j|\notag
 \end{align}
   Since $\bm{\hat y}'\bm{e}^S = \bm{\hat y}'(\bm{I}-\bm{H}^S)\bm{y} =
 \bs{\hat\beta}'\bm{X}'(\bm{y}-\bm{X}\bs{\beta}^\nu) = 
@@ -638,13 +651,11 @@ $,
 \left(\frac{\bs{x}_j'(\bm{y}-\bm{X}\bs{\beta}^\nu)}{n}\right)^2
 \leq \mr{MSE}_S - \mr{MSE}_{S\cup j} < 2\nu ~~~\forall~j
 \end{equation}
-so that $|\bm{\hat y}'\bm{e}^S| = |\bs{\hat\beta}_{S^c}\bm{X}_{S^c}'(\bm{y}-\bm{X}\bs{\beta}^\nu)| < n\sqrt{2\nu}|\bs{\hat\beta}_{S^c}|$.
-
-Applying (\ref{L0ineq}) inside (\ref{predconv}),
+so that $|\bm{\hat y}'\bm{e}^S| = |\bs{\hat\beta}_{S^c}\bm{X}_{S^c}'(\bm{y}-\bm{X}\bs{\beta}^\nu)| < n\sqrt{2\nu}|\bs{\hat\beta}_{S^c}|$.  Applying this inside (\ref{predconv}),
 \begin{align}\label{predconvineq}
 \frac{1}{2}\|\bm{X}(\bs{\hat\beta}-\bs{\beta}^\nu)\|^2
   + n\left(\omega^{\mr{min}}_{S^c}\lambda-\sqrt{2\nu}\right)|\bs{\hat\beta}_{S^c}|
-  &~\leq~ n\lambda\bs{\omega}_{S}'|\bs{\hat\beta}_{S}-\bs{\beta}^\nu_S|
+  &~\leq~ n\lambda\sum_{j\in S}\omega_j'|\hat\beta_{j}-\beta^\nu_j|
   ~\leq~ n\lambda\|\bs{\omega}_S\|\|\bs{\hat\beta}_{S}-\bs{\beta}^\nu_S\|.
 \end{align}
 Given $\omega^{\mr{min}}_{S^c}\lambda > \sqrt{2\nu}$,
@@ -661,59 +672,78 @@ Dividing each side by $\sqrt{n}\|\bm{X}(\bs{\hat\beta}-\bs{\beta}^\nu)\|/2$ and 
 \noindent {\bf Remarks}
 
 \vskip .25cm
-\noindent $\bullet$~~   The comparison to $L_0$ estimation, as opposed to some assumed model truth, is key to the simplicity of our inequality in (\ref{sparseineq}).  The result is finite sample exact, and completely non-parametric -- it makes no reference to the true distribution of $\bm{y}\mid \bm{X}$.  Indeed, if we are to make such assumptions, Theorem \ref{sparseapprox} provides bounds on the distance between a weighted lasso and optimal sparse prediction.  The next remark is an example.
+\noindent $\bullet$~~   Comparison to $L_0$ estimation, as opposed to some assumed model truth, is key to the simplicity of our inequality in (\ref{sparseineq}).  The result is finite sample exact, and completely non-parametric -- it makes no reference to the true distribution of $\bm{y}\mid \bm{X}$.  Indeed, if we are to make such assumptions, Theorem \ref{sparseapprox} provides bounds on the distance between a weighted lasso and optimal sparse prediction.  The next remark is an example.
 
 \vskip .25cm
-\noindent $\bullet$~~ From \cite{efron_estimation_2004}, the $C_p$ statistic
-\citep{mallows_comments_1973} implies that choosing $S$ to minimize
-$\mr{MSE}_S + 2s\sigma^2/n$, Mallows' unbiased estimate of residual variance,
-is optimal for minimizing prediction error on $\bm{y} \sim
-(\bm{f},\sigma^2\bm{I})$ -- that is, for $y_i$ independent with means $f_i$
-and shared variance $\sigma^2$. Theorem (\ref{sparseapprox}) with $\nu = \sigma^2/n$ and $L = \frac{\|\bs{\omega}_S\|}{\sqrt{s}}\left(\omega^{\mr{min}}_{S^c}- \sqrt{2}\sigma/(\lambda\sqrt{n})\right)^{-1}$ provides a comparison between weighted $L_1$ estimation and $C_p$-optimal prediction.\footnote{We work with
+\noindent $\bullet$~~ If we assume that $\bm{y} \sim
+(\bs{\mu},\sigma^2\bm{I})$ --  $y_i$ independent with mean $\mu_i$
+and shared variance $\sigma^2$ -- then the $C_p$ formula of  
+\citep{mallows_comments_1973} provides 
+$\mr{MSE}_S + 2s\sigma^2/n$ as an unbiased estimate of residual variance.
+Following \cite{efron_estimation_2004}, this implies $\nu = \sigma^2/n$ is the optimal $L_0$ penalty for minimizing prediction error.  
+Theorem (\ref{sparseapprox}) applies directly,  with $L = \frac{\|\bs{\omega}_S\|}{\sqrt{s}}\left(\omega^{\mr{min}}_{S^c}- \sqrt{2}\sigma/(\lambda\sqrt{n})\right)^{-1}$, to give a bound on the distance between weighted $L_1$ estimation and $C_p$-optimal prediction.\footnote{We work with
 $C_p$ here, rather than $AIC$ or $AICc$, since $C_p$ is conveniently defined
 the scale of squared errors.} Note that, since the condition on minimum $S^c$ weights has become
 $\omega^{\mr{min}}_{S^c} > (\sigma/\lambda)\sqrt{2/n}$, comparison to $C_p$ suggests we can use larger $\gamma$ (faster diminishing bias) with large $n$ or small $\sigma$.
 
 
 \vskip .25cm
-\noindent $\bullet$~~  Plausibility of the restricted eigenvale assumption $\phi(L,S) > 0$ depends critically upon $L$.  Here, the assumption is less restrictive if we can reduce $\|\bs{\omega}_S\|$ without making $\omega^{\mr{min}}_{S_c}$ small.  For example, the next sub-section suggests using large $\gamma$ so long as $\lambda$ is big enough to avoid false discovery. More generally, \cite{raskutti_restricted_2010} show that similar conditions hold  with very high probability for $\bm{X}$ drawn from a broad class of Gaussian distributions.  \cite{bickel_simultaneous_2009} provide a nice overview of sufficient conditions, and \cite{buhlmann_statistics_2011} have extensive discussion and examples related to restricted eigenvalue assumptions.
+\noindent $\bullet$~~  Plausibility of the restricted eigenvale assumption $\phi(L,S) > 0$ depends critically upon $L$.  Here, the assumption is less restrictive if we can reduce $\|\bs{\omega}_S\|$ without making $\omega^{\mr{min}}_{S_c}$ small.  For example, the next sub-section suggests using large $\gamma$ so long as $\lambda$ is big enough to avoid false discovery. \cite{raskutti_restricted_2010} show that similar conditions hold given  $\omega^{\mr{min}}_{S_c}=1$ with high probability for $\bm{X}$ drawn from a broad class of Gaussian distributions.  \cite{bickel_simultaneous_2009} provide a nice overview of sufficient conditions, and \cite{buhlmann_statistics_2011} have extensive discussion and examples related to restricted eigenvalue assumptions.
 
 
 \subsection{False Discovery Control}
 
-Two related goals in high-dimensional estimation are  support recovery -- having the set $\{j: \hat\beta_j \neq 0\} = \{j: \beta_j \neq 0\}$ for some `true' $\bs{\beta}$ -- and  sign recovery -- in addition, $\mr{sgn}(\bs{\hat\beta}) = \mr{sgn}(\bs{\beta})$.  For standard lasso estimated $\bs{\hat\beta}$, many authors have shown \citep[e.g.,][]{buhlmann_statistics_2011,zou_adaptive_2006} that to get exact support recovery asymptotically or with high probability requires an {\it irrepresentability condition} which limits the size of least-squares projections from `true support' onto spurious covariates.  
+A common goal in high-dimensional estimation is  support recovery -- having the set $\{j: \hat\beta_j \neq 0\} = \{j: \beta_j \neq 0\}$ for some `true' $\bs{\beta}$.
+For standard lasso estimated $\bs{\hat\beta}$, many authors have shown \citep[e.g.,][]{buhlmann_statistics_2011,zou_adaptive_2006} that to get exact support recovery asymptotically or with high probability requires an {\it irrepresentability condition} which limits the size of least-squares projections from `true support' onto spurious covariates.  
 \begin{definition} 
 The $(\theta,S,\bm{v})$-irrepresentable condition for $\theta\in[0,1]$ and $\bm{v}\in \ds{R}^s$ holds that, 
 \begin{equation}\label{irrep}
 |\bs{x}_j'\bm{X}_S(\bm{X}_S'\bm{X}_S)^{-1}\bm{v}| \leq \theta ~~\forall~j\notin S
 \end{equation}
 \end{definition}
-
-A common form of (\ref{irrep}) has $\bm{v}=\bm{1}$.\footnote{\cite{wainwright_sharp_2009} shows that the irrepresentable condition with $\theta=1$ and $\bm{v}=\bm{1}$ is necessary for lasso sign recovery in the {\it noiseless} estimation setting.} In this case, it
-is a strict design restriction; for example,
-\citet{buhlmann_statistics_2011} have a single variable that is
+\noindent (\ref{irrep}) is often presented with $\bm{v}=\bm{1}$.\footnote{\cite{wainwright_sharp_2009} shows that the irrepresentable condition with $\theta=1$ and $\bm{v}=\bm{1}$ is necessary for lasso sign recovery in the {\it noiseless} estimation setting.} It
+can be a strict design restriction; for example,
+\citet{buhlmann_statistics_2011} show a single variable that is
 highly correlated with many columns of $\bm{X}_S$ leading to failure. Much
-of the literature on concave penalized estimation has focused on achieving
+of the literature on concave penalization has focused on achieving
 support recovery {\it without} such conditions; see, e.g.,
-\cite{fan_strong_2014} for a recent overview that provides finite sample
-theory.  
+\cite{fan_strong_2014} for a recent overview.  
+Our results will require irrepresentable conditions with $\bm{v} =
+\bs{\omega}_S$, which becomes less restrictive as one is able to shrink
+weights $\omega_j$ for $j\in S$.  See the remarks for more discussion.
 
-Our exposition here will compare $\hat S = \{j: \hat\beta_j \neq 0\}$, for $\bs{\hat\beta}$ from weighted $L_1$ penalized estimation, to $S = \{j: \beta^\nu_j \neq 0\}$ for $\beta^\nu$ from $L_0$ penalized estimation as in Theorem \ref{sparseapprox}.  The result uses an irrepresentable condition with $\bm{v} = \bs{\omega}_S$, an assumption that becomes less restrictive as one is able to shrink weights $\omega_j$ for $j\in S$.
+Our comparison of interest is between $\hat S = \{j:
+\hat\beta_j \neq 0\}$, for $\bs{\hat\beta}$ from weighted $L_1$ penalized
+estimation, and $S = \{j:
+\beta^\nu_j \neq 0\}$ for $\bs{\beta}^\nu$ the $L_0$ penalized estimator from
+Theorem \ref{sparseapprox}. Whether looking to an $L_0$ oracle or a sparse
+truth, our experience is that exact support recovery does not occur in
+practice   (e.g., see the simulation in Section \ref{sim}).  Thus, we instead 
+focus on ability of the weighted lasso to minimize {\it false discoveries}:
+$\hat\beta_j
+\neq 0$ when $\beta^\nu_j=0$.  In particular, we describe how far along the regularization path one may expect to avoid any false discovery.
 
-A path-wise interpretation of Theorem \ref{signrecov} is that the gamma lasso achieves exact sign recovery if $(i)$ holds until $(ii)$ occurs.  We can re-state the result in terms of false positives relative to $\bs{\beta}^{\nu}$ along the path, with $\bs{\hat\beta}^t$ and $\hat S_t = \{j: \hat\beta^t_j\neq 0\}$ the  weighted lasso coefficient estimates and support under $\bs{\omega}^t$ and $\lambda_t$ at path segment $t$.
-\begin{corollary}
-Under the setting of Theorem \ref{signrecov}, if $\hat S_{t-1} \cap S^c = \varnothing$ and $\lambda_t > \sqrt{2\nu}$ then
+The result follows directly from the sign recovery lemma in Appendix
+\ref{extraproof}. 
+\begin{theorem}
+Consider the setting of Theorem \ref{sparseapprox}, but where $\bs{\hat\beta}
+= \bs{\hat \beta}_t$ is now the solution at segment `$t$' of a gamma lasso path,
+and say that $\hat S_{t} = \{j:\hat\beta^{t}_j\neq 0\}$.  
+
+If $\hat S_{t-1}
+\cap S^c = \varnothing$ and $\lambda_t > \sqrt{2\nu}$ then
 \begin{equation}\label{falsepos}
 \|\bm{X}_{S^c}'\bm{X}_S(\bm{X}_S'\bm{X}_S)^{-1}\bs{\omega}^t_S\|_{\infty} \leq 1 - \frac{\sqrt{2\nu}}{\lambda_t} ~~\Rightarrow~~\hat S_{t} \cap S^c = \varnothing.
 \end{equation}
-\end{corollary}
-\noindent 
+\end{theorem}
+\noindent {\bf Remarks}
+\vskip .25cm
+\noindent $\bullet$~~ 
 The results uses $\hat S_{t-1} \cap S^c = \varnothing \Rightarrow \omega_{S^c}^{t~\mr{min}} = 1$ for the GL algorithm.  So long as $\lambda_t$ is large enough, (\ref{falsepos}) suggests that  big $\gamma$ (for fast diminishing $\omega_j$) will help control false discovery.  Of course, the momment $\hat S_{t-1} \cap S^c \neq \varnothing$,  a large $\gamma$ allows spurious covariates to enter with very little shrinkage and can move the fit arbitratily far away from $L_0$-optimal support.
 
 \vskip .25cm
-\noindent {\bf Remarks}
-\vskip .25cm
-\noindent $\bullet$~~ From Theorem 7.4 in \cite{buhlmann_statistics_2011}, 
+\noindent $\bullet$~~ 
+From Theorem 7.4 in \cite{buhlmann_statistics_2011}, 
 the irrepresentability condition holds with 
 $|\bs{x}_j'\bm{X}_S(\bm{X}_S'\bm{X}_S)^{-1}\bs{\omega}_S|
 \leq \frac{\|\bs{\omega}_S\|}{\sqrt{s}}\theta_{\mr{adap}}(S)$ where $\theta_{\mr{adap}}(S)$ is their `adaptive restricted regression' coefficient.  Of direct interest here, they show that $\theta_{\mr{adap}}(S) \leq \sqrt{s}/\Lambda_{\mr{min}}(S)$ where $\Lambda_{\mr{min}}(S) = \mr{min}_{\{\bm{v}:\|\bm{v}\|=1\}}\bm{v}'\left(\frac{\bm{X}_S'\bm{X}_S}{n}\right)\bm{v}$ is the minimum eigenvalue of $\bm{X}_S'\bm{X}_S/n$.  Thus, $(i)$ can be replaced by the restriction $\Lambda_{\mr{min}}(S) \geq \|\bs{\omega}_S\|(1 - \sqrt{2\nu}/(\omega_{S^c}^{\mr{min}}\lambda))^{-1} = \sqrt{s}L$, with $L$ from Theorem \ref{sparseapprox}. Small values for $L$ are key in both predictive performance and support recovery.
@@ -732,8 +762,6 @@ Dividing by $n\lambda\omega_j$ and counting yields
 Thus, without the ability to
 make $\omega_j$ very big for $j \in S^c$ (e.g., as in a thresholding procedure
 like that of \citealt{zhou_thresholding_2009}), the result in (\ref{pessimism}) has little to say about false discovery control.
-See 
-\cite{buhlmann_statistics_2011} for more detail on related ideas.
 
 
 \section{Stability and Continuity}
@@ -1757,18 +1785,21 @@ where $\mr{w}_l = \mr{u}_l/(\mr{u}_l - \mr{v}_l)$.
 
 
 \section{Sign Recovery}
+\label{extraproof}
 
-\begin{theorem}\label{signrecov}
-Under the setting of Theorem \ref{sparseapprox}, $\mr{sgn}(\bs{\hat\beta}) = \mr{sgn}(\bs{\beta}^\nu)$ for $\omega_{S^c}^{\mr{min}}\lambda > \sqrt{2\nu}$ if
+
+\begin{lemma}\label{signrecov}
+Under the setting of Theorem \ref{sparseapprox}, with $\hat S = \{j:\hat\beta_j \neq 0\}$, if $\omega_{S^c}^{\mr{min}}\lambda > \sqrt{2\nu}$ then
 \begin{equation}
-\mr{(i)}~~|\bs{x}_j'\bm{X}_S(\bm{X}_S'\bm{X}_S)^{-1}\bs{\omega}_S| \leq 1 - \frac{\sqrt{2\nu}}{\lambda\omega_j}~~\forall~j ~\in~S^c
-~~~
-\mr{(ii)}~~\left|(\bm{X}_S'\bm{X}_S)^{-1}\bm{X}_S'\bm{y}\right|_\infty > n\lambda\left|(\bm{X}_S'\bm{X}_S)^{-1}\bs{\omega}_S\right|_\infty 
+|\bs{x}_j'\bm{X}_S(\bm{X}_S'\bm{X}_S)^{-1}\bs{\omega}_S| \leq 1 - \frac{\sqrt{2\nu}}{\lambda\omega_j}~~\forall~j ~\in~S^c \Rightarrow \hat{S} \cap S^c = \varnothing.
 \end{equation}
-\end{theorem}
+ If in addition
+$\left|(\bm{X}_S'\bm{X}_S)^{-1}\bm{X}_S'\bm{y}\right|_\infty > n\lambda\left|(\bm{X}_S'\bm{X}_S)^{-1}\bs{\omega}_S\right|_\infty$, then 
+$\mr{sgn}(\bs{\hat\beta}) = \mr{sgn}(\bs{\beta}^\nu)$.
+\end{lemma}
 \begin{proof} We adapt results of \cite{wainwright_sharp_2009}.
-From the Karush-Kuhn-Tucker (KKT) conditions, 
-$\bm{x}_j'\bm{X}(\bs{\hat\beta}_S-\bs{\beta}^\nu) + \bm{X}'\bm{e}^S = -n\lambda\zeta_j$ at convergence where $|\zeta_j| = \omega_j$ for $j\in\hat S$ and $|\zeta_j| \leq \omega_j$ for $j\in\hat S^c$.
+From the Karush-Kuhn-Tucker (KKT) conditions at weighted $L_1$ minimization convergence, 
+$\bm{x}_j'\bm{X}(\bs{\hat\beta}_S-\bs{\beta}^\nu) + \bm{X}'\bm{e}^S = -n\lambda\zeta_j$ where $|\zeta_j| = \omega_j$ for $j\in\hat S$ and $|\zeta_j| \leq \omega_j$ for $j\in\hat S^c$.
 Thus we we have no false positives if and only if
 \begin{equation}
 \bm{X}_S'\bm{X}_S(\bs{\hat\beta}_S-\bs{\beta}^\nu_S) + \bm{X}_S'\bm{e}^S =-n\lambda\bs{\zeta}_S ~~\Rightarrow~~ \bs{\hat\beta}_S-\bs{\beta}^\nu_S = -n\lambda(\bm{X}_S'\bm{X}_S)^{-1}\bs{\zeta}_S.
@@ -1781,11 +1812,12 @@ if and only if
 1 - \frac{|x_j'\bm{e}^S|}{n} \geq 1 - \frac{\sqrt{2\nu}}{\lambda\omega_j} \geq |\bs{x}_j'\bm{X}_S(\bm{X}_S'\bm{X}_S)^{-1}\bs{\omega}_S|.
 \end{equation}
 Finally, for sign recovery on $j\in S$ we need 
-\begin{equation}\label{signeq}
-|\beta_j^\nu| - |\beta^\nu_j - \hat\beta_j| > 0 ~~\forall~j~\in~S,
-\end{equation}
-and $(ii)$ follows from  $\bs{\beta^\nu}_S = (\bm{X}_S'\bm{X}_S)^{-1}\bm{X}_S'\bm{y}$ and $ \bs{\beta^\nu}_S- \bs{\hat\beta}_S = n\lambda (\bm{X}_S'\bm{X}_S)^{-1}\bs{\zeta}_S$.
-
+$
+|\beta_j^\nu| - |\beta^\nu_j - \hat\beta_j| > 0 ~~\forall~j~\in~S
+$,
+and our stated condition follows from  $\bs{\beta^\nu}_S =
+(\bm{X}_S'\bm{X}_S)^{-1}\bm{X}_S'\bm{y}$ and $ \bs{\beta^\nu}_S-
+\bs{\hat\beta}_S = n\lambda (\bm{X}_S'\bm{X}_S)^{-1}\bs{\zeta}_S$.
 \end{proof}
 
 \sgl\small
