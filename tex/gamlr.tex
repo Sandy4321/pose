@@ -250,6 +250,14 @@ $\gamma=\infty$ yields a subset selection routine where a coefficient is
 unpenalized in all segments after it first becomes nonzero. Figure
 \ref{gamlr_eg} shows solutions in a simple problem.
 
+% Consider two steps of a single-covariate least-squares GL path, moving from penalty size $\lambda$ to $\delta\lambda$ for $0<\delta<1$.  Given MLE $b$ we can write
+% the second segment estimator (at $\delta\lambda$) as \begin{equation}\label{twostep} f(b) = \left(b -
+% \frac{\delta\lambda}{1+\gamma(b-\lambda)_+}\right)_+  \end{equation} where
+% $\gamma,\lambda,\delta >0$, $\lambda < \infty$, $\delta<1$.  We call this the
+% gamma-lasso thresholding operator, and it is straightforward to verify
+% directly that it is Lipschitz continuous for $\gamma < \infty$.\footnote{}
+% }  
+
 \begin{figure}[hbt]
 \hskip -.2cm\includegraphics[width=6.5in]{../graphs/gamlr_eg}
 \vskip -.25cm
@@ -444,17 +452,15 @@ and penalized objectives $(\beta-B)^2 + c(\beta)$.}
 \subsection{Concave cost functions and their implementation}
 \label{concavecosts}
 
-Log cost is a simple concave penalty.  Another  straightforward option is the
-bridge of \cite{frank_statistical_1993}, where $c_j(\beta_j) =
-|\bs{\beta}_1|^{q}$ for $q \in (0,1)$.  However, both of these penalties can
-lead to discontinuous solution paths:  e.g., the minimizer of the solid line
-of the right panel in Figure \ref{solution} will jump from 0 to 3.5 depending
-upon small jitter to $B$. The SCAD penalty of \cite{fan_variable_2001} and the
-MCP of \citet{zhang_nearly_2010} are concave cost functions that avoid
-solution discontinuity while retaining diminishing bias. Both are popular {\it
-folded concave penalties}
-\citep[e.g.][]{fan_strong_2014}: piecewise functions constructed to satisfy oracle
- requirements.
+Log cost is a simple concave penalty.   However, it can lead to discontinuous
+solution paths:  e.g., the minimizer of the solid line of the right panel in
+Figure \ref{solution} will jump from 0 to 3.5 depending upon small jitter
+either to data $B$ or cost $\gamma s$. In contrast, the SCAD penalty of
+\cite{fan_variable_2001} and the MCP of \citet{zhang_nearly_2010}, popular
+types of {\it folded concave penalties}
+\citep[e.g.,][]{fan_strong_2014}, 
+which avoid solution discontinuity while retaining
+diminishing bias. 
 
 Much software has been contributed to accompany the literature on concave
 regularization. SCAD and MCP penalties are implemented  in the {\tt ncvreg}
@@ -490,7 +496,7 @@ local linear approximation \cite[LLA; e.g.,][]{candes_enhancing_2008}. LLA
 replaces the concave cost function $c_j$ in a penalized deviance with its
 tangent at the current estimate, $c_j'(\hat\beta_j)\beta_j$.  The approximate
 objective is then just a weighted $L_1$ penalized loss (solvable by, say, the
-CD of Section \ref{implement}), and one iterates between updating
+CD of Appendix \ref{implement}), and one iterates between updating
 $c'(\hat\beta)$ and solving the implied $L_1$ penalized minimization problem.
 For example, LLA under the log penalty parametrized as in Section \ref{bayes}
 has $c'(\beta) = s \gamma / (1 + \gamma |\beta|) = n\lambda/(1 + \gamma
@@ -507,21 +513,14 @@ until it jumps all the way out to near the MLE.
 
 Despite this issue, \citet{zou_one-step_2008} present numerical and
 theoretical evidence that simple LLA does well in practice. Importantly, they
-show that LLA does well even (or especially!) if you {\it stop it after one
+show that LLA does well even (or especially) if you {\it stop it after one
 iteration}. This is an example of one-step estimation (OSE), a general
 technique inspired by \cite{bickel_one-step_1975} that amounts to taking as
 your estimator the first step of an iterative approximation to some objective.
-Applications are usually accompanied by results claiming that they can be `as
-good' asymptotically as the full-step solution {\it if} the initial estimates
-are `good enough'.  
-OSE and similar ideas have had a resurgence in the concave penalization
-literature recently, motivated by the need for faster estimation algorithms.
-Indeed, in OSE LLA you end up with simple convex weighted $L_1$ minimization.
-Zou and Li also argue that OSE yields more stable estimates, with a result
-that parallels our simple statement in Section \ref{stability}: one-step LLA
-solutions are continuous if and only if $c'(\beta)$ is continuous for
-$|\beta|>0$, regardless of whether solutions would be continuous for the
-approximated objective.  
+Such early stopping can be as good asymptotically as the full-step
+solution {\it if} the initial estimates are good enough. OSE and similar
+ideas have had a resurgence in the concave penalization literature recently,
+motivated by the need for faster estimation algorithms -- OSE LLA requires only  convex weighted $L_1$ minimization.
 
 \cite{fan_strong_2014} consider early-stopping of LLA
 for folded concave penalization (e.g., SCAD) and provide finite sample results
@@ -764,86 +763,40 @@ make $\omega_j$ very big for $j \in S^c$ (e.g., as in a thresholding procedure
 like that of \citealt{zhou_thresholding_2009}), the result in (\ref{pessimism}) has little to say about false discovery control.
 
 
-\section{Stability and Continuity}
+\section{Stability}
 \label{stability}
 
+The benefits of diminishing bias come at a price: if the penalty is concave,
+the negative log posterior can be concave.  This can be seen
+in Figure \ref{solution}: the objectives
+are concave approaching the origin, and can even become multi-modal.
+It is  impractical to find the global minimum of such concave functions.
+But even if one seeks only a local solution,  concavity can lead to problems
+in estimation. As outlined in Section
+\ref{concavecosts}, multiple modes in the objective can cause local
+solvers to {\it jump} from one mode to another when the problem changes
+slightly.
 
-Imagine that you are a data analyst familiar with classical methods, such as
-hypothesis testing,  looking to try some of these more modern sparse
-regularized regression techniques.  Strictly concave penalties, with negative
-curvature instead of lasso's zero second derivative,  are tempting because
-they provide near-unbiased estimation for large signals.  That is, if
-$\hat\beta_j\neq0$ then it will be close to the result for  maximum likelihood
-estimation (MLE) on {\it in-the-model} coefficients. Unfortunately, you will
-discover that computation is difficult with these strictly concave penalties.
-Most available software takes far longer to run than convex
-alternatives and the solvers are not generally globally convergent.  At the
-extreme, solving for $L_0$ regularized coefficients is NP hard. In contrast,
-the lasso has a very fast forward stepwise procedure \citep{efron_least_2004},
-easy-to-estimate degrees of freedom \citep{zou_degrees_2007}, and is far more
-widely used in practice. These conveniences are due to the estimator stability
-that results from lasso's nondiminishing bias. How do you decide what to use,
-and is it possible to quickly evaluate the range of options between $L_0$ and
-$L_1$ costs?
+The consequence of these discontinuities is that model fit moves dramatically
+in response to small change in {\it either} data $\bm{y}$ or penalty size
+$\lambda$.  From the first perspective, estimators that make large changes under
+small data jitter are {\it instable}.  This hurts predictive performance by
+increasing predictor variance. Moreover, as covered in
+\cite{breiman_heuristics_1996}, the variability of
+choices made in model selection (see Section \ref{selection}) explodes with
+the estimation variance for each candidate model. In Section \ref{dof} we see
+also that model complexity -- a key input to selection -- can only be
+estimated reliably for stable models. From the second perspective, a fit that
+is very {\it sensitive} to specification is unreliable when there is
+any model uncertainty.  More immediately, if  $\bs{\hat\beta}$
+estimates jump along the regularization path -- that is, if the paths are
+non-smooth functions of $\lambda$ -- then $\bs{\hat\beta}^{t-1}$ will not be a
+good hot-start for $\bs{\hat\beta}^t$ and  computation time will
+quickly grow.
 
-The benefits of Section \ref{concave} come at a price: if the penalty is
-concave, the negative log posterior is not necessarily convex.  This can
-be seen in the right two panels of Figure \ref{solution}: the objectives are
-concave approaching the origin, and can even become bi-modal.
+% The rest of this section connects solution discontinuity to our Bayesian model, before looking at each of stability under data jitter and  sensitivity to penalty size.
 
-The obvious effect of a non-convexity is computational:  the models take
-longer to fit. The genius of LARS and the lasso is that entire regularization
-paths are easy to calculate {\it because}  estimates change slowly along those
-paths.  In contrast, the previous segment $\bs{\hat\beta}^{t-1}$ will not be a
-good hot-start for $\bs{\hat\beta}^{t}$ if the solution paths have
-discontinuity jumps. This causes a corresponding jump in computation time; for
-example, Figure \ref{nhltime} shows timings growing rapidly after
- this threshold (around $1<\gamma<10$) for the hockey data  of Section \ref{nhl}.
-Here the cost difference is mere seconds, but in larger $n$ and $p$
-applications the jumps become prohibitively expensive.
-
-\begin{figure}[bht]
-\vskip -.5cm
-\centering
-\includegraphics[width=5.5in]{../graphs/nhl_time}
-\vskip -.25cm
-\caption{\label{nhltime} 
-Timings for the hockey data fits of Section \ref{nhl}
-on a length-100 grid with $\lambda^{100} = 0.01\lambda^1$. This
-used a high absolute convergence tolerance of $10^{-10}$; results are less dramatic under default settings.}
-\end{figure}
-
-Such discontinuities occur if the objective is concave at the origin.
-Consider the solid line in the right panel of Figure \ref{solution}: under
-small permutation to penalty $\gamma s$, the solution moves between $0$ and
-near $4$. When conditional updates in coordinate descent (see Section
-\ref{implement}) have this shape, all other dimensions of the model fit need to
-change dramatically depending upon such thresholds.   Moreover, finding a {\it
-global} solution is computationally intractable if the objective is
-non-convex; this issue is discussed in  detail in Section
-\ref{lla}.
-
-
-A more subtle possible consequence of concavity is estimator instability. Path
-discontinuities will cause jumps in the implicit estimation function for
-$\bs{\hat\beta}$, such that small data jitter leads to large changes in model
-fit. As every statistics student should know, mean squared error for $\hat y$
-as a predictor of $y$ can be written as the sum of squared bias
-$(y-\ds{E}[\hat y])^2$ plus estimator variance $\mr{var}(\hat y)$.  Thus
-instability leads to lower quality prediction due to a large increase in the
-sampling variance. As detailed in the classic \cite{breiman_heuristics_1996}
-discussion, the effects of instability are especially dramatic when doing
-model selection, since variability of this choice explodes with the estimation
-variance for each individual candidate model (see also Section
-\ref{selection}).
-
-Given these issues, the benefits of concave penalties (i.e., the diminishing bias
-of Section \ref{concave}) are only worthwhile so long as we are able to
-remain stable.  The rest of this section looks first at what this means in
-terms of our Bayesian model and second at how sub-optimality of the gamma
-lasso as a joint MAP actually stabilizes the procedure.
-
-\subsection{Prior variance}
+\subsection{Stability and the Bayesian model prior}
 
 For orthogonal inputs, the penalized objective becomes concave only if
 negative log likelihood coordinate curvature $h_j = \partial^2 l(\bs{\beta})/\partial
@@ -869,113 +822,112 @@ matrix $\bm{H}$. For Gaussian regression with standardized orthogonal
 covariates, $h_j = \sum_i x_{ij}^2 = n$ and we get a simple rule: the joint
 MAP is stable  if prior variance on each $\tau_j$  is
 less than the number of observations.  For logistic regression you need
-$\mr{var}(\tau_j) < n/4$ to get the same guarantee. And for marginal rather
-than joint MAP estimation you need $\mr{var}(\tau_j) + \gamma^2$ less than $n$
-or $n/4$.
+$\mr{var}(\tau_j) < n/4$ to get the same guarantee. 
+%And for marginal rather than joint MAP estimation you need $\mr{var}(\tau_j) + \gamma^2$ less than $n$ or $n/4$.
 
 
-\subsection{Stability of the gamma lasso}
+\subsection{Lipshitz continuity}
 
-A rigorous definition of stability can be expressed in terms of the continuity
-of  estimators as a function of $\bm{y}$, the observed response.  In
-particular, Lipschitz continuity of such functions is of primary importance in
-estimation; e.g., for unbiased risk assessment as in
-\cite{stein_estimation_1981}.  Many popular concave cost functions, such as
-the SCAD and MC+, have been engineered to be Lipschitz continuous (at
-least under certain parameterizations).  It turns out that gamma lasso
-estimators have this property.
-
-Say $f(b)$ is the implicit function for $\hat\beta$ as a function of the MLE
-$b$.  $f$ is said to be Lipschitz continuous if  $ |f(b_1)-f(b_2)| \leq
-L|b_1-b_2| $ for some finite constant $L$ on all $b_1,b_2$ in the domain of
-$f$. If the MLE $b$ is itself Lipschitz with respect to $\bm{y}$, then we'll
-say that the estimator is Lipschitz stable.    Consider the single-coefficient
-two step path $[\hat\beta^0,\hat\beta^1]$ on $[\lambda,\delta\lambda]$ for
-$0<\delta<1$, such that $\hat\beta^0$ is the lasso estimate under $\tau =
-\lambda$ and $\hat\beta^1$ is the lasso estimate under $\tau =
-\delta\lambda/(1+\gamma|\hat\beta^0|)$. Given MLE $b$ we can re-write
-$\hat\beta^1$ as \begin{equation}\label{twostep} f(b) = \left(b -
-\frac{\delta\lambda}{1+\gamma(b-\lambda)_+}\right)_+  \end{equation} where
-$\gamma,\lambda,\delta >0$, $\lambda < \infty$, $\delta<1$.  We call this the
-gamma-lasso thresholding operator, and it is straightforward to verify
-directly that it is Lipschitz continuous for $\gamma < \infty$.\footnote{The subset selection procedure implied at
-$\gamma=\infty$ is clearly  {\it
-discontinous} -- consider $b_1$ and $b_2$ arbitrarily close but on
-either side of $\lambda$.}
+One possible definition of stability requires Lipschitz continuity. Say
+$\hat\beta(\bm{y})$ is our implicit estimation function. Then $\hat\beta$ is
+Lipschitz continuous if  $ \|\hat\beta(\bm{y}_1)-\hat\beta(\bm{y}_2)| \leq
+L\|\bm{y}_1-\bm{y}_2\| $ for some finite constant $L$ on all possible
+$\bm{y}_1,\bm{y}_2$. This is necessary for, e.g., our degrees of freedom
+estimator in Section \ref{dof}.  Many popular concave cost functions, such as
+the SCAD and MC+, have been engineered to be Lipschitz continuous.
+\cite{zou_one-step_2008} show that OSE LLA solutions have this property even
+if the target objective does not.
 
 More generally, since $L_1$ penalized least-squares estimators are Lipschitz continuous \cite[][]{zou_degrees_2007}, versions that use data-dependent penalty weighting will also be continuous so long as the weights are themselves finite and continuous functions of $\bm{y}$.\footnote{Holds also for generalized linear models under conditions that make maximum likelihood estimators continuous.}  This can be used to establish continuity of, e.g., the adaptive lasso with inverse weights set as marginal correlations or through a preliminary lasso run.  It also rules out continuity whenever weights are derived from hard-thresholding, such as in the thresholded lasso studied by \cite{van_de_geer_adaptive_2011}.
-For the gamma lasso, we are able to establish {\it path continuity}.
+For the gamma lasso, we are able to establish continuity of the entire regularization path.
 
 \begin{prop} For $\gamma<\infty$ the least-squares gamma lasso path is Lipschitz continuous. \end{prop} 
 \begin{proof}
 From the above discussion, we need to establish continuity of the weights.  At $\lambda_1$ and $\lambda_2$, the weights are always all one.  And if $\bs{\beta}^{t}$ are Lipschitz continuous,  then so are $\bs{\omega}^{t+1}$ for all $\gamma<0$ and thus $\bs{\beta}^{t+1}$ is Lipschitz continuous.  By induction the entire path is continuous.
 \end{proof}
+\noindent Note that the subset selection procedure implied at $\gamma=\infty$ is clearly
+{\it discontinous}.
+
+\subsection{Practical Stability}
+
+In practice, a regularization path can be Lipschitz continuous but still overly sensitive to data jitter and penalty size.  The most obvious effect is computational:  when solutions change too quickly along the path, you lose the benefit of hot-starts and computation time jumps for each segment. As an illustration, Figure \ref{nhltime} shows timings growing rapidly with large $\gamma$ for the hockey data  of Section \ref{nhl}, even though all of these specifications are theoretically stable.
+
+\begin{figure}[bht]
+\vskip -.5cm
+\centering
+\includegraphics[width=5.5in]{../graphs/nhl_time}
+\vskip -.25cm
+\caption{\label{nhltime} 
+Timings for the hockey data path fits of Section \ref{nhl}
+on a length-100 grid with $\lambda^{100} = 0.01\lambda^1$. }
+\end{figure}
+
 
 \section{Degrees of freedom}
 \label{dof}
 
-An estimation algorithm's degrees of freedom ($df$) is a key property in
-determining its tendency to over or under fit.  We use it in Section
-\ref{selection} as the  basis for selecting the optimal model along a
-fitted regularization path, so it is a key ingredient for practical
-application of the GL algorithm.  
+A predictor's degrees of freedom ($df$) determines its tendency to over or
+under fit, and is a key input for model selection. In an unpenalized linear
+model, $df$ is just the number of coefficients.  More generally
+\citep[e.g.][]{efron_least_2004}, for $\bm{y} \sim (\bs{\mu},\sigma^2\bm{I})$
+we define $df = \sigma^{-2} \sum_i \mr{cov}(\hat y_i, y_i)$ where $\hat y_i$
+is the estimated prediction rule for observation $y_i$. Given an estimator
+that is Lipschitz continuous with respect to $\bm{y}$, as in Section
+\ref{stability}, the SURE framework of \cite{stein_estimation_1981} applies
+and we get a more workable version of this definition,  $df =
+\ds{E}\left[\sum_i \partial \hat y_i/\partial y_i\right]$.
 
-In an unpenalized linear model, the degrees of freedom is just the number of
-estimated parameters.  More generally, it can be defined as
-\citep[e.g.][]{efron_least_2004} $df = \sigma^{-2} \sum_i \mr{cov}(\hat y_i,
-y_i)$ where $\hat y_i$ is the estimated prediction rule for observation $y_i$
-and $\sigma^2$ is residual variance. Given an estimator that is Lipschitz
-continuous with respect to $\bm{y}$, as demonstrated in Section
-\ref{stability} \citep[or in ][]{zou_one-step_2008} for our GL path segments,
-the SURE framework of \cite{stein_estimation_1981} applies and we get a more
-workable version of this definition,  $df = \ds{E}\left[\sum_i \partial \hat
-y_i/\partial y_i\right]$.
-
-Consider the case of a single coefficient $\beta$ estimated via least-squares
-under $L_1$ penalization $\tau$.   Write gradient at zero $g = -\sum_i
+Consider  a single coefficient $\beta$ estimated via least-squares
+under $L_1$ penalty $\tau$.   Write gradient at zero $g = -\sum_i
 x_iy_i$ and curvature $h = \sum_i x_i^2$ and set $\varsigma = -{\tt sign}(g)$.
-Then the prediction rule for $y$ given $x$ is $\hat y =
+The prediction rule is $\hat y =
 x(\varsigma/h)(|g|-\tau)_+$ with  derivative $\partial \hat y/\partial y =
-x_i^2/h \ds{1}_{[|g|<\tau]}$, yielding  the SURE degrees of freedom expression
+x_i^2/h \ds{1}_{[|g|<\tau]}$, yielding 
 $df = \ds{E}\left[ \ds{1}_{[|g|<\tau]} \right]$.   For many orthogonal
 covariates, we get $\hat y = \sum_j x_j(\varsigma_j/h_j)(|g_j|-\tau_j)_+$ and
-the degrees of freedom becomes  
 \begin{equation} \label{sure} df = \sum_j
 \ds{E}\left[ \ds{1}_{[|g_j|<\tau_j]} \right].
 \end{equation}
 \cite{zou_degrees_2007} plug sample gradients into (\ref{sure}) to derive
 $\hat p = \sum_j |g_j| < \tau_j = \sum |\hat\beta_j| \neq 0$, the number of
-nonzero  coefficients, as an unbiased estimator of model
+nonzero  coefficients, as an unbiased estimator of lasso
 degrees of freedom.
 
 
 We'll use the same tactic of plugging-in observed gradient.  However, for the
-GL algorithm each $\tau_j$ is a function of $y$.  Moreover, unlike $g_j$, our
-observed $\hat\tau_j$ have been optimized to fit the data and thus  plugging
-them into (\ref{sure}) would yield a biased (low) estimate of $df$. Fortunately,
-interpreting the GL algorithm as an estimator for the Bayesian  hierarchical
-model of Section \ref{bayes},  we do have a guess for each $\tau_j$ that is
-independent from the data: our $\mr{Ga}(s,1/\gamma)$ hyperprior. This implies the
-{\it gamma lasso estimator for degrees of freedom} \begin{equation}
+GL algorithm each $\tau_j$ is a function of $y$.  Moreover, estimated
+$\hat\tau_j$ have been optimized to fit the data and   plugging them into
+(\ref{sure}) yields a biased (low) estimate of $df$. Instead, we take
+advantage of the Bayesian  hierarchical model of Section \ref{bayes} and
+average (\ref{sure}) over the $\mr{Ga}(s,1/\gamma)$ prior on $\tau_j$.
+This implies the {\it gamma lasso estimator for degrees of freedom}
+\footnote{The number of unpenalized coefficients (e.g.,~1 for
+$\alpha$) is always added to this to get total $df$.} 
+\begin{equation}
 \label{edf} df^t = \sum_j \mr{Ga}(|g_{j}|;~ n\lambda^t/(\gamma\phi),
-1/\gamma). \end{equation}  The number of unpenalized coefficients (e.g.,~1 for
-$\alpha$) is always added to this to get total $df$.  For Gaussian regression,
-where $\phi$ is unknown, we just use the fitted mean square error $\hat\phi^t
-= \sum_i (y_i - \hat y_i)^2/n$. Under (\ref{edf}) as $\gamma \rightarrow 0$,
-$df^t \rightarrow \hat p$, the lasso $df$ of Zou et al. As $\gamma \rightarrow
-\infty$, $df^t$ becomes $p$ and we assign full model $df$ for all steps of the
-GL subset selection algorithm.
+1/\gamma), \end{equation} where here $\mr{Ga}$ denotes the Gamma distribution
+function. As $\gamma \rightarrow 0$, $df^t \rightarrow \hat
+p$, the lasso $df$ of Zou et al, and as $\gamma \rightarrow
+\infty$, $df^t$ becomes $p$ for all segments of subset selection.
+(
+As a Bayesian prior estimate of a frequentist statistic, (\ref{edf}) is a
+clearly heuristic formula.  There are also a number of approximations
+necessary in application.  Gaussian regression requires $\phi
+\approx \hat\sigma^{2t} = \sum_i (y_i - \hat y^t_i)^2/n$, which biases
+ $df^t$ upwards from truth for over-fit models and downwards with
+under-fit.   In the non-orthogonal case, where $g_{j} = g_j(0)$ becomes a
+function of all of the elements of $\bs{\beta}$, we plug in the most recent
+$g_j$ at which $\hat\beta^t_j=0$:  this
+requires no extra computation and has the advantage of maintaining $df =
+\hat p$ for $\gamma = 0$.  And for non-Gaussian models (e.g.,
+in Section \ref{nhl}), we apply (\ref{edf}) directly despite its
+motivation from squared errors.
 
-
-In the non-orthogonal case, $g_{j} = g_j(0)$ becomes a function of all of the
-elements of $\bs{\beta}$.     One option would be to plug-in the null model
-gradients (i.e. for all zero coefficients), but with any multicollinearity
-this yields too-large $df$ values (e.g., almost immediately $df \approx p$ in
-our simulations of Section \ref{sim}). Instead we use the most recent $g_j$ at
-which $\hat\beta^t_j=0$, such that the effect of previously in-the-model
-variables has been remove from our plug-in gradient.  This appears to work
-well in practice, requires no extra computation (since we already need these
-values in CD), and has the advantage of maintaining $df = \hat p$ for $\gamma = 0$.
+Despite these many compromises, we have found that (\ref{edf}) works remarkably
+well in both simulation and real data examples.  When used as an input to
+information criteria, as in the next section, it allows those criteria to
+perform as well or better than nonparametric cross-validation techniques over
+a wide range of $\gamma$ values.
 
 \section{Selection}
 \label{selection}
@@ -1602,24 +1554,22 @@ world where model selection is considered throughout construction of candidate
 models, not an afterthought, and where one seeks sparse representations even
 for non-sparse truth.
  
-Apart from the simulation study, we have not performed extensive
-comparison on properties of the many available weighting mechanisms. Although
+Apart from the simulation study, we have not provided extensive
+comparison of the many available weighting mechanisms. Although
 our gamma lasso performs as well as or better than adaptive lasso and MCP penalized
 alternatives in simulation, we are not arguing that its path-based weights are
-theoretically optimal. For example,
-\citep{van_de_geer_adaptive_2011} argue for weights based on estimates under a
-lower (smaller $\lambda$) $L_1$ penalty than will be used in the final
-weighted objective.  This will be computationally more expensive (because you
-can't use already fitted models as inputs to the weight function) and probably
-lead to higher variance estimation (because coefficient estimates under lower
-penalty will have higher variance), but we are happy to believe that it can
-lead to better support recovery properties.
+theoretically optimal. For example, instead of moving {\it forward} from higher to lower penalties, as we do,
+\cite{van_de_geer_adaptive_2011} argue for a single {\it backward} step 
+where the weights are based on initial coefficient values estimated under less
+penalty than is used in the final fit.  The backwards approach will be more
+expensive and the weights should have higher sampling variance, but we are
+happy to believe that it can yield better support recovery properties.
 
 The gamma lasso does have the advantage that using the regularization path to
 supply penalty weights is computationally efficient. To scale for truly Big
 Data, $L_1$ weights need be constructed at practically no cost on top of a
 standard lasso run. Beyond {\tt gamlr} and marginal regression adaptive lasso,
-we have found no other software for which this standard is met.
+we have found no other software where standard is met.
 
 \appendix
 \vskip 1cm
