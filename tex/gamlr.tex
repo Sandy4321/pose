@@ -14,6 +14,7 @@
 }
 \usepackage{algorithm}
 
+\graphicspath{{/Users/mtaddy/project/gamma_lasso/graphs/}}
 \newtheorem{prop}{\sc Proposition}[section]
 \newtheorem{theorem}{\sc Theorem}[section]
 \newtheorem{definition}{\sc Definition}[section]
@@ -103,6 +104,17 @@ a path of weighted $L_1$ penalized estimators with  weights at each segment a
 function of coefficient estimates at the previous segment.  Section
 \ref{bayes} derives a Bayesian foundation, while Section \ref{concave}
 connects concave and  weighted $L_1$ penalization.
+
+The gamma lasso is not a radically new idea.  Indeed, this
+article is intended to provide a review, wrapping up the material necessary for practical
+application of diminishing bias estimators.  Big Data application of such
+tools nearly always leads to a version of weighted $L_1$ regularization.  Our
+new approach learns from the literature to provide a much more practically
+effective and scalable algorithm than currently exists. However, we are not
+claiming {\it theoretical} optimality of the gamma lasso, and if others wish
+to claim superiority for their methods this article should help build
+perspective on what should be considered during implementation.
+
 
 One theme of our work holds that sparse estimation will be useful for (and
 often used in) settings where the true data generating process is non-sparse.
@@ -197,6 +209,21 @@ is  computationally efficient -- often requiring less time than for fit under
 a single $\lambda$ from cold-start initialization.
 
 
+\begin{figure}[thb]
+\hskip -.2cm\includegraphics[width=6.5in]{gamlr_eg}
+\vskip -.25cm
+\caption{\label{gamlr_eg} Gamma lasso estimation on $n=10^3$ 
+ observations of $y_i = 4 + 3x_{1i} - x_{2i} + \varepsilon_i$, where
+$\varepsilon_i \stackrel{ind}{\sim} \mr{N}(0,1)$ and
+$\{x_{1i},x_{2i},x_{3i}\}$ are marginally standard normal with correlation of
+0.9 between covariates ($x_{3i}$ is spurious). The penalty path has $T=100$
+segments, $\lambda^1 = n^{-1}\left| \sum_i x_{1i}y_i\right|$, and
+$\lambda^{100} = 0.01\lambda^1$. Degrees of freedom are on top and vertical
+lines mark AICc and BIC selected models (see Sections
+\ref{dof}-\ref{selection}).}
+\vskip -.25cm
+\end{figure}
+
 
 \subsection{The gamma lasso}
 \label{glsec}
@@ -245,22 +272,6 @@ unpenalized in all segments after it first becomes nonzero. Figure
 % gamma-lasso thresholding operator, and it is straightforward to verify
 % directly that it is Lipschitz continuous for $\gamma < \infty$.\footnote{}
 % }  
-
-\begin{figure}[thb]
-\vskip -.5cm
-\hskip -.2cm\includegraphics[width=6.5in]{gamlr_eg}
-\vskip -.25cm
-\caption{\label{gamlr_eg} Gamma lasso estimation on $n=10^3$ 
- observations of $y_i = 4 + 3x_{1i} - x_{2i} + \varepsilon_i$, where
-$\varepsilon_i \stackrel{ind}{\sim} \mr{N}(0,1)$ and
-$\{x_{1i},x_{2i},x_{3i}\}$ are marginally standard normal with correlation of
-0.9 between covariates ($x_{3i}$ is spurious). The penalty path has $T=100$
-segments, $\lambda^1 = n^{-1}\left| \sum_i x_{1i}y_i\right|$, and
-$\lambda^{100} = 0.01\lambda^1$. Degrees of freedom are on top and vertical
-lines mark AICc and BIC selected models (see Sections
-\ref{dof}-\ref{selection}).}
-\vskip -.25cm
-\end{figure}
 
 
 \subsection{Implementation}
@@ -1459,9 +1470,9 @@ that in absence of any other relevant information about each goal (not team,
 home/away, etc), the probability a goal was scored by his team given player
 $j$ is on ice becomes $p_j = e^{\beta_j}/(1+e^{\beta_j})$ and our `partial
 plus/minus' (PPM) is \[ \mr{ppm}_j = N_j(p_j - (1-p_j)) = N_j(2p_j-1) \] where
-$N_j$ is the total number of goals for which he was on-ice.  This measures both
-quality and quantity of contribution for an individual player, controlling for
-confounding information, and it lives on the same scale as classic PM.
+$N_j$ is the  number of goals for which he was on-ice.  This measures 
+quality and quantity of contribution, controlling for
+confounding information, and lives on the same scale as PM.
 
 Table \ref{nhleffects} contains the estimated PPM values for the 2013-2014
 season under various $\gamma$ levels, using AICc selection.  We see that, even
@@ -1506,7 +1517,7 @@ data, $L_1$ weights need be constructed at practically no cost on top of a
 standard lasso run. Beyond {\tt gamlr} and marginal regression adaptive lasso,
 we have found no other software where this standard is met.
 
-\newpage
+
 \appendix
 \vskip 1cm
 \noindent{\bf\Large Appendices}
