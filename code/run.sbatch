@@ -8,13 +8,12 @@
 #SBATCH --exclusive
 
 module load parallel
-module unload R
-module load R/3.0
 
-RHO=0.9
-S2N=0.5
+RHO=0
+S2N=2
 OUT=sim-rho$RHO-s2n$S2N
 mkdir -p results/$OUT
+rm -rf results/$OUT/*
 
 LOG=results/$OUT/an_sbatch_$SLURM_JOBID.log
 echo `date` > $LOG
