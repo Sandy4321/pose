@@ -8,8 +8,6 @@
 #SBATCH --exclusive
 
 module load parallel
-module unload R
-module load R/3.0
 
 RHO=0.9
 S2N=0.5
