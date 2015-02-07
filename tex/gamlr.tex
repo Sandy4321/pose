@@ -12,7 +12,7 @@
   singlelinecheck=false,
   justification=justified
 }
-\usepackage{algorithm}
+\usepackage{algorithm,algorithmic}
 
 \graphicspath{{/Users/mtaddy/project/gamma_lasso/graphs/}}
 \newtheorem{prop}{\sc Proposition}[section]
@@ -38,10 +38,6 @@
 \newcommand{\code}[1]{{\smaller\sf#1}}
 \newcommand{\e}[1]{{\footnotesize$\times10$}{$^{#1}$}}
 
-\sectionfont{\noindent\normalfont\large\bf}
-\subsectionfont{\noindent\normalfont\normalsize\bf}
-\subsubsectionfont{\noindent\normalfont\it}
-
 \usepackage[bottom,hang,flushmargin]{footmisc}
 
 \pdfminorversion=4
@@ -54,7 +50,7 @@
 ~
 \vskip 3cm
 
-\noindent {\huge \bf The Gamma Lasso} 
+\noindent {\LARGE \bf One-step estimator paths for concave regularization} 
 
 \vskip 1cm
 
@@ -75,9 +71,10 @@ range of concavity between $L_0$ and $L_1$ norms.  The `gamma lasso' heuristic
 does $L_1$ (lasso) penalized regression estimation on a grid of decreasing
 penalties, but adapts coefficient-specific weights to decrease as a function
 of the estimated coefficient in the previous path segment.  This  simple
-recipe is used to review the literature on diminishing bias penalty regularization,
-emphasizing connections to weighted $L_1$ penalties, the role of regularization paths and model selection, and the distance from a weighted lasso
-solution to an $L_0$ penalized oracle. The work is illustrated in
+recipe is used to review the literature on diminishing-bias penalty
+regularization, emphasizing connections to weighted-$L_1$ penalties, the role
+of regularization paths and model selection, and the distance from a weighted
+lasso solution to an $L_0$ penalized oracle. The work is illustrated in
 extensive linear regression simulations and in application of logistic
 regression to evaluate the performance of hockey players.}
  
@@ -90,60 +87,83 @@ regression to evaluate the performance of hockey players.}
 \section{Introduction}
 \label{intro}
 
-For regression in high-dimensions it is useful to regularize estimation
-through a penalty on coefficient size.   This article introduces a very fast
-algorithm, the {\it gamma lasso}, for $L_1$ penalty regularization with a
-data-dependent weight on the cost of each coefficient. The algorithm  serves
-as a basis for exploring the world of sparse {\it diminishing bias}
-regularization, where penalties are spiked at zero  but have costs diminish so as to remove bias from estimation of large
-signals.
+For regression in high-dimensions, it is useful to regularize estimation
+through a penalty on coefficient size.   $L_1$  regularization \citep[i.e.,
+the lasso of][]{tibshirani_regression_1996} is especially popular, with costs
+that are non-differentiable at their minima and can lead to  coefficient
+solutions of exactly zero.  A related approach is that of concave penalized
+regularization (e.g. SCAD from \citealt{fan_variable_2001} or MCP from
+\citealt{zhang_nearly_2010}) with cost functions that are also spiked at zero
+but flatten for large values (as opposed to the constant increase of an $L_1$
+norm).  This yields sparse solutions where the large non-zero values are estimated
+with little bias. The combination of  \textit{sparsity} and \textit{diminishing-bias} 
+ is appealing in many settings, and a large literature on concave
+penalized estimation has developed over the past 15 years.  For example, many
+authors (e.g., from \citealt{fan_variable_2001} and
+\citealt{fan_nonconcave_2004})  have contributed work on their \textit{oracle
+properties}, a class of results showing conditions under which coefficient
+estimates through concave penalization, or in related schemes, will be the same
+as if you knew the `sparse truth'.
 
-We introduce regularization path estimation in Section \ref{intro}.1, before
-detailing the gamma lasso (GL) algorithm in  \ref{intro}.2. Briefly, GL solves
-a path of weighted $L_1$ penalized estimators with  weights at each segment a
-function of coefficient estimates at the previous segment.  Section
-\ref{bayes} derives a Bayesian foundation, while Section \ref{concave}
-connects concave and  weighted $L_1$ penalization.
+Unfortunately,  exact solvers for concave penalized estimation  all require
+significantly more compute time than a standard lasso.  As we review in
+Section \ref{concave},  recent literature is recommends the use of approximate
+solvers.  Certainly, this is necessary for data of the size we encounter in
+analysis of, say, internet commerce.  These approximations  take the form of
+iteratively weighted-$L_1$ regularization, where the coefficient-specific
+weights are based upon pre-estimates of the coefficients taken from previous
+iterations of the approximate solver.  One theme of this literature
+\citep[e.g.,][]{zou_one-step_2008,fan_strong_2014} 
+holds that even a single step of weighted-$L_1$ regularization is enough to
+get solutions that are close-to-optimal, so long as the pre-estimates
+are \textit{good enough} starting points. The crux of success with such one-step
+estimation (OSE) is thus finding starts that are, indeed, good enough.
 
-% The gamma lasso is not a radically new idea.  Indeed, this
-% article is intended to provide a review, wrapping up the material necessary for practical
-% application of diminishing bias estimators.  Big Data application of such tools
-% nearly always leads to a version of weighted $L_1$ regularization.  Our new
-% approach learns from the literature to provide a much more practically
-% effective and scalable algorithm than currently exists. However, we are not
-% claiming {\it theoretical} optimality of the gamma lasso, and if others wish
-% to claim superiority for their methods this article should help build
-% perspective on what should be considered during implementation.
+This article presents a computational strategy for obtaining a {\it path} of
+ one-step estimates under concave penalization.  The generic POSE -- path of
+ one-step estimators -- algorithm simply uses each solution along a
+ regularization path as the basis for weights at the next path iteration. In
+ this way, we are able to achieve  near-lasso speeds while obtaining a path of
+ sparse diminishing-bias estimators.  Our implementation and illustrations
+ apply POSE using the log penalty
+ \citep[e.g.][]{candes_enhancing_2008}, and we refer to this as the `gamma
+ lasso'  for its interpretation as the posterior mode under a hierarchical Bayesian model.
+However, we make no claims for theoretical superiority for one target penalty over another.  Rather, we treat one-step weighted-$L_1$ estimators at face-value and address practical issues in computation for such schemes:
+\begin{itemize}
+\item minimizing the cost of computing good pre-estimates,
+\item moving quickly along a path of candidate estimators, and
+\item having tools available for selection amongst these candidates.
+\end{itemize}
+All three issues are related to each other, and we will illustrate their interdependency.
+
+Section \ref{rp} acts as a short survey of sparse diminishing-bias
+regularization: we describe regularization paths in general in \ref{rp}.1,
+review the connection between concave and weighted-$L_1$ penalties in
+\ref{rp}.2, and presents novel results on the distance between weighted-$L_1$
+ and $L_0$ minimization in \ref{rp}.3. The POSE algorithm is introduced in
+\ref{pose}, with our specific gamma lasso version of the algorithm derived
+from Bayesian foundations in \ref{pose}.1.  Section \ref{sss} then covers,
+from the perspective of this gamma lasso, the related implementation issues
+mentioned above: path speed and stability in \ref{sss}.1, and model selection
+tools in \ref{sss}.2.  Finally, Section \ref{eg} presents two empirical studies:
+\ref{eg}.1 contains an extensive simulation experiment, and in \ref{eg}.2 we investigate the following data analysis question: given all goals in the past decade of NHL hockey, and information about who was on the ice, what can we say about individual player contributions? 
+
+Throughout, we focus on practice and computation rather than revisiting
+statistical properties of the estimators.  For example, the theoretical
+results in Section \ref{rp}.3 and the simulation study in Section \ref{eg}.1 take
+$L_0$ minimization as our oracle comparator. We remain agnostic about
+existence of any sparse `truth' and promote the applicability of these
+techniques from a pure information-compression perspective. And Section \ref{sss} emphasizes the ability to quickly obtain and select amongst a range of
+penalty specifications, as required by any practitioner who is (as we are)
+unwilling to rely upon theoretical derivation for penalty size when analyzing
+real data. The goal is to help push sparse diminishing-bias
+regularization into the Big Data mainstream.\footnote{To this end, we also
+provide polished and well-documented software in the
+\texttt{gamlr} package for R.}
 
 
-One theme of our work holds that sparse estimation will be useful for (and
-often used in) settings where the true data generating process is non-sparse.
-This can be motivated from an information compression  perspective -- e.g., in
-Big data settings such as
-\cite{taddy_distributed_2013}, where many estimates need to be quickly
-communicated across multiple machines -- or from a simple desire to minimize
-complexity and focus decision making.   In these cases, diminishing bias 
-helps get fits that are {\it as sparse as possible} while still being useful
-for prediction. Section \ref{theory} presents theoretical results on the
-distance between weighted $L_1$ estimation and an $L_0$ penalized oracle
-(rather than  some assumed sparse truth), and Section
-\ref{sim} provides a simulation study.
-
-Another central view of this work is that GL and related
-techniques from sparse regularization do not actually {\it do} model
-selection; rather, the paths of estimators corresponding to different levels
-of penalization provide a set of candidates from which one must choose. It is
-essential that these paths are evaluated as a whole, and that they are good platforms for model selection. Section
-\ref{stability} studies path stability, focusing on implications for
-algorithm speed and for predictor
-variance.  Section \ref{dof} describes a heuristic for model
-degrees of freedom, and Section \ref{selection} details cross validation and
-information criteria as tools for model selection.
-
-Finally,  Section \ref{nhl} explores all of these ideas in a high-dimensional inference problem: given all goals in the past decade of NHL hockey, and information about who was on the ice, what can we say about individual player contributions?  We'll explore how various degrees of diminishing bias lead to different conclusions, ranging from a world where rookies are among the best in the league and another where only established stars have any measurable effect.
-
-
-\subsection{Regularization paths}
+\section{Regularization paths}
+\label{rp}
 
 Denote $n$ response observations as $\bm{y} = [y_1,\ldots,y_n]'$ and the associated matrix of $p$ covariates as $\bm{X} =
 [\bm{x}_1 \cdots \bm{x}_n]'$, with rows $\bm{x}_i = [x_{i1},\ldots,x_{ip}]'$ and columns $\bs{x}_j = [x_{1j},\ldots,x_{nj}]'$.\footnote{Since the size of penalized $\beta_j$ depends upon the units of $x_{ij}$,  it is common to scale
@@ -199,7 +219,7 @@ These paths begin at $\lambda^1$ set to infimum $\lambda$ such that
 Given a regularization path, the selection problem is to choose $\lambda$
 so that models estimated under that  squelch are neither over nor under fit.
 For this reason, it is essential that the paths provide good material for
-model selection.  In Section \ref{stability} and afterwards, we see that path
+model selection.  In Section \ref{sss} and afterwards, we see that path
 {\it stability} is a key property.  This is closely linked with the
 rate of change in $\bs{\hat\beta}$ as a function of $\lambda$.  At the very
 least, one desires coefficient paths  smooth enough that $\bs{\hat\beta}^t$ at
@@ -220,7 +240,7 @@ $\{x_{1i},x_{2i},x_{3i}\}$ are marginally standard normal with correlation of
 segments, $\lambda^1 = n^{-1}\left| \sum_i x_{1i}y_i\right|$, and
 $\lambda^{100} = 0.01\lambda^1$. Degrees of freedom are on top and vertical
 lines mark AICc and BIC selected models (see Sections
-\ref{dof}-\ref{selection}).}
+\ref{sss}.2-\ref{selection}).}
 \vskip -.25cm
 \end{figure}
 
@@ -274,7 +294,8 @@ unpenalized in all segments after it first becomes nonzero. Figure
 % }  
 
 
-\subsection{Implementation}
+\section{POSE and the gamma lasso}
+\label{pose}
 
 Each  gamma lasso path segment is solved through coordinate descent,
 as detailed in Appendix \ref{implement}.  The algorithm is implemented in {\tt
@@ -286,7 +307,7 @@ fantastic and widely used package for costs between $L_1$ and $L_2$ norms. In
 the lasso case ($\gamma=0$), the two algorithms are essentially equivalent.
 
 
-\section{Bayesian motivation}
+\subsection{Bayesian motivation}
 \label{bayes}
 
 Consider a model where each $\beta_j$ is
@@ -417,7 +438,7 @@ that occur as $\lambda^t
 $-n\lambda\gamma/(1+\gamma|\beta_j|)^2$. Larger $\gamma$ causes the penalty to
 flatten faster.
 
-This small cost gradient for large signals is the `diminishing bias' property
+This small cost gradient for large signals is the `diminishing-bias' property
 discussed in the introduction. It is {\it the} reason why one would use
 concave penalization instead of $L_1$ or convex alternatives.  Theoretically,
 it is a necessary condition for oracle
@@ -427,62 +448,40 @@ $n$ will be the same as if you knew which should be zero.
 allow $p$ to grow slowly with $n$,  and \citet{armagan_posterior_2013} provide
 results specific to log penalization. 
 
-There is good reason to seek diminishing bias even
+There is good reason to seek diminishing-bias even
 if you think it impossible to recover true support or if you don't believe the
 truth to be sparse. Having large signals estimated without attenuation can
 lead to sparse models that do as well in prediction as their denser
 counterparts.   As mentioned in the introduction, this extra sparsity is
 useful for information compression and for easier model interpretation.  We'll
-also see in simulation and in theory that sparser diminishing bias estimators
+also see in simulation and in theory that sparser diminishing-bias estimators
 tend to yield lower false discovery rates -- fewer of the nonzero coefficients will
 be spurious with respect to a theoretically optimal $L_0$ oracle.
 
 The remainder of this section will survey the literature on concave penalty
 estimation, with a focus on implementations of these ideas and their
-relationship to weighted $L_1$ penalization.
+relationship to weighted-$L_1$ penalization.
 
 
+For example,  one run of SCAD via
+the \texttt{ncvreg} R package \citep{breheny_coordinate_2011} for the
+simulation in Section \ref{eg}.1 requires around 10 minutes, compared to 1-2
+seconds for the lasso.  This slowness is due to the difficulty of concave
+minimization: finding global, or even good local, minima is an extremely tough
+task.  The most efficient exact solver that we've found is the
+\texttt{sparsenet} of \citet{mazumder_sparsenet_2011}, also implemented in R,
+which first fits a lasso path under decreasing $L_1$ penalty magnitude and,
+for each segment on this path, adapts coefficient estimates along a second
+path of increasing penalty concavity.  While compute times for
+\texttt{sparsenet} are still much higher than for lasso (e.g., 15-20 seconds
+in our simulation), it is solving over a large set of penalty
+specifications during this time. Indeed, our gamma lasso takes from
+\texttt{sparsenet} the idea of moving along a path of closely related
+specifications, but does not require grids in both  cost size and concavity.
+Intuitively, a single GL run takes a path diagonally through this
+concavity-size grid.
 
-\begin{figure}[t]
-\vskip -.25cm
-\includegraphics[width=6.4in]{solution}
-\caption{\label{solution} Log penalties $c(\beta) = s\log(1 + \gamma|\beta|)$ 
-and penalized objectives $(\beta-B)^2 + c(\beta)$.}
-\end{figure}
-
-\subsection{Concave cost functions and their implementation}
-\label{concavecosts}
-
-The dominant literature on diminishing bias estimation revolves around
-{\it folded concave penalties}, such as SCAD 
-\citep{fan_variable_2001} and MCP \citep{zhang_nearly_2010}.
-These concave cost functions are purpose-built to avoid solution
-discontinuity (see Section \ref{stability}). SCAD and MCP penalties are
-implemented  in the {\tt ncvreg} {\sf R} package
-\citep{breheny_coordinate_2011}, and elsewhere, but unfortunately the solvers
-all require much more compute time than a standard lasso.  One run of SCAD via
-{\tt ncvreg} for the simulation in Section \ref{sim} requires around 10
-minutes, limiting the technology to small data analysis problems. This
-slowness is due to the difficulty of concave minimization: finding global, or
-even good local, minima is an extremely tough task.
-
-One approach that does manage to quickly find good solutions  is the SparseNet
-of \citet{mazumder_sparsenet_2011} which first fits a lasso path and, for each
-$\lambda$ on this path, adapts coefficient estimates along a second path of
-increasing concavity (analogous to increasing values of our $\gamma$). The
-authors show that moving through a grid of both $\lambda$ and $\gamma$ in this
-way helps to avoid minor modes and leads to faster convergence. An
-implementation for the MCP penalty is in the {\tt sparsenet} package for {\sf
-R}, and it is the best  software we've found for concave penalization.
-Runtimes for {\tt sparsenet} and roughly equivalent loops of {\tt gamlr} over
-multiple $\gamma$ are similar. The (significant) advantage of {\tt gamlr} is
-that each different $\gamma$ specification can be run in parallel (or you can
-just try one), while {\tt sparsenet} is inherently serial over dense $\gamma$
-and $\lambda$ sequences.
-
-\subsection{Concave penalization and weighted $L_1$ costs}
-\label{lla}
-
+Given the computational cost of exact solvers, , 
 Another relatively fast class of solvers for concave penalized estimators uses
 local linear approximation \cite[LLA; e.g.,][]{candes_enhancing_2008}. LLA
 replaces the concave cost function $c_j$  with its tangent at the current
@@ -512,7 +511,7 @@ your estimator the first step of an iterative approximation to some objective.
 Such early-stopping can be as good asymptotically as the full-step
 solution {\it if} the initial estimates are good enough. OSE and similar
 ideas have had a resurgence in the concave penalization literature recently,
-motivated by the need for faster estimation algorithms.  OSE LLA requires only  convex weighted $L_1$ minimization.
+motivated by the need for faster estimation algorithms.  OSE LLA requires only  convex weighted-$L_1$ minimization.
 
 \cite{fan_strong_2014} consider early-stopping of LLA
 for folded concave penalization  and show that, under strong sparsity
@@ -532,29 +531,51 @@ the BIC for selection along these paths.
 
 If one uses OSE LLA, or a two-step estimator starting from
 $\bs{\hat\beta}=0$ as suggested in \cite{fan_strong_2014} and
-\cite{wang_calibrating_2013}, the result {\it is just weighted $L_1$
+\cite{wang_calibrating_2013}, the result {\it is just weighted-$L_1$
 minimization}. Thus OSE methods are  closely related to  the adaptive lasso
-\citep[AL;][]{zou_adaptive_2006}, which does weighted $L_1$ minimization under
+\citep[AL;][]{zou_adaptive_2006}, which does weighted-$L_1$ minimization under
 weights $\omega_j = 1/|\hat\beta^0_j|$, where $\hat\beta^0_j$ is an initial
 guess at the coefficient value.  The original paper advocates using MLE
 estimates for initial values, while
 \cite{huang_adaptive_2008} suggest using marginal regression coefficients
 $\hat\beta^0_j = \mr{cor}(\bm{x}_j,\bm{y})$ and show that this can provide oracle
 properties in the  $p>n$ setting (we include marginal AL in our study of
-Section \ref{sim}).  Like GL, AL provides
-diminishing bias penalization without solving for an explicit concave penalty.
+Section \ref{eg}.1).  Like GL, AL provides
+diminishing-bias penalization without solving for an explicit concave penalty.
 
 Each segment of our gamma lasso path is also a one-step estimator, for log
 penalized objectives starting from the estimates at the previous segment.  And
 since path estimation relies on $\bs{\hat\beta}^{t-1}$ being close to
 $\bs{\hat\beta}^{t}$, it seems a natural partner for OSE. All of these methods
 -- GL, LLA OSE, AL -- differ only in how the weights are
-constructed.  Regardless of which you prefer, weighted $L_1$ penalties are
-likely to play a central role in diminishing bias penalization whenever the
+constructed.  Regardless of which you prefer, weighted-$L_1$ penalties are
+likely to play a central role in diminishing-bias penalization whenever the
 dataset is too large for use of exact concave penalty solvers.
+
+\begin{figure}[t]
+\vskip -.25cm
+\includegraphics[width=6.4in]{solution}
+\caption{\label{solution} Log penalties $c(\beta) = s\log(1 + \gamma|\beta|)$ 
+and penalized objectives $(\beta-B)^2 + c(\beta)$.}
+\end{figure}
+
 
 \section{Comparison to $L_0$ penalized estimation}
 \label{theory}
+
+
+One theme of our work holds that sparse estimation will be useful for (and
+often used in) settings where the true data generating process is non-sparse.
+This can be motivated from an information compression  perspective -- e.g., in
+Big data settings such as
+\cite{taddy_distributed_2013}, where many estimates need to be quickly
+communicated across multiple machines -- or from a simple desire to minimize
+complexity and focus decision making.   In these cases, diminishing-bias 
+helps get fits that are {\it as sparse as possible} while still being useful
+for prediction. Section \ref{theory} presents theoretical results on the
+distance between weighted-$L_1$ estimation and an $L_0$ penalized oracle
+(rather than  some assumed sparse truth), and Section
+\ref{eg}.1 provides a simulation study.
 
 We are interested in $L_1$ penalization with data-dependent weights as a way
 to obtain fits that are as sparse as possible without compromising predictive
@@ -566,7 +587,7 @@ the distances -- in prediction and on coefficients -- between  $L_0$  and weight
 $L_1$ penalized estimation.  This comparison yields simple
 relationships that make no assumptions about the underlying data model.
 Moreover, when we do make standard assumptions about the data generating
-process, we are able to quantify distance between weighted $L_1$ estimates and
+process, we are able to quantify distance between weighted-$L_1$ estimates and
 a theoretically optimal $L_0$ penalized estimator.
 
 
@@ -610,10 +631,10 @@ $
 \end{definition}
 \noindent The specific RE in Definition (\ref{redef}) matches the `adaptive restricted eigenvalues' of \cite{buhlmann_statistics_2011}.  These and related RE quantities are common in prediction and estimation results for both $L_1$ and concave penalization schemes.  See the remarks for more detail.
 
-Finally, our result derives a bound on the distance between prediction rules based on $L_0$ and weighted $L_1$ penalized estimation.  Intercepts are suppressed for simplicity.
+Finally, our result derives a bound on the distance between prediction rules based on $L_0$ and weighted-$L_1$ penalized estimation.  Intercepts are suppressed for simplicity.
 \begin{theorem} \label{sparseapprox}  Consider squared-error loss $l(\bs{\beta}) =
 \frac{1}{2}\|\bm{X}\bs{\beta}-\bm{y}\|^2$, and suppose $\bs{\beta}^{\nu}$ minimizes the $L_0$ penalized objective $l(\bs{\beta}) + n\nu\sum_{j=1}^p\ds{1}_{\{\beta_j\neq0\}}$ with $\bs{\beta}^\nu = \bs{\beta}^S$ and $|S|=s<n$.   
-Write $\bs{\hat\beta}$ as solution to the weighted $L_1$ minimization $l(\bs{\beta}) + n\lambda\sum_j\omega_j|\beta_j|$. 
+Write $\bs{\hat\beta}$ as solution to the weighted-$L_1$ minimization $l(\bs{\beta}) + n\lambda\sum_j\omega_j|\beta_j|$. 
 
 Then  
 $\omega^{\mr{min}}_{S^c}\lambda > \sqrt{2\nu}$ while $\phi^2(L,S) > 0$ implies
@@ -661,7 +682,7 @@ Dividing each side by $\sqrt{n}\|\bm{X}(\bs{\hat\beta}-\bs{\beta}^\nu)\|/2$ and 
 \noindent {\bf Remarks}
 
 \vskip .25cm
-\noindent $\bullet$~~  This is finite sample exact and completely non-parametric -- it makes no reference to the true distribution of $\bm{y}\mid \bm{X}$.  Indeed, if we make such assumptions, Theorem \ref{sparseapprox} provides bounds on the distance between a weighted lasso and optimal prediction.  The next remark is an example.
+\noindent $\bullet$~~  This is finite sample exact and completely non-parametric -- it makes no reference to the true distribution of $\bm{y}\mid \bm{X}$.  Indeed, if we make such assumptions, Theorem \ref{sparseapprox} provides bounds on the distance between a weighted-lasso and optimal prediction.  The next remark is an example.
 
 \vskip .25cm
 \noindent $\bullet$~~ If we assume that $\bm{y} \sim
@@ -670,10 +691,10 @@ and shared variance $\sigma^2$ -- then the $C_p$ formula of
 \citep{mallows_comments_1973} provides 
 $\mr{MSE}_S + 2s\sigma^2/n$ as an unbiased estimate of residual variance.
 Following \cite{efron_estimation_2004}, this implies $\nu = \sigma^2/n$ is the optimal $L_0$ penalty for minimizing prediction error.  
-Theorem (\ref{sparseapprox}) applies directly,  with $L = \frac{\|\bs{\omega}_S\|}{\sqrt{s}}\left(\omega^{\mr{min}}_{S^c}- \sqrt{2}\sigma/(\lambda\sqrt{n})\right)^{-1}$, to give a bound on the distance between weighted $L_1$ estimation and $C_p$-optimal prediction.\footnote{We work with
+Theorem (\ref{sparseapprox}) applies directly,  with $L = \frac{\|\bs{\omega}_S\|}{\sqrt{s}}\left(\omega^{\mr{min}}_{S^c}- \sqrt{2}\sigma/(\lambda\sqrt{n})\right)^{-1}$, to give a bound on the distance between weighted-$L_1$ estimation and $C_p$-optimal prediction.\footnote{We work with
 $C_p$ here, rather than $AIC$ or $AICc$, since $C_p$ is conveniently defined
 the scale of squared errors.} Note that, since the condition on minimum $S^c$ weights has become
-$\omega^{\mr{min}}_{S^c} > (\sigma/\lambda)\sqrt{2/n}$, comparison to $C_p$ suggests we can use larger $\gamma$ (faster diminishing bias) with large $n$ or small $\sigma$.
+$\omega^{\mr{min}}_{S^c} > (\sigma/\lambda)\sqrt{2/n}$, comparison to $C_p$ suggests we can use larger $\gamma$ (faster diminishing-bias) with large $n$ or small $\sigma$.
 
 
 \vskip .25cm
@@ -702,13 +723,13 @@ Our results will require irrepresentable conditions with $\bm{v} =
 weights $\omega_j$ for $j\in S$.  See the remarks for more discussion.
 
 Our comparison of interest is between $\hat S = \{j:
-\hat\beta_j \neq 0\}$, for $\bs{\hat\beta}$ from weighted $L_1$ penalized
+\hat\beta_j \neq 0\}$, for $\bs{\hat\beta}$ from weighted-$L_1$ penalized
 estimation, and $S = \{j:
 \beta^\nu_j \neq 0\}$ for $\bs{\beta}^\nu$ the $L_0$ penalized estimator from
 Theorem \ref{sparseapprox}. Whether looking to an $L_0$ oracle or a sparse
 truth, our experience is that exact support recovery does not occur in
-practice   (e.g., see the simulation in Section \ref{sim}).  Thus, we instead 
-focus on ability of the weighted lasso to minimize {\it false discoveries}:
+practice   (e.g., see the simulation in Section \ref{eg}.1).  Thus, we instead 
+focus on ability of the weighted-lasso to minimize {\it false discoveries}:
 $\hat\beta_j
 \neq 0$ when $\beta^\nu_j=0$.  In particular, we describe how far along the regularization path one may expect to avoid any false discovery.
 
@@ -756,10 +777,17 @@ make $\omega_j$ very big for $j \in S^c$ (e.g., as in a thresholding procedure
 like that of \citealt{zhou_thresholding_2009}), the result in (\ref{pessimism}) has little to say about false discovery control.
 
 
-\section{Stability}
-\label{stability}
+\section{Speed, stability, and selection}
+\label{sss}
 
-The benefits of diminishing bias come at a price: the negative log posterior
+
+Another central view of this work is that GL and related
+techniques from sparse regularization do not actually {\it do} model
+selection; rather, the paths of estimators corresponding to different levels
+of penalization provide a set of candidates from which one must choose. It is
+essential that these paths are evaluated as a whole, and that they are good platforms for model selection.
+
+The benefits of diminishing-bias come at a price: the negative log posterior
 can be concave.  This can lead to large changes in fit from small change in
 {\it either} data $\bm{y}$ or penalty size $\lambda$.  For example,  the
 minimizer of the solid line of the right panel in Figure \ref{solution} will
@@ -769,7 +797,7 @@ $\gamma s$.
 Estimators that make large changes under small
 data jitter are {\it instable}.  This hurts predictive performance by
 increasing predictor variance, it precludes estimation of model complexity as
-in Section \ref{dof}, and
+in Section \ref{sss}.2, and
 \citet{breiman_heuristics_1996} argues that variability of model choice
 explodes if the candidate fits are themselves instable. From another
 perspective, a fit that is {\it sensitive} to specification is unreliable when
@@ -815,7 +843,7 @@ $\hat\beta(\bm{y})$ is our implicit estimation function. Then $\hat\beta$ is
 Lipschitz continuous if  $ \|\hat\beta(\bm{y}_1)-\hat\beta(\bm{y}_2)| \leq
 L\|\bm{y}_1-\bm{y}_2\| $ for some finite constant $L$ on all possible
 $\bm{y}_1,\bm{y}_2$. This is necessary for, e.g., our degrees of freedom
-estimator in Section \ref{dof}.  Many popular concave cost functions, such as
+estimator in Section \ref{sss}.2.  Many popular concave cost functions, such as
 the SCAD and MC+, have been engineered to be Lipschitz continuous.
 \cite{zou_one-step_2008} show that OSE LLA solutions have this property even
 if the target objective does not.
@@ -831,7 +859,7 @@ From the above discussion, we need to establish continuity of the weights.  At $
 
 \subsection{Practical Stability}
 
-A regularization path can be Lipschitz continuous but still overly sensitive to data jitter and penalty size.  The most obvious effect is computational:  when solutions change too quickly along the path, you lose the benefit of hot-starts and computation time blows up. As an illustration, Figure \ref{nhltime} shows timings growing rapidly with large $\gamma$ for the hockey data  of Section \ref{nhl}, even though all of these specifications are theoretically stable.
+A regularization path can be Lipschitz continuous but still overly sensitive to data jitter and penalty size.  The most obvious effect is computational:  when solutions change too quickly along the path, you lose the benefit of hot-starts and computation time blows up. As an illustration, Figure \ref{nhltime} shows timings growing rapidly with large $\gamma$ for the hockey data  of Section \ref{eg}.2, even though all of these specifications are theoretically stable.
 
 \begin{figure}[bht]
 \vskip -.5cm
@@ -839,13 +867,13 @@ A regularization path can be Lipschitz continuous but still overly sensitive to 
 \includegraphics[width=5in]{nhl_time}
 \vskip -.25cm
 \caption{\label{nhltime} 
-Timings for the hockey data path fits of Section \ref{nhl}
+Timings for the hockey data path fits of Section \ref{eg}.2
 on a length-100 grid with $\lambda^{100} = 0.01\lambda^1$. }
 \vskip -.25cm
 \end{figure}
 
 
-\section{Degrees of freedom}
+\subsection{Degrees of freedom}
 \label{dof}
 
 A predictor's degrees of freedom ($df$) determines its tendency to over or
@@ -854,7 +882,7 @@ model, $df$ is just the number of coefficients.  More generally, for $\bm{y} \si
 we define $df = \sigma^{-2} \sum_i \mr{cov}(\hat y_i, y_i)$ where $\hat y_i$
 is the prediction rule for observation $y_i$ \citep[e.g.][]{efron_least_2004}. Given an estimator
 that is Lipschitz continuous with respect to $\bm{y}$, as in Section
-\ref{stability}, the SURE framework of \cite{stein_estimation_1981} applies
+\ref{sss}, the SURE framework of \cite{stein_estimation_1981} applies
 and we get a more workable version of this definition:  $df =
 \ds{E}\left[\sum_i \partial \hat y_i/\partial y_i\right]$.
 
@@ -900,7 +928,7 @@ function of all of the elements of $\bs{\beta}$, we plug in the most recent
 $g_j$ at which $\hat\beta^t_j=0$:  this
 requires no extra computation and has the advantage of maintaining $df =
 \hat p^t$ for $\gamma = 0$.  And for non-Gaussian models (e.g.,
-in Section \ref{nhl}), we apply (\ref{edf}) directly despite its
+in Section \ref{eg}.2), we apply (\ref{edf}) directly despite its
 motivation from squared errors.
 
 Despite these many compromises, we have found that (\ref{edf}) works remarkably
@@ -908,7 +936,7 @@ well in both simulation and real data examples.  When used as an input to
 information criteria, as in the next section, it allows those criteria to
 perform as well or better than nonparametric cross-validation.
 
-\section{Selection}
+\subsection{Selection}
 \label{selection}
 
 
@@ -978,7 +1006,7 @@ which minimizes (\ref{ic}).
 
 The commonly applied AIC uses $c(df)=2df$ and is derived as an asymptotic approximation to (\ref{dualexpect}) in 
 \cite{akaike_information_1973}.  However, our experience (e.g., see Section
-\ref{sim}) is that AIC selects over-fit models when applied to high dimensional
+\ref{eg}.1) is that AIC selects over-fit models when applied to high dimensional
 problems.  This is because the approximation upon which it is based
 is valid only for large $n/df$ \citep{burnham_model_2002}.  A `corrected' AICc
 for finite $n/df$ is derived in
@@ -989,7 +1017,7 @@ application to penalized deviance estimation.
 \end{equation}
 The correction multiplier is $n/(n-df-1)$, and AICc approaches standard AIC if $n\gg df$.  We find massive improvements from this correction, and in our simulations (and other experience) AICc can match or exceed the  performance of CV-based selection.  
 
-Since the AICc plays a central role in our applied work, we present below an informal derivation based on the Mallows $C_p$ formula.  The goal here is to make the result as intuitive as possible.  See \cite{claeskens_model_2008} for a more traditional derivation and full theoretical review of information criteria, and refer to \citet{flynn_efficiency_2013} for results extending to generalized linear models (which we take for granted in the hockey application of Section \ref{nhl}). 
+Since the AICc plays a central role in our applied work, we present below an informal derivation based on the Mallows $C_p$ formula.  The goal here is to make the result as intuitive as possible.  See \cite{claeskens_model_2008} for a more traditional derivation and full theoretical review of information criteria, and refer to \citet{flynn_efficiency_2013} for results extending to generalized linear models (which we take for granted in the hockey application of Section \ref{eg}.2). 
 
 \subsubsection{Derivation of AIC and AICc}
 
@@ -1039,8 +1067,10 @@ sympathetic to its Bayesian motivation, the BIC's $\log n$ penalty is too
 harsh for large $n$ and it leads to selection of under-fit models in Big data
 applications.  
 
-\section{Simulation}
-\label{sim}
+\section{Examples}
+\label{eg}
+
+\subsection{Simulation}
 
 This section will  analyze data simulated from
  the following $p=1000$ dimensional regression.
@@ -1117,7 +1147,7 @@ The two criteria roughly track each other, although AICc more heavily
 penalizes over-fit and at $\gamma=10$ their minima do not match.  Notice that
 as $\gamma$ increases, the CV error increases more quickly after it's minimum;
 this indicates that the consequences of over-fit are worse under faster
-diminishing bias.
+diminishing-bias.
 
 % \begin{table}[p]\vspace{-.5cm}
 % \caption[l]{\it Predictive Mean Square Error\hfill}
@@ -1403,7 +1433,7 @@ same in each case -- average deviance slightly above 1.16 -- but errors
 increase much faster away from optimality with larger $\gamma$.   We also see
 that AICc selection is always between the CV.min and CV.1se selctions:  at
 $\gamma=0$ AICc matches the CV.1se choice, while at $\gamma=10$ it has moved
-right to the CV.1se  selection.  Our heuristic from Section \ref{dof} might be
+right to the CV.1se  selection.  Our heuristic from Section \ref{sss}.2 might be
 over-estimating $df$ for large-$\gamma$ models (especially under this very
 collinear design), but one would also suspect that CV estimates of minimum
 deviance are biased downward more dramatically for larger $\gamma$ than for
@@ -1491,7 +1521,7 @@ amongst the 64 nonzero player effects.
 \label{discussion}
 
 Diminishing bias estimation in Big data, where exact solvers are too
-computationally expensive, reduces largely to weighted $L_1$ penalization.
+computationally expensive, reduces largely to weighted-$L_1$ penalization.
 This review has covered a number of topics that we think relevant for such
 schemes: theoretical distance to $L_0$ minimization, relationship to a
 Bayesian model, and stability, degrees of freedom, and estimates of predictive
@@ -1561,10 +1591,10 @@ $L_1$ penalized estimation since the work by \citet{friedman_pathwise_2007} and
 \citet{wu_coordinate_2008}.
 
 Our CD routine, outlined in Algorithm \ref{bmove}, is a solver for penalized
-weighted least squares problems as defined in equation (\ref{newton}) below.
+weighted-least squares problems as defined in equation (\ref{newton}) below.
 This applies directly in Gaussian regression, and for non-Gaussian models  we
 follow \citet{friedman_regularization_2010} and apply CD inside an outer loop
-of iteratively re-weighted least-squares \citep[IRLS;
+of iteratively re-weighted-least-squares \citep[IRLS;
 e.g.,][]{green_iteratively_1984}. Given current parameter values
 $\bs{\hat\beta}$, the Newton-Raphson update for maximum likelihood estimation
 is $\bs{\beta} = \bs{\hat\beta} - \bm{H}^{-1}\bm{g}$, where $\bm{H}$ is the
@@ -1581,7 +1611,7 @@ solution. For binomial regression, $v_i = q_i(1-q_i)$ and $z_i = \hat\eta_i -
 probability of success.
 
 This yields $\bs{\beta} = (\bm{X}'\bm{V}\bm{X})^{-1}\bm{X}'\bm{V}\bm{z}$, such
-that the Newton update solves a weighted least-squares problem.   Adding $L_1$
+that the Newton update solves a weighted-least-squares problem.   Adding $L_1$
 costs,  the minimization objective from (\ref{l1pen}) becomes
 \begin{equation} \label{newton}  \argmin_{\alpha,\beta_1 \ldots \beta_p \in
 \ds{R}} \sum_i \frac{v_i}{2}(\alpha + \bm{x}_i'\bs{\beta} - z_i)^2  + n\sum_j \omega_j
@@ -1641,7 +1671,7 @@ and $\bs{\hat\eta} = \hat\alpha + \bm{X}'\bs{\hat\beta}$.
 \citet{tseng_convergence_2001} establishes local convergence for CD on
 (\ref{newton}) as a consequence of penalty separability: the 
 non-differentiable part of our objective is a sum of functions on only a single
-coordinate.  Thus CD solves each weighted least squares problem, and  the full
+coordinate.  Thus CD solves each weighted-least squares problem, and  the full
 algorithm converges if IRLS does.  For non-Gaussian models this is not always
 guaranteed, but divergence is rare and we find the algorithm reliable in
 practice.
@@ -1683,7 +1713,7 @@ $\left|(\bm{X}_S'\bm{X}_S)^{-1}\bm{X}_S'\bm{y}\right|_\infty > n\lambda\left|(\b
 $\mr{sgn}(\bs{\hat\beta}) = \mr{sgn}(\bs{\beta}^\nu)$.
 \end{lemma}
 \begin{proof} We adapt results of \cite{wainwright_sharp_2009}.
-From the Karush-Kuhn-Tucker (KKT) conditions at weighted $L_1$ minimization convergence, 
+From the Karush-Kuhn-Tucker (KKT) conditions at weighted-$L_1$ minimization convergence, 
 $\bm{x}_j'\bm{X}(\bs{\hat\beta}_S-\bs{\beta}^\nu) + \bm{X}'\bm{e}^S = -n\lambda\zeta_j$ where $|\zeta_j| = \omega_j$ for $j\in\hat S$ and $|\zeta_j| \leq \omega_j$ for $j\in\hat S^c$.
 Thus we we have no false positives if and only if
 \begin{equation}
