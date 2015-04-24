@@ -31,7 +31,7 @@ Bnow[names(p1314)] <- Bnow[names(p1314)]+p1314
 Bnow[order(-Bnow)[1:10]] # 10 biggest
 
 
-pm <- colSums(player[now,names(Bnow)]) # traditional plus minus
+pm <- colSums(player[now,names(Bnow)]*c(-1,1)[y[now]+1]) # traditional plus minus
 ng <- colSums(abs(player[now,names(Bnow)])) # total number of goals
 # The individual effect on probability that a
 # given goal is for vs against that player's team
