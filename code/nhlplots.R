@@ -150,8 +150,8 @@ for(gamma in gvec){
 	else effect <- cbind(effect,effectg[1:50,])
 }
 for(j in c(1,5,9)) effect[,j] <- as.character(effect[,j])
-for(i in 1:25){
-	cat(paste(as.character(effect[i,-c(2,6,10)]),collapse=" & "), "\\\\\n") }
+for(i in 1:20){
+	cat(i,"&", paste(as.character(effect[i,-c(2,6,10)]),collapse=" & "), "\\\\\n") }
 
 
 n <- nrow(x)
