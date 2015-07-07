@@ -905,7 +905,7 @@ This section will  analyze data simulated from
  the following $p=1000$ dimensional regression.
 \begin{align}
 \label{simdgp}
-y \sim \mr{N}\left(\bm{x}'\bs{\beta},\sigma^2\right)~~\text{where}~~\bm{x} = \bm{u}*\bm{z},~~\bm{x}\sim \mr{N}\left(\bm{0},\bs{\Sigma}\right),~~z_{j} \stackrel{ind}{\sim} \mr{Bin}(0.5),~~\beta_j = \frac{1}{j}\exp\left(-\frac{j}{50}\right).
+y \sim \mr{N}\left(\bm{x}'\bs{\beta},\sigma^2\right)~~\text{where}~~\bm{x} = \bm{u}*\bm{z},~~\bm{u}\sim \mr{N}\left(\bm{0},\bs{\Sigma}\right),~~z_{j} \stackrel{ind}{\sim} \mr{Bin}(0.5),~~\beta_j = \frac{1}{j}\exp\left(-\frac{j}{50}\right).
 \end{align}
 
 \vspace{-.4cm}
@@ -1590,4 +1590,3 @@ where $\mr{w}_l = \mr{u}_l/(\mr{u}_l - \mr{v}_l)$.
 
 
 \end{document}
-
