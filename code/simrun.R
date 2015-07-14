@@ -213,6 +213,8 @@ getE <- function(W,lam,f){
 		sprintf("results/%s/cpineq%s.txt",OUT,f),append=TRUE)
 	write(paste(irrep,collapse="|"),
 		sprintf("results/%s/irrep%s.txt",OUT,f),append=TRUE)
+	write(paste(wmin,collapse="|"),
+		sprintf("results/%s/wmin%s.txt",OUT,f),append=TRUE)
 	return(list(L=L,cpineq=cpineq,irrep=irrep))
 }
 
