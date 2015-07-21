@@ -19,6 +19,12 @@ write(d$sigma, sprintf("results/%s/sigma.txt",OUT),append=TRUE)
 times <- paste(round(c(tgl0,tgl2,tgl10,tmrgal,tsnet),1),collapse="|")
 write(times, sprintf("results/%s/times.txt",OUT),append=TRUE)
 
+## lambda grids
+gllam <- paste(gl0$gamlr$lambda,collapse="|")
+write(gllam, sprintf("results/%s/gllam.txt",OUT),append=TRUE)
+mrglam <- paste(mrgal$gamlr$lambda,collapse="|")
+write(mrglam, sprintf("results/%s/mrglam.txt",OUT),append=TRUE)
+
 ## prediction
 e0 <- predict(gl0$gamlr,d$x,select=0)-d$y.val
 e2 <- predict(gl2$gamlr,d$x,select=0)-d$y.val
