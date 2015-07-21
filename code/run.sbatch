@@ -1,7 +1,6 @@
 #!/bin/bash
 ## run with `sbatch -N[#machines] code/run.sbatch'
 #SBATCH --time=12:0:0
-#SBATCH --ntasks=16
 #SBATCH --mem-per-cpu=2000
 #SBATCH --output=%j.err
 #SBATCH --constraint=ib
@@ -9,21 +8,25 @@
 
 module load parallel
 
-RHO=0
-S2N=2
-OUT=sim-rho$RHO-s2n$S2N
-mkdir -p results/$OUT
-rm -rf results/$OUT/*
+for RHO in {0, 0.5, 0.9}; do
+    for S2N in {0.5, 1, 2}; do
 
-LOG=results/$OUT/an_sbatch_$SLURM_JOBID.log
-echo `date` > $LOG
-echo "$SLURM_NNODES nodes" >> $LOG
+        OUT=sim-rho$RHO-s2n$S2N
+        mkdir -p results/$OUT
+        rm -rf results/$OUT/*
+        
+        LOG=results/$OUT/an_sbatch_$SLURM_JOBID.log
+        echo `date` > $LOG
+        echo "$SLURM_NNODES nodes" >> $LOG
+        
+        export para="parallel --delay .2 -j $SLURM_NTASKS --joblog results/$OUT/para.log"
+        export srun="srun --exclusive -N1 -c1 --ntasks=1"  
+        
+        $para $srun "Rscript code/simrun.R {1} $RHO $S2N $OUT > results/$OUT/r.log" ::: {1..1000}
+        
+        echo "done @" `date` >> $LOG
 
-export para="parallel --delay .2 -j $SLURM_NTASKS --joblog results/$OUT/para.log"
-export srun="srun --exclusive -N1 -c1 --ntasks=1"  
-
-$para $srun "Rscript code/simrun.R {1} $RHO $S2N $OUT > results/$OUT/r.log" ::: {1..1000}
-
-echo "done @" `date` >> $LOG
+    done
+done
 
 
