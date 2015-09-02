@@ -1410,14 +1410,17 @@ Under the setting of Theorem \ref{sparseapprox}, with $\hat S = \{j:\hat\beta_j 
 $\left|(\bm{X}_S'\bm{X}_S)^{-1}\bm{X}_S'\bm{y}\right|_\infty > n\lambda\left|(\bm{X}_S'\bm{X}_S)^{-1}\bs{\omega}_S\right|_\infty$, then 
 $\mr{sgn}(\bs{\hat\beta}) = \mr{sgn}(\bs{\beta}^\nu)$.
 \end{lemma}
-\begin{proof} We adapt results of \cite{wainwright_sharp_2009}.
-From the Karush-Kuhn-Tucker (KKT) conditions at weighted-$L_1$ minimization convergence, 
-$\bm{x}_j'\bm{X}(\bs{\hat\beta}_S-\bs{\beta}^\nu) + \bm{X}'\bm{e}^S = -n\lambda\zeta_j$ where $|\zeta_j| = \omega_j$ for $j\in\hat S$ and $|\zeta_j| \leq \omega_j$ for $j\in\hat S^c$.
-Thus we we have no false positives if and only if
+\begin{proof} 
+The Karush-Kuhn-Tucker (KKT) conditions at weighted-$L_1$ minimization convergence imply that 
+\begin{equation}
+\bm{x}_j'\bm{X}(\bs{\hat\beta}-\bs{\beta}^\nu) + \bm{x}_j'\bm{e}^S = -n\lambda\zeta_j~~\text{for}~~j=1\dots p
+\end{equation} where $|\zeta_j| = \omega_j$ for $j\in\hat S$ and $|\zeta_j| \leq \omega_j$ for $j\in\hat S^c$.  Following  closely related proofs in \cite{wainwright_sharp_2006,wainwright_sharp_2009,zhou_adaptive_2009}, 
+$\hat{S} \cap S^c = \varnothing$ occurs if and only if these KKT conditions
+hold for projections restricted to $S$,
 \begin{equation}
 \bm{X}_S'\bm{X}_S(\bs{\hat\beta}_S-\bs{\beta}^\nu_S) + \bm{X}_S'\bm{e}^S =-n\lambda\bs{\zeta}_S ~~\Rightarrow~~ \bs{\hat\beta}_S-\bs{\beta}^\nu_S = -n\lambda(\bm{X}_S'\bm{X}_S)^{-1}\bs{\zeta}_S.
 \end{equation}
-And all of the spurious regressors in $S^c$ will have $\hat \beta_j = 0$
+Thus all of the spurious regressors in $S^c$ will have $\hat \beta_j = 0$
 if and only if
 \begin{equation}
 \bs{x}_j'\bm{X}_S(\bs{\hat\beta}_S-\bs{\beta}^\nu_S) - \bs{x}_j'\bm{e}^S 
