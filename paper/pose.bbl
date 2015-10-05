@@ -1,5 +1,11 @@
 \begin{thebibliography}{}
 
+\bibitem[\protect\citeauthoryear{Efron, Hastie, Johnstone, and
+  Tibshirani}{Efron et~al.}{2004}]{efron_least_2004}
+Efron, B., T.~Hastie, I.~Johnstone, and R.~Tibshirani (2004).
+\newblock Least angle regression.
+\newblock {\em Annals of Statistics\/}~{\em 32}, 407--499.
+
 \bibitem[\protect\citeauthoryear{Fan and Li}{Fan and
   Li}{2001}]{fan_variable_2001}
 Fan, J. and R.~Li (2001).

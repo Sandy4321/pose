@@ -16,6 +16,7 @@
 \newtheorem{definition}{\sc Definition}[section]
 \newtheorem{lemma}{\sc Lemma}[section]
 \newtheorem{corollary}{\sc Corollary}[section]
+\DeclareMathOperator*{\argmin}{argmin}
 
 \marginsize{1.1in}{.9in}{.3in}{1.4in}
 
@@ -88,7 +89,7 @@ probability).   From an information compression perspective,  the increased
 sparsity encouraged by diminishing-bias penalties (since single large
 coefficients are allowed to account for the signals of other correlated
 covariates) leads to lower memory, storage, and communication requirements.
-Such savings that are very important in distributed  computing schemes
+Such savings are very important in distributed  computing schemes
 \citep[e.g.,][]{taddy_distributed_2013}.
 
 
@@ -97,18 +98,67 @@ Unfortunately,  exact solvers for concave penalized estimation  all require
 significantly more compute time than a standard lasso.  In our experience,
 this has precluded their use in settings -- e.g., in text or web-data analysis
 -- where both $n$ (the number of observations) and $p$ (the number of
-covariates) are very large.  
-As we review below,  recent literature recommends the use of approximate solvers.
-Certainly, this is necessary for data of the size we encounter in analysis of,
-say, internet commerce.  These approximations  take the form of
-iteratively-weighted-$L_1$ regularization, where the coefficient-specific
-weights are based upon estimates of the coefficients taken from previous
-iterations of the approximate solver.  This literature
+   covariates) are very large. As we review below,  recent literature
+   recommends the use of approximate solvers. Certainly, this is necessary for
+   data of the size we encounter in analysis of, say, internet commerce.
+   These approximations  take the form of iteratively-weighted-$L_1$
+   regularization, where the coefficient-specific weights are based upon
+   estimates of the coefficients taken from previous iterations of the
+   approximate solver.  This literature
 \citep[e.g.,][]{zou_one-step_2008,fan_strong_2014} 
 holds that even a single step of weighted-$L_1$ regularization is enough to
 get solutions that are close to optimal, so long as the pre-estimates
 are \textit{good enough} starting points. The crux of success with such one-step
 estimation (OSE) is  finding starts that are, indeed, good enough.
+
+
+This article proposes a framework for sparse diminishing-bias regularization
+that combines ideas from OSE with the concept of a \textit{regularization
+path} -- a general technique, most famously associated with the LARS algorithm \cite{efron_least_2004}, 
+
+As detailed in Section  path of one-step estimators (POSE) does $L_1$
+ penalized regression estimation on a grid of decreasing penalties, but adapts
+ coefficient-specific weights to decrease as a function of the coefficient
+ estimated in the previous path step.
+
+
+\section{Path of one-step estimators}
+\label{pose}
+
+Our path of one-step estimators (POSE), in Algorithm \ref{posealgo}, uses solutions along the sequence of decreasing penalty sizes, $\lambda^t$, as the basis for LLA weights at the next path step.  In this, we are assuming a penalty specification such that $\lim_{b\to 0} c'(|b|) = 1$ and that the cost function is differentiable for $b\neq 0$.  This yields a path of one-step LLA
+penalized coefficient estimates. 
+
+\vskip .2cm
+{
+\begin{algorithm}[ht]
+\caption{\label{posealgo} POSE }
+\vskip .2cm
+Initialize $\bs{\hat\beta}^0 = \bf{0}$, so that $\hat S_0 = \varnothing$.
+
+\vskip .2cm
+Set $\lambda^1 >
+0$ with step size
+$0 < \delta < 1$.
+
+\vspace{-.75cm}
+\begin{align}
+\text{for}~t=1\ldots T :&\notag \\
+\omega^{t}_j  &=  
+\left\{ 
+  \begin{array}{r}
+    c'(|\hat\beta^{t-1}_j|) ~\text{for}~j \in \hat S_t \\
+    1  ~\text{for}~j \in \hat S_t^c  
+  \end{array} 
+  \right. 
+  \label{wset}\\
+\left[\hat\alpha,\bs{\hat\beta}\right]^t &= \argmin_{\alpha,\beta_j\in\ds{R}}~~
+l(\alpha,\bs{\beta}) + n\sum_j \lambda^t\omega^t_j|\beta_j| \label{l1pen}\\
+\lambda^{t+1} &= \delta \lambda^t\notag
+\end{align}
+\vskip -.3cm
+\end{algorithm}}
+
+ From an engineering standpoint, POSE has the same appeal as any successful path algorithm: if the estimates change little from iteration $t$ to $t+1$, then you will be able to quickly solve for a large set of candidate specifications.  Following the discussion of Section \ref{rp}.1, such algorithms are a natural match with one-step estimation: OSE relies upon inputs being close to the optimal solution, which is precisely the setting where path algorithms are most efficient.  More rigorously, Theorem \ref{sparseapprox} applied to POSE yields  $\hat S_{t-1} \cap S^c = \varnothing \Rightarrow \omega_{S^c}^{t~\mr{min}} = 1$.  Thus so long as $\lambda$ is large enough,  Section \ref{rp}.2 demonstrates that  fast diminishing $\omega_j$ will help control false discovery and improve prediction.  Of course, the moment $\hat S_t \cap S^c \neq \varnothing$,  diminishing-bias allows spurious covariates to enter with  little shrinkage and can move the fit arbitrarily far away from $L_0$-optimality -- that is, with $\lambda$ too small the diminishing bias hurts your ability to estimate and predict.  This is why it is essential to have a path of candidate $\lambda^t$ to choose amongst.
 
 
 \section{Sparse regularization paths and diminishing bias}
