@@ -74,25 +74,30 @@ regularization (e.g. SCAD from \citealt{fan_variable_2001} or MCP from
 \citealt{zhang_nearly_2010}) with cost functions that are also spiked at zero
 but flatten for large values (as opposed to the constant increase of an $L_1$
 norm).  This yields sparse solutions where  large non-zero values are estimated
-with little bias. The combination of  \textit{sparsity} and \textit{diminishing-bias} 
+with little bias. 
+
+The combination of  \textit{sparsity} and \textit{diminishing-bias} 
  is appealing in many settings, and a large literature on concave
 penalized estimation has developed over the past 15 years.  For example, many
 authors (e.g., from \citealt{fan_variable_2001} and
 \citealt{fan_nonconcave_2004})  have contributed work on their \textit{oracle
 properties}, a class of results showing conditions under which coefficient
-estimates through concave penalization, or in related schemes, will be the same
-as if you knew the sparse `truth'.
+estimates through concave penalization, or in related schemes, will be the
+same as if you knew the sparse `truth' (either asymptotically or with high
+probability).   From an information compression perspective,  the increased
+sparsity encouraged by diminishing-bias penalties (since single large
+coefficients are allowed to account for the signals of other correlated
+covariates) leads to lower memory, storage, and communication requirements.
+Such savings that are very important in distributed  computing schemes
+\citep[e.g.,][]{taddy_distributed_2013}.
+
 
 
 Unfortunately,  exact solvers for concave penalized estimation  all require
 significantly more compute time than a standard lasso.  In our experience,
 this has precluded their use in settings -- e.g., in text or web-data analysis
 -- where both $n$ (the number of observations) and $p$ (the number of
-covariates) are very large.   This lack of adoption occurs despite memory and
-communication savings due to the increased sparsity encouraged by
-diminishing-biased penalties (single large coefficients are allowed to account
-for the signals of other correlated covariates) -- savings that are very important in distributed  computing schemes \citep[e.g.,][]{taddy_distributed_2013}.
-
+covariates) are very large.  
 As we review below,  recent literature recommends the use of approximate solvers.
 Certainly, this is necessary for data of the size we encounter in analysis of,
 say, internet commerce.  These approximations  take the form of
