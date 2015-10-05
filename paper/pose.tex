@@ -124,11 +124,163 @@ penalties, but adapts coefficient-specific weights to decrease as a function
 of the coefficient estimated in the previous path step.  POSE takes advantage
 of the natural match between path algorithms and one-step estimation: OSE
 relies upon inputs being close to the optimal solution, which is precisely the
-setting where path algorithms are most efficient.  This framework 
+setting where path algorithms are most efficient.  This framework allows us to provide 
+\begin{itemize}
+\item a {\it path} of coefficient fits, each element of which corresponds to sparse diminishing-bias regularization estimation under a different level of penalization; where
+\item obtaining the path of coefficient fits requires no more computation than  a state-of-the-art $L_1$ regularization pat algorithm; and
+\item there are reliable closed-form rules for selection of the optimal penalty level along this path.
+\end{itemize}
+The last capability here is derived from a Bayesian interpretation for our \textit{gamma lasso} implementation of POSE (see Section \ref{sec:gamlr}) from which we are able to construct heuristic information criteria for penalty selection.
+We view such penalty-selection tools as an essential ingredient for practical applicability in large-scale industrial machine learning where, e.g., cross-validation is not always viable or advisable.
 
-The later penalty-selection capability is derived from a Bayesian interpretation for our \textit{gamma lasso} implementation of POSE (Section , from which we are able to derive heuristic information criteria 
 
-We view such penalty-selection tools as an essential ingredient for practical applicability in large-scale industrial machine learning, where, e.g., cross-validation is not always viable or advisable.
+The remainder of this paper is outlined as follows.  Section \ref{rp} is a
+survey of sparse diminishing-bias regularization: we review the connection
+between concave and weighted-$L_1$ penalties in
+\ref{rp}.1, and present novel results on the distance between weighted-$L_1$
+ and $L_0$ minimization in \ref{rp}.2. The POSE algorithm is introduced in
+Section \ref{pose}, with our  gamma lasso specification in \ref{pose}.1 and its motivation from Bayesian foundations in \ref{pose}.2.  Section \ref{sss}  covers
+implementation issues key to any path-based strategy:  speed and stability
+in \ref{sss}.1, and model selection  in \ref{sss}.2.  Finally, Section
+\ref{eg} presents two empirical studies:
+a  simulation experiment in \ref{eg}.1, and in \ref{eg}.2 we investigate the data analysis question: given all goals in the past decade of NHL hockey, what can we say about individual player contributions? 
+
+\section{Sparse regularization paths and diminishing bias}
+\label{rp}
+
+Denote $n$ response observations as $\bm{y} = [y_1,\ldots,y_n]'$ and the associated matrix of $p$ covariates as $\bm{X} =
+[\bm{x}_1 \cdots \bm{x}_n]'$, with rows $\bm{x}_i = [x_{i1},\ldots,x_{ip}]'$ and columns $\bs{x}_j = [x_{1j},\ldots,x_{nj}]'$.\footnote{Since the size of penalized $\beta_j$ depends upon the units of $x_{ij}$,  it is common to scale
+the coefficient by $\mr{sd}(\bs{x}_j)$, the standard deviation of the $j^{th}$ column
+of $\bm{X}$; this is achieved if $x_{ij}$ is replaced by $x_{ij}/\mr{sd}(\bs{x}_j)$
+throughout.} Write $\eta_{i} =
+\alpha+\bm{x}_i'\bs{\beta}$ as the linear equation for observation $i$, and
+denote with $l(\alpha, \bs{\beta}) = l(\bs{\eta})$  an unregularized
+objective  proportional to the negative log likelihood.  For example, in Gaussian (linear)
+regression, $l(\bs{\eta})$ is the sum-of-
+squares $0.5\sum_i \left(y_i - \eta_i\right)^2$ and in binomial (logistic)
+regression,  $l(\bs{\eta}) = -\sum_i \left[\eta_iy_i -
+\log(1+e^{\eta_i})\right]$ for $y_i \in [0,1]$.  
+A penalized estimator is then the solution to
+\begin{equation} \label{pendev}
+\argmin_{\alpha,\beta_j\in\ds{R}}~~\left\{~l(\alpha,{\bs{\beta}}) + n\lambda \sum_{j=1}^p c_j(|\beta_j|)~\right\},
+\end{equation}
+where $\lambda>0$ controls overall penalty magnitude and are $c_j()$ are coefficient cost functions.
+ 
+\begin{figure*}[t]
+\vspace{-.5cm}
+\includegraphics[width=\textwidth]{graphs/penalties}
+\vskip -.5cm
+\caption{\label{costs} 
+From left to right, 
+$L_2$ costs \citep[ridge,][]{hoerl_ridge_1970}, $L_1$ \citep[lasso,][]{tibshirani_regression_1996}, the `elastic net' mixture of $L_1$ and $L_2$ \citep{zou_regularization_2005}, and the log penalty \citep{candes_enhancing_2008}.
+}
+\end{figure*}
+
+A few common cost functions are shown in Figure \ref{costs}.  Those that have
+a non-differentiable spike at zero (all but ridge) lead to sparse estimators,
+with some coefficients set to exactly zero.   The curvature of the penalty
+away from zero dictates then the weight of shrinkage imposed on the nonzero
+coefficients:  $L_2$ costs increase with coefficient size,  lasso's $L_1$
+penalty has zero curvature and imposes constant shrinkage, and as curvature
+goes towards $-\infty$ one approaches the $L_0$ penalty of subset selection.
+In this article we are primarily interested in {\it concave} cost functions,
+like the log penalty, which span the range between $L_1$ and $L_0$ penalties.
+
+The penalty size, $\lambda$, acts as a {\it squelch}: it suppresses noise to
+focus on the true input signal. Large $\lambda$ lead to very simple 
+model estimates, while as $\lambda \rightarrow 0$ we approach maximum
+likelihood estimation (MLE). Since you don't know optimal $\lambda$,
+practical application of penalized estimation requires a {\it regularization
+path}: a $p \times T$ field of $\bs{\hat\beta}$ estimates obtained while
+moving from high to low penalization along $\lambda^1 > \lambda^2 \ldots >
+\lambda^T$ \citep[e.g., LARS in][is a well known example]{efron_least_2004}.
+These paths begin at $\lambda^1$ set to infimum $\lambda$ such that
+(\ref{pendev}) is minimized at $\bs{\hat\beta} = \bm{0}$ (see Appendix
+\ref{models}), and proceed down to some pre-specified $\lambda^T$ (e.g., $\lambda^T=
+0.01\lambda^1$).
+
+\subsection{Concave penalization}
+
+
+\begin{figure*}[t]
+\vskip -.25cm
+\includegraphics[width=\textwidth]{graphs/solution}
+\caption{\label{solution} Log penalties $c(\beta) = s\log(1 + \gamma|\beta|)$ 
+and penalized objectives $(\beta-B)^2 + c(\beta)$.}
+\end{figure*}
+
+
+Concave penalties such as the log penalty, which have a gradient that is
+decreasing with absolute coefficient size,  yield the `diminishing-bias'
+property discussed in the introduction. It is {\it the} reason why one would
+use concave penalization instead of $L_1$ or convex alternatives.
+Unfortunately, such penalties can overwhelm the convex likelihood and produce a 
+concave minimization objective; see Figure \ref{solution} for illustration.
+
+
+This concavity makes computation difficult.  For example,  one run of SCAD via
+the \texttt{ncvreg} R package \citep{breheny_coordinate_2011} for the
+simulation in Section \ref{eg}.1 requires around 10 minutes, compared to 1-2
+seconds for the lasso.  The slowness is due to the difficulty of concave
+minimization: finding global, or even good local, minima is an extremely tough
+task.  The most efficient exact solver that we've found is the
+\texttt{sparsenet} of \citet{mazumder_sparsenet_2011}, also implemented in R,
+which first fits a lasso path under decreasing $L_1$ penalty magnitude and,
+for each segment on this path, adapts coefficient estimates along a second
+path of increasing penalty concavity. While far more efficient than previous
+alternatives, \texttt{sparsenet}  relies upon solution over a large set of
+penalty specifications\footnote{POSE shares with
+\texttt{sparsenet} the idea of moving along a path of closely related
+specifications, but does not require a grid in both  cost size and concavity.
+Intuitively,  POSE runs  a path diagonally through this grid.}  
+ and its compute cost remains much higher than for lasso
+(e.g., 15-20 seconds in our simulation).
+
+A relatively fast class of solvers for concave penalized estimators uses
+local linear approximation \cite[LLA; e.g.,][]{candes_enhancing_2008}. LLA
+replaces the concave cost function $c_j$  with its tangent at the current
+estimate, $c_j'(\hat\beta_j)\beta_j$.  The objective is then just a weighted
+$L_1$ penalized loss (solvable, say, as in Appendix \ref{implement}), and one
+iterates between updating $c'(\hat\beta)$ and solving the implied $L_1$
+penalized minimization problem.  \citet{zou_one-step_2008} present numerical
+and theoretical evidence that  LLA does well in practice. Importantly, they
+show that LLA does well even (or especially) if you {\it stop it after one
+iteration}. This is an example of one-step estimation (OSE), a 
+technique inspired by \cite{bickel_one-step_1975} that amounts to taking as
+your estimator the first step of an iterative approximation to some objective.
+Such early-stopping can be as good  as the full-step solution
+{\it if} the initial estimates are good enough. 
+
+OSE and similar ideas have had a resurgence in the concave penalization
+literature recently, motivated by the need for faster estimation algorithms.
+\cite{fan_strong_2014} consider early-stopping of LLA for folded concave
+penalization  and show that, under strong sparsity assumptions about true
+$\bs{\beta}$ and given appropriate initial values, OSE LLA is with high
+probability an oracle estimator.   Zhang (2010,2013)
+\nocite{zhang_analysis_2010,zhang_multi-stage_2013} investigates  
+`convex relaxation' iterations, where estimates under convex regularization
+ are the basis for weights in a subsequent penalized objective.  He shows that
+ just one or two steps here is sufficient for obtaining oracle support
+ recovery properties under much weaker conditions than required by a standard
+ lasso.  \cite{wang_calibrating_2013} propose a two step algorithm that feeds
+ lasso coefficients into a linear approximation to folded concave
+ penalization.  These OSE methods are all closely related to  the adaptive lasso
+\citep[AL;][]{zou_adaptive_2006}, which does weighted-$L_1$ minimization under
+weights $\omega_j = 1/|\hat\beta^0_j|$, where $\hat\beta^0_j$ is an initial
+guess at the coefficient value.  The original AL paper advocates using MLE
+estimates for initial values, while
+\cite{huang_adaptive_2008} suggest using marginal regression coefficients
+$\hat\beta^0_j = \mr{cor}(\bm{x}_j,\bm{y})$.\footnote{We include marginal AL in our study
+of Section \ref{eg}.1.}
+
+OSE LLA, or a two-step estimator starting from
+$\bs{\hat\beta}=0$ as suggested in \cite{fan_strong_2014} and
+\cite{wang_calibrating_2013}, or any version of the adaptive lasso, are {\it all just weighted-$L_1$
+minimization}. These methods differ only in how the
+weights are constructed.  Regardless of which you prefer, weighted-$L_1$
+penalties are likely to play a central role in diminishing-bias penalization
+whenever the dataset is too large for use of exact concave penalty solvers.
+
 
 
 \section{Path of one-step estimators}
@@ -203,8 +355,8 @@ unpenalized in all segments after it first becomes nonzero. Figure
 \ref{gamlr_eg} shows solutions in a simple problem.
 
 
-\begin{figure}[t]
-\hskip -.2cm\includegraphics[width=6.5in]{gamlr_eg}
+\begin{figure*}[t]
+\hskip -.2cm\includegraphics[width=6.5in]{graphs/gamlr_eg}
 \vskip -.25cm
 \caption{\label{gamlr_eg} Gamma lasso estimation on $n=10^3$ 
  observations of $y_i = 4 + 3x_{1i} - x_{2i} + \varepsilon_i$, where
@@ -216,7 +368,7 @@ $\lambda^{100} = 0.01\lambda^1$. Degrees of freedom are on top and vertical
 lines mark AICc and BIC selected models (see Section
 \ref{sss}).}
 \vskip -.25cm
-\end{figure}
+\end{figure*}
 
 Each  gamma lasso path segment is solved through coordinate descent,
 as detailed in Appendix \ref{implement}.  The algorithm is implemented in {\tt
