@@ -107,19 +107,28 @@ this has precluded their use in settings -- e.g., in text or web-data analysis
    approximate solver.  This literature
 \citep[e.g.,][]{zou_one-step_2008,fan_strong_2014} 
 holds that even a single step of weighted-$L_1$ regularization is enough to
-get solutions that are close to optimal, so long as the pre-estimates
-are \textit{good enough} starting points. The crux of success with such one-step
+get solutions that are close to optimal, so long as the pre-estimates are
+\textit{good enough} starting points. The crux of success with such one-step
 estimation (OSE) is  finding starts that are, indeed, good enough.
 
 
-This article proposes a framework for sparse diminishing-bias regularization
-that combines ideas from OSE with the concept of a \textit{regularization
-path} -- a general technique, most famously associated with the LARS algorithm \cite{efron_least_2004}, 
+This article provides a complete framework for sparse diminishing-bias
+regularization that combines ideas from OSE with the concept of a
+\textit{regularization path} -- a general technique, most famously associated
+with the LARS algorithm \cite{efron_least_2004}, that estimates a sequence of
+models under decreasing amounts of regularization.  So long as the model estimates do not change too much from one level of regularization to the next, such path algorithms can be very fast to run and are an efficient way to obtain a high-quality \textit{set} of models to choose amongst.  
 
-As detailed in Section  path of one-step estimators (POSE) does $L_1$
- penalized regression estimation on a grid of decreasing penalties, but adapts
- coefficient-specific weights to decrease as a function of the coefficient
- estimated in the previous path step.
+A path of one-step estimators (POSE; detailed in Section \ref{pose})
+algorithm does $L_1$ penalized regression estimation on a grid of decreasing
+penalties, but adapts coefficient-specific weights to decrease as a function
+of the coefficient estimated in the previous path step.  POSE takes advantage
+of the natural match between path algorithms and one-step estimation: OSE
+relies upon inputs being close to the optimal solution, which is precisely the
+setting where path algorithms are most efficient.  This framework 
+
+The later penalty-selection capability is derived from a Bayesian interpretation for our \textit{gamma lasso} implementation of POSE (Section , from which we are able to derive heuristic information criteria 
+
+We view such penalty-selection tools as an essential ingredient for practical applicability in large-scale industrial machine learning, where, e.g., cross-validation is not always viable or advisable.
 
 
 \section{Path of one-step estimators}
@@ -163,6 +172,131 @@ l(\alpha,\bs{\beta}) + n\sum_j \lambda^t\omega^t_j|\beta_j| \label{l1pen}\\
 
 \section{Sparse regularization paths and diminishing bias}
 \label{rp}
+
+
+
+
+\section{The gamma lasso}
+\label{sec:gamlr}
+
+The gamma lasso (GL) specification for POSE is based upon the log penalty,
+\begin{equation}\label{logpen}
+c(\beta_j) =  \log(1+\gamma|\beta_j|),
+\end{equation} where $\gamma > 0$.  This
+penalty is concave with curvature $-1/(\gamma^{-1}+|\beta_j|)^2$ and it spans the
+range from $L_0$ ($\gamma\rightarrow \infty$) to $L_1$ ($\gamma\rightarrow 0$)
+costs (see Figure \ref{solution}).  It appears under a variety of parameterizations and names in the
+literature; see
+\citet{mazumder_sparsenet_2011} and applications in
+\citet{friedman_fast_2008}, \citet{candes_enhancing_2008},
+\citet{cevher_learning_2009}, \citet{taddy_multinomial_2013} and \citet{armagan_generalized_2013}. 
+
+GL -- POSE under the log penalty  -- leads to line (\ref{wset}) being replaced by
+\begin{equation}\label{gammalasso}
+\omega^{t}_j  = \left(1 + \gamma |\hat\beta^{t-1}_j|\right)^{-1} ~~j=1\ldots p 
+\end{equation}
+Behavior of the resulting paths  is governed by $\gamma$, which we refer to as the
+penalty {\it scale}.  Under $\gamma=0$, GL is just the usual lasso.
+ Bias diminishes faster for larger $\gamma$ and, at the  extreme,
+$\gamma=\infty$ yields a subset selection routine where a coefficient is
+unpenalized in all segments after it first becomes nonzero. Figure
+\ref{gamlr_eg} shows solutions in a simple problem.
+
+
+\begin{figure}[t]
+\hskip -.2cm\includegraphics[width=6.5in]{gamlr_eg}
+\vskip -.25cm
+\caption{\label{gamlr_eg} Gamma lasso estimation on $n=10^3$ 
+ observations of $y_i = 4 + 3x_{1i} - x_{2i} + \varepsilon_i$, where
+$\varepsilon_i \stackrel{ind}{\sim} \mr{N}(0,1)$ and
+$\{x_{1i},x_{2i},x_{3i}\}$ are marginally standard normal with correlation of
+0.9 between covariates ($x_{3i}$ is spurious). The penalty path has $T=100$
+segments, $\lambda^1 = n^{-1}\left| \sum_i x_{1i}y_i\right|$, and
+$\lambda^{100} = 0.01\lambda^1$. Degrees of freedom are on top and vertical
+lines mark AICc and BIC selected models (see Section
+\ref{sss}).}
+\vskip -.25cm
+\end{figure}
+
+Each  gamma lasso path segment is solved through coordinate descent,
+as detailed in Appendix \ref{implement}.  The algorithm is implemented in {\tt
+c} as part of the {\tt gamlr} package for {\sf R}. The software  has detailed documentation and versioned source code is at
+{\tt github.com/mataddy/gamlr}.  Usage of {\tt gamlr} mirrors that of its
+convex penalty analogue {\tt glmnet} \citep{friedman_regularization_2010}, the
+fantastic and widely used package for costs between $L_1$ and $L_2$ norms. In
+the lasso case ($\gamma=0$), the two algorithms are essentially equivalent.
+
+
+\subsection{Bayesian motivation}
+
+Consider a model where each $\beta_j$ is
+assigned a Laplace distribution prior with scale $\tau_j>0$,
+\begin{equation}\label{blasso}
+\beta_j \sim \mr{La}\left(\tau_j\right) =
+\frac{\tau_j}{2}\exp\left[ -\tau_j|\beta_j| ~\right].
+\end{equation}
+Typically, scale parameters $\tau_1 =
+\ldots = \tau_p$ are set as a single shared value, say $n\lambda/\phi$ where
+ $\phi$ is the exponential family dispersion (e.g. Gaussian variance
+$\sigma^2$ or 1 for the binomial).   Posterior
+maximization under the prior in (\ref{blasso}) is then lasso estimation \citep[e.g.,][]{park_bayesian_2008}.
+
+Instead of working from shared scale, assume an independent gamma
+$\mr{Ga}(s,1/\gamma)$ hyperprior with `shape' $s$ and `scale' $\gamma$ for
+each $\tau_j$, such that $\ds{E}[\tau_j] = s\gamma$ and $\mr{var}(\tau_j) =
+s\gamma^2$.  Then the {\it joint} prior for both coefficient and scale is
+\begin{equation}\label{glprior}
+\pi(\beta_j,\tau_j) = \mr{La}\left(\beta_j ;~ \tau_j\right)
+\mr{Ga}\left(\tau_j;~ s,\gamma^{-1}\right) = \frac{ 1}{2\Gamma({s})} 
+\left(\frac{\tau_j}{\gamma}\right)^{s}
+               \exp\left[-\tau_j(\gamma^{-1}+|\beta_j|)\right].
+\end{equation}
+The gamma hyperprior is conjugate here, implying a $\mr{Ga}\left(s+1, ~1/\gamma +
+|\beta_j|\right)$ posterior for $\tau_j \mid \beta_j$ with conditional
+posterior mode (MAP) at $\hat\tau_j = \gamma s/(1 + \gamma |\beta_j|)$.
+
+Consider joint MAP estimation of $[\bs{\tau},\bs{\beta}]$ under the prior in
+   (\ref{glprior}), where we've suppressed $\alpha$ for simplicity. By taking
+   negative logs and removing constants, this is equivalent to solving
+\begin{equation}\label{gljoint}
+\min_{\beta_j\in\ds{R},~\tau_j \in \ds{R}^{+}}~~
+\phi^{-1}l(\bs{\beta}) + \sum_j \left[\tau_j(\gamma^{-1}+|\beta_j|) - s\log(\tau_j)\right].
+\end{equation}
+It is straightforward to show that (\ref{gljoint}) is equivalent 
+to the log-penalized objective 
+\begin{equation}\label{logobj}
+\min_{\beta_j\in\ds{R}}~~
+\phi^{-1}l(\bs{\beta}) + \sum_j  s\log(1+\gamma|\beta_j|)
+\end{equation}
+
+\begin{prop}\label{penprop}
+  $\bs{\hat\beta}$ solves (\ref{logobj}) if and only if it is also in the
+  solution to (\ref{gljoint}).
+\end{prop}
+\begin{proof}
+  The conditional posterior mode for each $\tau_j$ given $\beta_j$
+  is $\tau(\beta_j) = \gamma s/(1 + \gamma|\beta_j|)$.  Any joint solution
+  $[\bs{\hat\beta},\bs{\hat\tau}]$ for (\ref{gljoint}) thus
+  consists of $\hat{\tau}_{j} = \tau(\hat\beta_{j})$;
+  otherwise, it is always possible to decrease the objective by
+  replacing $\hat\tau_{j}$. Setting each $\tau_j = 
+  \tau(\beta_j)$ in (\ref{gljoint}) and removing constant terms yields
+  (\ref{logobj}).  Moreover, the solution to (\ref{gljoint}) solves
+  (\ref{logobj}): otherwise, there would need to be a point on the profile
+  slice of (\ref{gljoint}) defined by $\tau_{j} =
+  \tau(\hat\beta_{j})$ that is lower than its minimum.
+\end{proof}
+
+For a Bayesian it is odd to be solving for $\bs{\tau}$ rather than
+marginalizing over its uncertainty.  However, recognizing the form of a gamma
+density  in (\ref{glprior}), $\pi(\beta_j,\tau_j)$ integrates over $\tau_j$ to
+yield the marginal prior $ \pi(\beta_j) = 0.5s\left( 1+
+\gamma|\beta_j|\right)^{-(s+1)}$. This is the generalized double Pareto
+density, as in  \citet{armagan_generalized_2013}. Since $-\log \pi(\beta_j)
+\propto (s+1)\log(1 + \gamma|\beta_j|)$, the {\it profile} MAP solution to
+(\ref{gljoint}) is also the {\it marginal} MAP for
+$\bs{\beta}$ under $\mr{Ga}(s-1,1/\gamma)$ priors on each $\tau_j$.
+
 
 \setstretch{1}
 \bibliographystyle{chicago}

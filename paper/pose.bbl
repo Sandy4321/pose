@@ -1,5 +1,23 @@
 \begin{thebibliography}{}
 
+\bibitem[\protect\citeauthoryear{Armagan, Dunson, and Lee}{Armagan
+  et~al.}{2013}]{armagan_generalized_2013}
+Armagan, A., D.~B. Dunson, and J.~Lee (2013).
+\newblock Generalized double pareto shrinkage.
+\newblock {\em To appear in Statistica Sinica\/}.
+
+\bibitem[\protect\citeauthoryear{Candes, Wakin, and Boyd}{Candes
+  et~al.}{2008}]{candes_enhancing_2008}
+Candes, E.~J., M.~B. Wakin, and S.~P. Boyd (2008).
+\newblock Enhancing sparsity by reweighted l1 minimization.
+\newblock {\em Journal of Fourier Analysis and Applications\/}~{\em 14},
+  877--905.
+
+\bibitem[\protect\citeauthoryear{Cevher}{Cevher}{2009}]{cevher_learning_2009}
+Cevher, V. (2009).
+\newblock Learning with compressible priors.
+\newblock In {\em Neural Information Processing Systems ({NIPS})}.
+
 \bibitem[\protect\citeauthoryear{Efron, Hastie, Johnstone, and
   Tibshirani}{Efron et~al.}{2004}]{efron_least_2004}
 Efron, B., T.~Hastie, I.~Johnstone, and R.~Tibshirani (2004).
@@ -27,10 +45,41 @@ Fan, J., L.~Xue, and H.~Zou (2014, June).
 \newblock Strong oracle optimality of folded concave penalized estimation.
 \newblock {\em The Annals of Statistics\/}~{\em 42\/}(3), 819--849.
 
-\bibitem[\protect\citeauthoryear{Taddy}{Taddy}{2013}]{taddy_distributed_2013}
-Taddy, M. (2013).
+\bibitem[\protect\citeauthoryear{Friedman, Hastie, and Tibshirani}{Friedman
+  et~al.}{2010}]{friedman_regularization_2010}
+Friedman, J., T.~Hastie, and R.~Tibshirani (2010).
+\newblock Regularization paths for generalized linear models via coordinate
+  descent.
+\newblock {\em Journal of Statistical Software\/}~{\em 33}, 1--22.
+
+\bibitem[\protect\citeauthoryear{Friedman}{Friedman}{2008}]{friedman_fast_2008}
+Friedman, J.~H. (2008).
+\newblock Fast sparse regression and classification.
+\newblock Technical Report, Dept. of Statistics, Stanford University.
+
+\bibitem[\protect\citeauthoryear{Mazumder, Friedman, and Hastie}{Mazumder
+  et~al.}{2011}]{mazumder_sparsenet_2011}
+Mazumder, R., J.~H. Friedman, and T.~Hastie (2011).
+\newblock {SparseNet} : Coordinate descent with nonconvex penalties.
+\newblock {\em Journal of the American Statistical Association\/}~{\em 106},
+  1125--1138.
+
+\bibitem[\protect\citeauthoryear{Park and Casella}{Park and
+  Casella}{2008}]{park_bayesian_2008}
+Park, T. and G.~Casella (2008).
+\newblock The bayesian lasso.
+\newblock {\em Journal of the American Statistical Association\/}~{\em 103},
+  681--686.
+
+\bibitem[\protect\citeauthoryear{Taddy}{Taddy}{2013a}]{taddy_distributed_2013}
+Taddy, M. (2013a).
 \newblock Distributed multinomial regression.
 \newblock {arXiv}:1311.6139.
+
+\bibitem[\protect\citeauthoryear{Taddy}{Taddy}{2013b}]{taddy_multinomial_2013}
+Taddy, M. (2013b).
+\newblock Multinomial inverse regression for text analysis.
+\newblock {\em Journal of the American Statistical Association\/}~{\em 108}.
 
 \bibitem[\protect\citeauthoryear{Tibshirani}{Tibshirani}{1996}]{tibshirani_regression_1996}
 Tibshirani, R. (1996).
