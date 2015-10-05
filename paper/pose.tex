@@ -1,0 +1,116 @@
+\documentclass[twoside]{article}
+\usepackage{aistats2016}
+%\usepackage[accepted]{aistats2016}
+
+\usepackage{amssymb,amsmath,natbib,graphicx,amsthm,
+  setspace,sectsty,anysize,times,dsfont,enumerate}
+
+\usepackage[svgnames]{xcolor}
+
+\usepackage{lscape,arydshln,relsize,rotating,multirow}
+\usepackage{algorithm,algorithmic}
+
+
+\newtheorem{prop}{\sc Proposition}[section]
+\newtheorem{theorem}{\sc Theorem}[section]
+\newtheorem{definition}{\sc Definition}[section]
+\newtheorem{lemma}{\sc Lemma}[section]
+\newtheorem{corollary}{\sc Corollary}[section]
+
+\marginsize{1.1in}{.9in}{.3in}{1.4in}
+
+\newcommand{\nb}{\color{blue}}
+\newcommand{\dbl}{\setstretch{1.5}}
+\newcommand{\sgl}{\setstretch{1.2}}
+
+\newcommand{\bs}[1]{\boldsymbol{#1}}
+\newcommand{\mc}[1]{\mathcal{#1}}
+\newcommand{\mr}[1]{\mathrm{#1}}
+\newcommand{\bm}[1]{\mathbf{#1}}
+\newcommand{\ds}[1]{\mathds{#1}}
+\newcommand{\indep}{\perp\!\!\!\perp}
+
+
+\begin{document}
+
+\twocolumn[
+
+\aistatstitle{One-step estimator paths for concave regularization}
+
+\aistatsauthor{ Matt Taddy }
+
+\aistatsaddress{The  University of Chicago Booth School of Business} ]
+
+\begin{abstract}
+The statistics literature of the past 15 years has established many favorable
+ properties for sparse diminishing-bias regularization: techniques which can
+ roughly be understood as providing estimation under penalty functions
+ spanning the range of concavity between $L_0$ and $L_1$ norms.  However,
+ lasso $L_1$-regularized estimation remains the standard tool for industrial
+ `Big Data' applications because of its minimal computational cost and the
+ presence of easy-to-apply rules for penalty selection.   In response, this
+ article proposes a simple new algorithm framework that requires no more
+ computation than a lasso path: the path of one-step estimators (POSE) does
+ $L_1$ penalized regression estimation on a grid of decreasing penalties, but
+ adapts coefficient-specific weights to decrease as a function of the
+ coefficient estimated in the previous path step.  This provides sparse
+ diminishing-bias regularization at no extra cost over the fastest lasso
+ algorithms. Moreover, our `gamma lasso' implementation of POSE is accompanied
+ by a reliable heuristic for the fit degrees of freedom, so that
+ standard information criteria can be applied in penalty selection. The
+ methods are illustrated in extensive simulations and in application of
+ logistic regression to evaluating the performance of hockey players.
+ \end{abstract}
+
+\section{Introduction}
+\label{intro}
+
+For regression in high-dimensions, it is useful to regularize estimation
+through a penalty on coefficient size.   $L_1$  regularization \citep[i.e.,
+the lasso of][]{tibshirani_regression_1996} is especially popular, with costs
+that are non-differentiable at their minima and can lead to  coefficient
+solutions of exactly zero.  A related approach is concave penalized
+regularization (e.g. SCAD from \citealt{fan_variable_2001} or MCP from
+\citealt{zhang_nearly_2010}) with cost functions that are also spiked at zero
+but flatten for large values (as opposed to the constant increase of an $L_1$
+norm).  This yields sparse solutions where  large non-zero values are estimated
+with little bias. The combination of  \textit{sparsity} and \textit{diminishing-bias} 
+ is appealing in many settings, and a large literature on concave
+penalized estimation has developed over the past 15 years.  For example, many
+authors (e.g., from \citealt{fan_variable_2001} and
+\citealt{fan_nonconcave_2004})  have contributed work on their \textit{oracle
+properties}, a class of results showing conditions under which coefficient
+estimates through concave penalization, or in related schemes, will be the same
+as if you knew the sparse `truth'.
+
+
+Unfortunately,  exact solvers for concave penalized estimation  all require
+significantly more compute time than a standard lasso.  In our experience,
+this has precluded their use in settings -- e.g., in text or web-data analysis
+-- where both $n$ (the number of observations) and $p$ (the number of
+covariates) are very large.   This lack of adoption occurs despite memory and
+communication savings due to the increased sparsity encouraged by
+diminishing-biased penalties (single large coefficients are allowed to account
+for the signals of other correlated covariates) -- savings that are very important in distributed  computing schemes \citep[e.g.,][]{taddy_distributed_2013}.
+
+As we review below,  recent literature recommends the use of approximate solvers.
+Certainly, this is necessary for data of the size we encounter in analysis of,
+say, internet commerce.  These approximations  take the form of
+iteratively-weighted-$L_1$ regularization, where the coefficient-specific
+weights are based upon estimates of the coefficients taken from previous
+iterations of the approximate solver.  This literature
+\citep[e.g.,][]{zou_one-step_2008,fan_strong_2014} 
+holds that even a single step of weighted-$L_1$ regularization is enough to
+get solutions that are close to optimal, so long as the pre-estimates
+are \textit{good enough} starting points. The crux of success with such one-step
+estimation (OSE) is  finding starts that are, indeed, good enough.
+
+
+\section{Sparse regularization paths and diminishing bias}
+\label{rp}
+
+\setstretch{1}
+\bibliographystyle{chicago}
+\bibliography{pose}
+
+\end{document}

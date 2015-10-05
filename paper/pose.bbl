@@ -1,0 +1,46 @@
+\begin{thebibliography}{}
+
+\bibitem[\protect\citeauthoryear{Fan and Li}{Fan and
+  Li}{2001}]{fan_variable_2001}
+Fan, J. and R.~Li (2001).
+\newblock Variable selection via nonconcave penalized likelihood and its oracle
+  properties.
+\newblock {\em Journal of the American Statistical Association\/}~{\em 96},
+  1348--1360.
+
+\bibitem[\protect\citeauthoryear{Fan and Peng}{Fan and
+  Peng}{2004}]{fan_nonconcave_2004}
+Fan, J. and H.~Peng (2004).
+\newblock Nonconcave penalized likelihood with a diverging number of
+  parameters.
+\newblock {\em The Annals of Statistics\/}~{\em 32}, 928--961.
+
+\bibitem[\protect\citeauthoryear{Fan, Xue, and Zou}{Fan
+  et~al.}{2014}]{fan_strong_2014}
+Fan, J., L.~Xue, and H.~Zou (2014, June).
+\newblock Strong oracle optimality of folded concave penalized estimation.
+\newblock {\em The Annals of Statistics\/}~{\em 42\/}(3), 819--849.
+
+\bibitem[\protect\citeauthoryear{Taddy}{Taddy}{2013}]{taddy_distributed_2013}
+Taddy, M. (2013).
+\newblock Distributed multinomial regression.
+\newblock {arXiv}:1311.6139.
+
+\bibitem[\protect\citeauthoryear{Tibshirani}{Tibshirani}{1996}]{tibshirani_regression_1996}
+Tibshirani, R. (1996).
+\newblock Regression shrinkage and selection via the lasso.
+\newblock {\em Journal of the Royal Statistical Society, Series B\/}~{\em 58},
+  267--288.
+
+\bibitem[\protect\citeauthoryear{Zhang}{Zhang}{2010}]{zhang_nearly_2010}
+Zhang, C.-H. (2010).
+\newblock Nearly unbiased variable selection under minimax concave penalty.
+\newblock {\em Annals of Statistics\/}~{\em 38}, 894--942.
+
+\bibitem[\protect\citeauthoryear{Zou and Li}{Zou and
+  Li}{2008}]{zou_one-step_2008}
+Zou, H. and R.~Li (2008).
+\newblock One-step sparse estimates in nonconcave penalized likelihood models.
+\newblock {\em The Annals of Statistics\/}~{\em 36\/}(4), 1509--1533.
+
+\end{thebibliography}
