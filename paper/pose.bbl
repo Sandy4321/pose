@@ -12,12 +12,24 @@ Bickel, P.~J. (1975).
 \newblock {\em Journal of the American Statistical Association\/}~{\em 70},
   428--434.
 
+\bibitem[\protect\citeauthoryear{Bickel, Ritov, and Tsybakov}{Bickel
+  et~al.}{2009}]{bickel_simultaneous_2009}
+Bickel, P.~J., Y.~Ritov, and A.~B. Tsybakov (2009, August).
+\newblock Simultaneous analysis of lasso and dantzig selector.
+\newblock {\em The Annals of Statistics\/}~{\em 37\/}(4), 1705--1732.
+
 \bibitem[\protect\citeauthoryear{Breheny and Huang}{Breheny and
   Huang}{2011}]{breheny_coordinate_2011}
 Breheny, P. and J.~Huang (2011, March).
 \newblock Coordinate descent algorithms for nonconvex penalized regression,
   with applications to biological feature selection.
 \newblock {\em The Annals of Applied Statistics\/}~{\em 5\/}(1), 232--253.
+
+\bibitem[\protect\citeauthoryear{Buhlmann and van~de Geer}{Buhlmann and van~de
+  Geer}{2011}]{buhlmann_statistics_2011}
+Buhlmann, P. and S.~van~de Geer (2011).
+\newblock {\em Statistics for High-Dimensional Data}.
+\newblock Springer.
 
 \bibitem[\protect\citeauthoryear{Candes, Wakin, and Boyd}{Candes
   et~al.}{2008}]{candes_enhancing_2008}
@@ -30,6 +42,13 @@ Candes, E.~J., M.~B. Wakin, and S.~P. Boyd (2008).
 Cevher, V. (2009).
 \newblock Learning with compressible priors.
 \newblock In {\em Neural Information Processing Systems ({NIPS})}.
+
+\bibitem[\protect\citeauthoryear{Efron}{Efron}{2004}]{efron_estimation_2004}
+Efron, B. (2004).
+\newblock The estimation of prediction error: Covariance penalties and
+  cross-validation.
+\newblock {\em Journal of the American Statistical Association\/}~{\em 99},
+  619--632.
 
 \bibitem[\protect\citeauthoryear{Efron, Hastie, Johnstone, and
   Tibshirani}{Efron et~al.}{2004}]{efron_least_2004}
@@ -70,6 +89,13 @@ Friedman, J.~H. (2008).
 \newblock Fast sparse regression and classification.
 \newblock Technical Report, Dept. of Statistics, Stanford University.
 
+\bibitem[\protect\citeauthoryear{Gramacy, Jensen, and Taddy}{Gramacy
+  et~al.}{2013}]{gramacy_estimating_2013}
+Gramacy, R.~B., S.~T. Jensen, and M.~Taddy (2013).
+\newblock Estimating player contribution in hockey with regularized logistic
+  regression.
+\newblock {\em Journal of Quantitative Analysis in Sports\/}~{\em 9}.
+
 \bibitem[\protect\citeauthoryear{Hoerl and Kennard}{Hoerl and
   Kennard}{1970}]{hoerl_ridge_1970}
 Hoerl, A. and R.~Kennard (1970).
@@ -81,6 +107,11 @@ Hoerl, A. and R.~Kennard (1970).
 Huang, J., S.~Ma, and C.-H. Zhang (2008).
 \newblock Adaptive lasso for sparse high-dimensional regression models.
 \newblock {\em Statistica Sinica\/}~{\em 18\/}(4), 1603.
+
+\bibitem[\protect\citeauthoryear{Mallows}{Mallows}{1973}]{mallows_comments_1973}
+Mallows, C.~L. (1973).
+\newblock Some comments on {CP}.
+\newblock {\em Technometrics\/}~{\em 15}, 661--675.
 
 \bibitem[\protect\citeauthoryear{Mazumder, Friedman, and Hastie}{Mazumder
   et~al.}{2011}]{mazumder_sparsenet_2011}
@@ -95,6 +126,13 @@ Park, T. and G.~Casella (2008).
 \newblock The bayesian lasso.
 \newblock {\em Journal of the American Statistical Association\/}~{\em 103},
   681--686.
+
+\bibitem[\protect\citeauthoryear{Raskutti, Wainwright, and Yu}{Raskutti
+  et~al.}{2010}]{raskutti_restricted_2010}
+Raskutti, G., M.~J. Wainwright, and B.~Yu (2010).
+\newblock Restricted eigenvalue properties for correlated gaussian designs.
+\newblock {\em The Journal of Machine Learning Research\/}~{\em 11},
+  2241--2259.
 
 \bibitem[\protect\citeauthoryear{Taddy}{Taddy}{2013a}]{taddy_distributed_2013}
 Taddy, M. (2013a).
@@ -111,6 +149,18 @@ Tibshirani, R. (1996).
 \newblock Regression shrinkage and selection via the lasso.
 \newblock {\em Journal of the Royal Statistical Society, Series B\/}~{\em 58},
   267--288.
+
+\bibitem[\protect\citeauthoryear{Wainwright}{Wainwright}{2006}]{wainwright_sharp_2006}
+Wainwright, M.~J. (2006).
+\newblock Sharp thresholds for high-dimensional and noisy recovery of sparsity.
+\newblock {\em UC Berkeley Technical Report\/}.
+
+\bibitem[\protect\citeauthoryear{Wainwright}{Wainwright}{2009}]{wainwright_sharp_2009}
+Wainwright, M.~J. (2009, May).
+\newblock Sharp thresholds for high-dimensional and noisy sparsity recovery
+  using {L1}-constrained quadratic programming (lasso).
+\newblock {\em {IEEE} Transactions on Information Theory\/}~{\em 55\/}(5),
+  2183--2202.
 
 \bibitem[\protect\citeauthoryear{Wang, Kim, and Li}{Wang
   et~al.}{2013}]{wang_calibrating_2013}
