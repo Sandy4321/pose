@@ -159,9 +159,8 @@ implemented version of POSE.  Section \ref{sec:weighted} gives an overview on
 the relationship between concave and weighted-$L_1$ regularization. Section \ref{sec:select} provides a Bayesian model interpretation
 for the gamma lasso, and derives from this model a set of information criteria
 that can be applied in penalty selection along the regularization path.
-Finally, Section
-\ref{eg} presents two empirical studies:
-an extensive  simulation experiment in \ref{eg}.1, and in \ref{eg}.2 we investigate the data analysis question: given all goals in the past decade of NHL hockey, what can we say about individual player contributions? 
+Finally, we present two empirical studies:
+an extensive  simulation experiment in Section \ref{sec:sim}, and in Section \ref{sec:nhl} we investigate the data analysis question: given all goals in the past decade of NHL hockey, what can we say about individual player contributions? 
 
 
 \section{Paths of one-step estimators}
@@ -173,13 +172,11 @@ the coefficient by $\mr{sd}(\bs{x}_j)$, the standard deviation of the $j^{th}$ c
 of $\bm{X}$; this is achieved if $x_{ij}$ is replaced by $x_{ij}/\mr{sd}(\bs{x}_j)$
 throughout.} Write $\eta_{i} =
 \alpha+\bm{x}_i'\bs{\beta}$ as the linear equation for observation $i$, and
-denote with $l(\alpha, \bs{\beta}) = l(\bs{\eta})$  an unregularized
-objective  proportional to the negative log likelihood.  For example, in Gaussian (linear)
-regression, $l(\bs{\eta})$ is the sum-of-
-squares $0.5\sum_i \left(y_i - \eta_i\right)^2$ and in binomial (logistic)
+denote with $l(\alpha, \bs{\beta}) = l(\bs{\eta})$  the negative log likelihood.  For example, in Gaussian (linear)
+regression, $l(\bs{\eta})$ is the sum-of-squares $0.5\sum_i \left(y_i - \eta_i\right)^2$ and in binomial (logistic)
 regression,  $l(\bs{\eta}) = -\sum_i \left[\eta_iy_i -
-\log(1+e^{\eta_i})\right]$ for $y_i \in [0,1]$.  
-A penalized estimator is  the solution to
+\log(1+e^{\eta_i})\right]$ for $y_i \in [0,1]$. A penalized estimator is  the
+solution to
 \begin{equation} \label{pendev}
 \argmin_{\alpha,\beta_j\in\ds{R}}~~\left\{~l(\alpha,{\bs{\beta}}) + n\lambda \sum_{j=1}^p c(|\beta_j|)~\right\},
 \end{equation}
@@ -298,10 +295,10 @@ Unfortunately, such penalties can overwhelm the convex likelihood and produce a
 concave minimization objective; see Figure \ref{solution}.
 This  makes computation difficult.  For example,  one run of SCAD via the
 \texttt{ncvreg} R package \citep{breheny_coordinate_2011} for the simulation in
-Section \ref{eg}.1 requires around 10 minutes, compared to 1-2 seconds for 
+Section \ref{sec:sim} requires around 10 minutes, compared to 1-2 seconds for 
 lasso (or gamma lasso).  The most efficient exact solver that we've found is the
 \texttt{sparsenet} of \citet{mazumder_sparsenet_2011}, also implemented in R,
-which first fits a lasso path under decreasing $L_1$ penalty magnitude and, for
+which first fits a lasso path and, for
 each segment on this path, adapts coefficient estimates along a second path of
 increasing penalty concavity. However, \texttt{sparsenet}  relies upon solution
 over a large set of specifications\footnote{POSE shares with
@@ -316,13 +313,13 @@ algorithms replace the concave cost function $c$  with its tangent at the
 current estimate, $c'(\hat\beta_j)\beta_j$.  The objective is then just a
 weighted $L_1$ penalized loss. An exact LLA solver iterates between updating
 $c'(\hat\beta)$ and solving the implied $L_1$ penalized minimization problem.
-More importantly for POSE, \citet{zou_one-step_2008} present numerical and
-theoretical evidence that LLA can provide near-optimal solutions even (or
-especially) if you {\it stop it after one iteration}. This is an example of
-one-step estimation (OSE), a technique inspired by \cite{bickel_one-step_1975}
-that amounts to taking as your estimator the first step of an iterative
-approximation to some objective. Such early-stopping can be as good  as the
-full-step solution {\it if} the initial estimates are good enough.
+\citet{zou_one-step_2008} present numerical and theoretical evidence that LLA
+can provide near-optimal solutions even if you {\it stop it
+after one iteration}. This is an example of one-step estimation (OSE), a
+technique inspired by \cite{bickel_one-step_1975} that amounts to taking as
+your estimator the first step of an iterative approximation to some objective.
+Early-stopping can be as good  as the full solution {\it if} the
+initial estimates are good enough.
 
 OSE and similar ideas have had a resurgence in the concave penalization
 literature recently, motivated by the need for faster estimation algorithms.
@@ -332,23 +329,27 @@ $\bs{\beta}$ and given appropriate initial values, OSE LLA is with high
 probability an oracle estimator.   Zhang (2010,2013)
 \nocite{zhang_analysis_2010,zhang_multi-stage_2013} investigates  
 `convex relaxation' iterations, where estimates under convex regularization
- are the basis for weights in a subsequent penalized objective.  He shows that
- just one or two steps here is sufficient for obtaining oracle support
- recovery properties under much weaker conditions than required by a standard
- lasso.  \cite{wang_calibrating_2013} propose a two step algorithm that feeds
- lasso coefficients into a linear approximation to folded concave
- penalization.  These OSE methods are all closely related to  the adaptive lasso
+ are the basis for weights in a subsequent penalized objective.
+ \cite{wang_calibrating_2013} propose a two step algorithm that feeds lasso
+ coefficients into a linear approximation to folded concave penalization.
+ These OSE methods are all closely related to  the adaptive lasso
 \citep[AL;][]{zou_adaptive_2006}, which does weighted-$L_1$ minimization under
 weights $\omega_j = 1/|\hat\beta^0_j|$, where $\hat\beta^0_j$ is an initial
 guess at the coefficient value.  The original AL paper advocates using MLE
 estimates for initial values, while
 \cite{huang_adaptive_2008} suggest using marginal regression coefficients
 $\hat\beta^0_j = \mr{cor}(\bm{x}_j,\bm{y})$.\footnote{We include marginal AL in our study
-of Section \ref{eg}.1.}
+of Section \ref{sec:sim}}
 
 The main point here is that OSE LLA, or a two-step estimator starting from
 $\bs{\hat\beta}=0$, or any version of the adaptive lasso, are all  interpretable as weighted-$L_1$ 
-penalization with weights equal to something like $c'(\beta^0)$ for initial coefficient guess $\beta^0$. POSE and GL take advantage of an  available source of initial values in any path estimation algorithm -- the solved values from the previous path iteration.  Our  simulations in Section \ref{eg}.1  show that this efficient strategy works as well or better than  expensive exact solvers.  In the next section, we provide some theoretical intuition on why it works.
+penalization with weights equal to something like $c'(\beta^0)$ for initial
+coefficient guess $\beta^0$. POSE and GL take advantage of an  available
+source of initial values in any path estimation algorithm -- the solved values
+from the previous path iteration.  Our  simulations in Section \ref{sec:sim}
+show that this efficient strategy works as well or better than  expensive
+exact solvers.  In the next section, we provide some theoretical intuition on
+why it works.
 
 
 \subsection{Comparison between weighted-$L_1$ and $L_0$ penalized estimation}
@@ -360,15 +361,16 @@ interested in weighted-$L_1$ penalization as a way to obtain fits that are as
 sparse as possible without compromising predictive ability, regardless of the
 underlying data generating process (or `true' sparsity).
 
- For any support subset $S \subset \{1\ldots p\}$ with cardinality $|S|=s$ and
-complement $S^c = \{1\ldots p\}\setminus S$, denote vectors restricted to $S$
-as $\bm{\beta}_S = [\beta_j:j\in S]'$, matrices as $\bm{X}_S$, etc.  Use
-$\bs{\beta}^S$ to denote the coefficients for ordinary
-least-squares (OLS) restricted to $S$: that is, $\bs{\beta}^S_S =
+ For  $S \subset \{1\ldots p\}$ with cardinality $|S|=s$ and complement $S^c =
+\{1\ldots p\}\setminus S$, denote vectors restricted to covariates in $S$ as
+$\bm{\beta}_S = [\beta_j:j\in S]'$, matrices as $\bm{X}_S$, etc.  Use
+$\bs{\beta}^S$ to denote the coefficients for ordinary least-squares (OLS)
+restricted to $S$: that is, $\bs{\beta}^S_S =
 (\bm{X}_S'\bm{X}_S)^{-1}\bm{X}_S'\bm{y}$ and $\beta^{S}_j = 0~\forall~j\notin
 S$.  Moreover, $\bm{e}^S = \bm{y}-\bm{X}\bs{\beta}^S =
 (\bm{I}-\bm{H}^S)\bm{y}$ are residuals and $\bm{H}^S =
-\bm{X}_S(\bm{X}_S'\bm{X}_S)^{-1}\bm{X}_S'$ the hat (projection) matrix from OLS restricted to $S$.  \footnote{We suppress intercepts throughout, and use $|\cdot|$ and $\|\cdot\|$ applied to vectors as the $L_1$ and $L_2$ norms, respectively.}
+\bm{X}_S(\bm{X}_S'\bm{X}_S)^{-1}\bm{X}_S'$ the projection matrix from OLS on $S$.  
+Use $|\cdot|$ and $\|\cdot\|$ for $L_1$ and $L_2$ norms.
 
 We use the following result for iterative \textit{stagewise} regression, with proof in the supplemental appendix. 
 \begin{lemma}\label{SSElemma}
@@ -457,26 +459,78 @@ weighted-lasso and optimal prediction.  The next remark is an example.
 variance $\sigma^2$.  The $C_p$ formula of
 \cite{mallows_comments_1973} gives 
 $\mr{MSE}_S + 2s\sigma^2/n$ as an unbiased estimate of residual variance.
-Following \cite{efron_estimation_2004}, this implies $\nu = \sigma^2/n$ is the optimal $L_0$ penalty for minimizing prediction error.  
-Theorem (\ref{thm:sparseapprox}) applies directly,  with $L = \frac{\|\bs{\omega}_S\|}{\sqrt{s}}\left(\omega^{\mr{min}}_{S^c}- \sqrt{2}\sigma/(\lambda\sqrt{n})\right)^{-1}$, to give a bound on the distance between weighted-$L_1$ estimation and $C_p$-optimal prediction.\footnote{We work with
-$C_p$ here, rather than $AIC$ or $AICc$, since $C_p$ is conveniently defined
-the scale of squared errors.} Note that, since the condition on minimum $S^c$ weights has become
-$\omega^{\mr{min}}_{S^c} > (\sigma/\lambda)\sqrt{2/n}$, comparison to $C_p$ suggests we can use larger $\gamma$  with large $n$ or small $\sigma$.
+Following \cite{efron_estimation_2004}, this implies $\nu = \sigma^2/n$ is the
+optimal $L_0$ penalty for minimizing prediction error. Theorem
+(\ref{thm:sparseapprox}) applies directly,  with $L =
+\frac{\|\bs{\omega}_S\|}{\sqrt{s}}\left(\omega^{\mr{min}}_{S^c}-
+\sqrt{2}\sigma/(\lambda\sqrt{n})\right)^{-1}$, to give a bound on the distance
+between weighted-$L_1$ estimation and $C_p$-optimal prediction. Note that,
+since the condition on minimum $S^c$ weights has become
+$\omega^{\mr{min}}_{S^c} > (\sigma/\lambda)\sqrt{2/n}$, comparison to $C_p$
+suggests we can use larger $\gamma$  with large $n$ or small $\sigma$.
 
 
-\noindent $\bullet$~~  Plausibility of the restricted eigenvalue assumption $\phi(L,S) > 0$ depends  upon $L$.  It is less restrictive if we can reduce $\|\bs{\omega}_S\|$ without making $\omega^{\mr{min}}_{S_c}$ small.  \textit{This is a key motivation for the POSE algorithm:} if covariates with  nonzero $\hat \beta_j$ for large $\lambda$ (i.e., early in the path) can be assumed to live in $S$, then increasing $\gamma >0$ will improve prediction.
+\noindent $\bullet$~~  Plausibility of the restricted eigenvalue assumption
+$\phi(L,S) > 0$ depends  upon $L$.  It is less restrictive if we can reduce
+$\|\bs{\omega}_S\|$ without making $\omega^{\mr{min}}_{S_c}$ small.
+\textit{This is a key motivation for the POSE algorithm:} if covariates with
+nonzero $\hat \beta_j$ for large $\lambda$ (i.e., early in the path) can be
+assumed to live in $S$, then increasing $\gamma >0$ will improve prediction.
 Of course, the moment that $\lambda$ becomes small enough that elements of
 $S_c$ get nonzero $\hat\beta$, then larger $\gamma$ can lead to over-fit.  For
 this reason it is essential that we have tools for choosing  optimal
 $\lambda$.
 
-\noindent $\bullet$~~ In the supplemental material,  we also adapt standard results from \cite{wainwright_sharp_2006,wainwright_sharp_2009} to show how reducing $\|\bs{\omega}_S\|$ without making $\omega^{\mr{min}}_{S_c}$ small can lead to lower false discovery rates with respect to the $L_0$ oracle. However, such results depend upon design restrictions that are less realistic in practice. 
+\noindent $\bullet$~~ In the supplemental material,  we also adapt standard
+results from \cite{wainwright_sharp_2006,wainwright_sharp_2009} to show how
+reducing $\|\bs{\omega}_S\|$ without making $\omega^{\mr{min}}_{S_c}$ small
+can lead to lower false discovery rates with respect to the $L_0$ oracle.
+However, such results depend upon design restrictions that are less realistic
+in practice.
 
 
 \section{Penalty selection}
 \label{sec:select}
 
-\subsection{Bayesian motivation}
+Lasso, the gamma lasso, and related 
+sparse regularization estimators do not actually {\it do} model selection; rather, they
+can be used to obtain paths of estimates corresponding to different levels of
+penalization.  Each penalty level corresponds to a different `model'
+and we must select the optimal choice from these candidates.
+
+$K$-fold cross-validation \cite[CV; e.g.,][]{efron_estimation_2004} 
+is the most common technique for penalty selection, and it does a good job.  However, there are many scenarios where
+we might want an analytic alternative to CV.  For example, if a single fit is expensive then doing it $K$
+times will be impractical.  More subtly, truly Big Data are distributed: they
+are too large to store on a single machine. Algorithms can be designed to work
+in parallel on subsets
+\citep[e.g.,][]{taddy_distributed_2013} but a bottleneck
+results if you need to communicate across machines for CV experimentation.
+Finally, CV can lead to over-fit for unstable algorithms whose
+results change dramatically in response to data jitter; see
+\cite{breiman_heuristics_1996} for a classic discussion.  Such instability
+arises for large $\gamma$ combined with small $\lambda$ in our GL algorithm
+and, more generally, in many concave regularized estimators; see the
+supplemental material for a detailed overview.
+
+An important feature of the standard $L_1$ lasso is that it comes with a
+simple approximation for the estimation degrees-of-freedom (\textit{df}) at
+any $\lambda$: the number of nonzero estimated coefficients
+\citep[see][]{zou_degrees_2007}.  These \textit{df} can then combined with the fitted
+deviance for penalty selection via common information criteria.
+
+This section derives the gamma lasso as approximately maximizing the posterior
+for a hierarchical Bayesian model, and uses this
+interpretation to obtain a heuristic degrees-of-freedom for each estimate
+along the GL path.  These GL \textit{df} can  be input to information criteria
+for model selection. In particular, our extensive simulations demonstrate that the GL
+\textit{df} can be used with  the corrected AICc of
+\citet{hurvich_regression_1989}  to obtain out-of-sample predictive
+performance that is as good or better than that from cross-validated
+predictors.
+
+
+\subsection{Bayesian model interpretation}
 
 Consider a model where each $\beta_j$ is
 assigned a Laplace distribution prior with scale $\tau_j>0$,
@@ -485,21 +539,21 @@ assigned a Laplace distribution prior with scale $\tau_j>0$,
 \frac{\tau_j}{2}\exp\left[ -\tau_j|\beta_j| ~\right].
 \end{equation}
 Typically, scale parameters $\tau_1 =
-\ldots = \tau_p$ are set as a single shared value, say $n\lambda/\phi$ where
- $\phi$ is the exponential family dispersion (e.g. Gaussian variance
+\ldots = \tau_p$ are set as a single value, say $n\lambda/\phi$ where
+ $\phi$ is the dispersion (e.g. Gaussian variance
 $\sigma^2$ or 1 for the binomial).   Posterior
-maximization under the prior in (\ref{blasso}) is then lasso estimation \citep[e.g.,][]{park_bayesian_2008}.
+maximization under the prior in (\ref{blasso}) is $L_1$ regularized estimation \citep[e.g.,][]{park_bayesian_2008}.
 
-Instead of working from shared scale, assume an independent gamma
+Instead of a single shared scale, assume an independent gamma
 $\mr{Ga}(s,1/\gamma)$ hyperprior with `shape' $s$ and `scale' $\gamma$ for
 each $\tau_j$, such that $\ds{E}[\tau_j] = s\gamma$ and $\mr{var}(\tau_j) =
-s\gamma^2$.  Then the {\it joint} prior for both coefficient and scale is
-\begin{equation}\label{glprior}
-\pi(\beta_j,\tau_j) = \mr{La}\left(\beta_j ;~ \tau_j\right)
-\mr{Ga}\left(\tau_j;~ s,\gamma^{-1}\right) = \frac{ 1}{2\Gamma({s})} 
+s\gamma^2$.  The {\it joint} coefficient-scale prior is
+\begin{align}\label{glprior}
+\pi(\beta_j,\tau_j) &= \mr{La}\left(\beta_j ;~ \tau_j\right)
+\mr{Ga}\left(\tau_j;~ s,\gamma^{-1}\right) \\&= \frac{ 1}{2\Gamma({s})} 
 \left(\frac{\tau_j}{\gamma}\right)^{s}
-               \exp\left[-\tau_j(\gamma^{-1}+|\beta_j|)\right].
-\end{equation}
+               \exp\left[-\tau_j(\gamma^{-1}+|\beta_j|)\right].\notag
+\end{align}
 The gamma hyperprior is conjugate here, implying a $\mr{Ga}\left(s+1, ~1/\gamma +
 |\beta_j|\right)$ posterior for $\tau_j \mid \beta_j$ with conditional
 posterior mode (MAP) at $\hat\tau_j = \gamma s/(1 + \gamma |\beta_j|)$.
@@ -508,50 +562,71 @@ Consider joint MAP estimation of $[\bs{\tau},\bs{\beta}]$ under the prior in
    (\ref{glprior}), where we've suppressed $\alpha$ for simplicity. By taking
    negative logs and removing constants, this is equivalent to solving
 \begin{equation}\label{gljoint}
-\min_{\beta_j\in\ds{R},~\tau_j \in \ds{R}^{+}}~~
-\phi^{-1}l(\bs{\beta}) + \sum_j \left[\tau_j(\gamma^{-1}+|\beta_j|) - s\log(\tau_j)\right].
+\argmin_{\beta_j\in\ds{R},~\tau_j \in \ds{R}^{+}}\!\!
+\frac{l(\bs{\beta})}{\phi} + \sum_j \left[\tau_j(\gamma^{-1}+|\beta_j|) - s\log(\tau_j)\right],
 \end{equation}
-It is straightforward to show that (\ref{gljoint}) is equivalent 
+and is straightforward to show (supplemental) that this is equivalent 
 to the log-penalized objective 
 \begin{equation}\label{logobj}
 \min_{\beta_j\in\ds{R}}~~
-\phi^{-1}l(\bs{\beta}) + \sum_j  s\log(1+\gamma|\beta_j|)
+\phi^{-1}l(\bs{\beta}) + \sum_j  s\log(1+\gamma|\beta_j|).
 \end{equation}
 
-\begin{prop}\label{penprop}
-  $\bs{\hat\beta}$ solves (\ref{logobj}) if and only if it is also in the
-  solution to (\ref{gljoint}).
-\end{prop}
-\begin{proof}
-  The conditional posterior mode for each $\tau_j$ given $\beta_j$
-  is $\tau(\beta_j) = \gamma s/(1 + \gamma|\beta_j|)$.  Any joint solution
-  $[\bs{\hat\beta},\bs{\hat\tau}]$ for (\ref{gljoint}) thus
-  consists of $\hat{\tau}_{j} = \tau(\hat\beta_{j})$;
-  otherwise, it is always possible to decrease the objective by
-  replacing $\hat\tau_{j}$. Setting each $\tau_j = 
-  \tau(\beta_j)$ in (\ref{gljoint}) and removing constant terms yields
-  (\ref{logobj}).  Moreover, the solution to (\ref{gljoint}) solves
-  (\ref{logobj}): otherwise, there would need to be a point on the profile
-  slice of (\ref{gljoint}) defined by $\tau_{j} =
-  \tau(\hat\beta_{j})$ that is lower than its minimum.
-\end{proof}
-
-For a Bayesian it is odd to be solving for $\bs{\tau}$ rather than
-marginalizing over its uncertainty.  However, recognizing the form of a gamma
-density  in (\ref{glprior}), $\pi(\beta_j,\tau_j)$ integrates over $\tau_j$ to
-yield the marginal prior $ \pi(\beta_j) = 0.5s\left( 1+
-\gamma|\beta_j|\right)^{-(s+1)}$. This is the generalized double Pareto
-density, as in  \citet{armagan_generalized_2013}. Since $-\log \pi(\beta_j)
-\propto (s+1)\log(1 + \gamma|\beta_j|)$, the {\it profile} MAP solution to
-(\ref{gljoint}) is also the {\it marginal} MAP for
-$\bs{\beta}$ under $\mr{Ga}(s-1,1/\gamma)$ priors on each $\tau_j$.
+\subsection{Degrees of freedom}
 
 
+For prediction rules, say $\hat y_i$, that are suitably stable \citep[i.e.,
+Lipschitz; see][]{zou_degrees_2007}, the SURE framework of
+\cite{stein_estimation_1981} applies and  $df =
+\ds{E}\left[\sum_i \partial \hat y_i/\partial y_i\right]$.
+Consider  a single coefficient $\beta$ estimated via least-squares under $L_1$
+penalty $\tau$.   Write gradient at zero $g = -\sum_i x_iy_i$ and curvature $h
+= \sum_i x_i^2$ and set $\varsigma = -{\tt sign}(g)$. The prediction rule is
+$\hat y = x(\varsigma/h)(|g|-\tau)_+$ with  derivative $\partial\hat y_i/\partial y = x_i^2/h \ds{1}_{[|g|<\tau]}$, so that the SURE expression
+yields $df = \ds{E}\left[ \ds{1}_{[|g|<\tau]} \right]$.   This expectation is
+taken with respect to the {\it unknown true} distribution over $\bm{y} |
+\bm{X}$, not that estimated from the observed sample.  However, 
+ one can evaluate this expression at observed
+gradients as an unbiased estimator for the true \textit{df} \citep[e.g.,][]{zou_degrees_2007}.
 
-\section{Examples}
-\label{eg}
+This motivates our heuristic $df$ in weighted-$L_1$ regularization:  the {\it prior} expectation for the number  $L_1$ penalty dimensions, $\tau_j = \lambda \omega_j$, that are less than their corresponding absolute gradient dimension.  Referring to our Bayesian model above, each $\tau_j$ is $iid$ $\mr{Ga}(s,1/\gamma)$ in the prior,
+leading to the GL degrees of freedom
+\begin{equation}
+\label{edf} df^t = \sum_j \mr{Ga}(|g_{j}|;~n\lambda^t/(\gamma\phi),
+1/\gamma), \end{equation} where $\mr{Ga}(~\cdot~;~\mr{shape}, 1/\mr{scale})$
+is the Gamma cumulative distribution function and $g_j$ is an estimate of  the
+$j^{th}$ coefficient gradient evaluated at $\hat\beta_j=0$.\footnote{Note that the number of unpenalized variables (e.g., 1 for $\alpha$) should also be added to the total  estimation $df$. }
 
-\subsection{Simulation}
+For  orthogonal covariates,  $g_j$ is just the marginal gradient at zero.
+In the non-orthogonal case, where $g_{j} = g_j(0)$ becomes a
+function of all of the elements of $\bs{\hat\beta}$, we plug in the most recent
+$g_j$ at which $\hat\beta^t_j=0$:  this
+requires no extra computation and has the advantage of maintaining $df =
+\hat p^t$ for $\gamma = 0$.
+
+\subsection{Selection via information criteria}
+
+An information criterion is an attempt to approximate
+ divergence between the unknown true data generating
+process and our parametric approximation; see the supplement for an
+overview.  These  take the form
+\begin{equation}
+2l(\bs{\hat\beta}) + k(df)
+\end{equation}
+where $k(df)$ is the cost function on the degrees-of-freedom associated with
+estimates $\bs{\hat\beta}$.  For example, the AIC of
+\cite{akaike_information_1973} uses $k(df) = 2df$ while the BIC of \cite{schwarz_estimating_1978}
+uses $k(df) = \log(n)df$.
+
+As detailed in \cite{flynn_efficiency_2013}, the corrected AICc with $k(df) =
+2df(n/n-df-1)$ does a much better job than the AIC or BIC in choosing the
+optimal model for prediction when $df$ is large.  Alternatively, the BIC is often preferred
+for accurate support recovery or avoiding false discovery; see, e.g.,
+\cite{zou_degrees_2007}.
+
+
+\section{Simulation experiment}
+\label{sec:sim}
 
 This section will  analyze data simulated from
  the following $p=1000$ dimensional regression.
@@ -630,7 +705,8 @@ Points-and-bars show mean OOS MSE $\pm 1$se.  }
 \vspace{-.25cm}
 \end{figure*}
 
-\subsection{Hockey players}
+\section{Hockey example}
+\label{sec:nhl}
 
 
 This section attempts to quantify the
