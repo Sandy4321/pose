@@ -3,14 +3,14 @@
 \bibitem[\protect\citeauthoryear{Akaike}{Akaike}{1973}]{akaike_information_1973}
 Akaike, H. (1973).
 \newblock Information theory and the maximum likelihood principle.
-\newblock In B.~Petrov and F.~Csaki (Eds.), {\em 2nd International Symposium on
-  Information Theory}, Akademiai Kiado, Budapest.
+\newblock In {\em 2nd International Symposium on Information Theory}, Akademiai
+  Kiado, Budapest.
 
 \bibitem[\protect\citeauthoryear{Armagan, Dunson, and Lee}{Armagan
   et~al.}{2013}]{armagan_generalized_2013}
 Armagan, A., D.~B. Dunson, and J.~Lee (2013).
 \newblock Generalized double pareto shrinkage.
-\newblock {\em To appear in Statistica Sinica\/}.
+\newblock {\em Statistica Sinica\/}~{\em 23}, 119.
 
 \bibitem[\protect\citeauthoryear{Bickel}{Bickel}{1975}]{bickel_one-step_1975}
 Bickel, P.~J. (1975).
@@ -20,13 +20,13 @@ Bickel, P.~J. (1975).
 
 \bibitem[\protect\citeauthoryear{Bickel, Ritov, and Tsybakov}{Bickel
   et~al.}{2009}]{bickel_simultaneous_2009}
-Bickel, P.~J., Y.~Ritov, and A.~B. Tsybakov (2009, August).
+Bickel, P.~J., Y.~Ritov, and A.~B. Tsybakov (2009).
 \newblock Simultaneous analysis of lasso and dantzig selector.
 \newblock {\em The Annals of Statistics\/}~{\em 37\/}(4), 1705--1732.
 
 \bibitem[\protect\citeauthoryear{Breheny and Huang}{Breheny and
   Huang}{2011}]{breheny_coordinate_2011}
-Breheny, P. and J.~Huang (2011, March).
+Breheny, P. and J.~Huang (2011).
 \newblock Coordinate descent algorithms for nonconvex penalized regression,
   with applications to biological feature selection.
 \newblock {\em The Annals of Applied Statistics\/}~{\em 5\/}(1), 232--253.
@@ -84,7 +84,7 @@ Fan, J. and H.~Peng (2004).
 
 \bibitem[\protect\citeauthoryear{Fan, Xue, and Zou}{Fan
   et~al.}{2014}]{fan_strong_2014}
-Fan, J., L.~Xue, and H.~Zou (2014, June).
+Fan, J., L.~Xue, and H.~Zou (2014).
 \newblock Strong oracle optimality of folded concave penalized estimation.
 \newblock {\em The Annals of Statistics\/}~{\em 42\/}(3), 819--849.
 
@@ -169,15 +169,17 @@ Stein, C.~M. (1981).
 \newblock Estimation of the mean of a multivariate normal distribution.
 \newblock {\em The Annals of Statistics\/}~{\em 9}, 1135--1151.
 
-\bibitem[\protect\citeauthoryear{Taddy}{Taddy}{2013a}]{taddy_distributed_2013}
-Taddy, M. (2013a).
-\newblock Distributed multinomial regression.
-\newblock {arXiv}:1311.6139.
-
-\bibitem[\protect\citeauthoryear{Taddy}{Taddy}{2013b}]{taddy_multinomial_2013}
-Taddy, M. (2013b).
+\bibitem[\protect\citeauthoryear{Taddy}{Taddy}{2013}]{taddy_multinomial_2013}
+Taddy, M. (2013).
 \newblock Multinomial inverse regression for text analysis.
-\newblock {\em Journal of the American Statistical Association\/}~{\em 108}.
+\newblock {\em Journal of the American Statistical Association\/}~{\em 108},
+  755--770.
+
+\bibitem[\protect\citeauthoryear{Taddy}{Taddy}{2015}]{taddy_distributed_2015}
+Taddy, M. (2015).
+\newblock Distributed multinomial regression.
+\newblock {\em The Annals of Applied Statistics\/}.
+\newblock To appear.
 
 \bibitem[\protect\citeauthoryear{Tibshirani}{Tibshirani}{1996}]{tibshirani_regression_1996}
 Tibshirani, R. (1996).
@@ -191,7 +193,7 @@ Wainwright, M.~J. (2006).
 \newblock {\em UC Berkeley Technical Report\/}.
 
 \bibitem[\protect\citeauthoryear{Wainwright}{Wainwright}{2009}]{wainwright_sharp_2009}
-Wainwright, M.~J. (2009, May).
+Wainwright, M.~J. (2009).
 \newblock Sharp thresholds for high-dimensional and noisy sparsity recovery
   using {L1}-constrained quadratic programming (lasso).
 \newblock {\em {IEEE} Transactions on Information Theory\/}~{\em 55\/}(5),
@@ -199,7 +201,7 @@ Wainwright, M.~J. (2009, May).
 
 \bibitem[\protect\citeauthoryear{Wang, Kim, and Li}{Wang
   et~al.}{2013}]{wang_calibrating_2013}
-Wang, L., Y.~Kim, and R.~Li (2013, October).
+Wang, L., Y.~Kim, and R.~Li (2013).
 \newblock Calibrating nonconvex penalized regression in ultra-high dimension.
 \newblock {\em The Annals of Statistics\/}~{\em 41\/}(5), 2505--2536.
 
@@ -215,7 +217,7 @@ Zhang, T. (2010b).
   1081--1107.
 
 \bibitem[\protect\citeauthoryear{Zhang}{Zhang}{2013}]{zhang_multi-stage_2013}
-Zhang, T. (2013, November).
+Zhang, T. (2013).
 \newblock Multi-stage convex relaxation for feature selection.
 \newblock {\em Bernoulli\/}~{\em 19\/}(5B), 2277--2293.
 

@@ -92,7 +92,7 @@ sparsity encouraged by diminishing-bias penalties (since single large
 coefficients are allowed to account for the signals of other correlated
 covariates) leads to lower memory, storage, and communication requirements.
 Such savings are very important in distributed  computing schemes
-\citep[e.g.,][]{taddy_distributed_2013}.
+\citep[e.g.,][]{taddy_distributed_2015}.
 
 
 Unfortunately,  exact solvers for concave penalized estimation  all require
@@ -338,8 +338,7 @@ weights $\omega_j = 1/|\hat\beta^0_j|$, where $\hat\beta^0_j$ is an initial
 guess at the coefficient value.  The original AL paper advocates using MLE
 estimates for initial values, while
 \cite{huang_adaptive_2008} suggest using marginal regression coefficients
-$\hat\beta^0_j = \mr{cor}(\bm{x}_j,\bm{y})$.\footnote{We include marginal AL in our study
-of Section \ref{sec:sim}}
+$\hat\beta^0_j = \mr{cor}(\bm{x}_j,\bm{y})$.
 
 The main point here is that OSE LLA, or a two-step estimator starting from
 $\bs{\hat\beta}=0$, or any version of the adaptive lasso, are all  interpretable as weighted-$L_1$ 
@@ -504,7 +503,7 @@ we might want an analytic alternative to CV.  For example, if a single fit is ex
 times will be impractical.  More subtly, truly Big Data are distributed: they
 are too large to store on a single machine. Algorithms can be designed to work
 in parallel on subsets
-\citep[e.g.,][]{taddy_distributed_2013} but a bottleneck
+\citep[e.g.,][]{taddy_distributed_2015} but a bottleneck
 results if you need to communicate across machines for CV experimentation.
 Finally, CV can lead to over-fit for unstable algorithms whose
 results change dramatically in response to data jitter; see
@@ -611,15 +610,15 @@ An information criterion is an attempt to approximate
 process and our parametric approximation; see the supplement for an
 overview.  These  take the form
 \begin{equation}
-2l(\bs{\hat\beta}) + k(df)
+l(\bs{\hat\beta}) + k(df)
 \end{equation}
-where $k(df)$ is the cost function on the degrees-of-freedom associated with
-estimates $\bs{\hat\beta}$.  For example, the AIC of
-\cite{akaike_information_1973} uses $k(df) = 2df$ while the BIC of \cite{schwarz_estimating_1978}
-uses $k(df) = \log(n)df$.
+where $k$ is the cost on the degrees-of-freedom associated with
+ $\bs{\hat\beta}$ and $l$ is the negative log likelihood.  The AIC of
+\cite{akaike_information_1973} uses $k(df) = df$ while the BIC of \cite{schwarz_estimating_1978}
+uses $k(df) = \log(n)df/2$.
 
 As detailed in \cite{flynn_efficiency_2013}, the corrected AICc with $k(df) =
-2df(n/n-df-1)$ does a much better job than the AIC or BIC in choosing the
+df\times n/(n-df-1)$ does a better job than the AIC or BIC in choosing the
 optimal model for prediction when $df$ is large.  Alternatively, the BIC is often preferred
 for accurate support recovery or avoiding false discovery; see, e.g.,
 \cite{zou_degrees_2007}.
@@ -628,23 +627,22 @@ for accurate support recovery or avoiding false discovery; see, e.g.,
 \section{Simulation experiment}
 \label{sec:sim}
 
-This section will  analyze data simulated from
- the following $p=1000$ dimensional regression.
+We consider samples of size $n=1000$ from
 \begin{align}
 \label{simdgp}
-y \sim \mr{N}\left(\bm{x}'\bs{\beta},\sigma^2\right)~~\text{where}~~\bm{x} = \bm{u}*\bm{z},~~\bm{u}\sim \mr{N}\left(\bm{0},\bs{\Sigma}\right),~~z_{j} \stackrel{ind}{\sim} \mr{Bin}(0.5),~~\beta_j = \frac{1}{j}\exp\left(-\frac{j}{50}\right).
+&y \sim \mr{N}\left(\bm{x}'\bs{\beta},\sigma^2\right)~\text{where}~\beta_j = \frac{\exp\left(-\frac{j}{\sf d}\right)}{j},~j=1\ldots p,\notag\\
+&\text{and}~\bm{x} = \bm{u}*\bm{z},~~\bm{u}\sim \mr{N}\left(\bm{0},\bs{\Sigma}\right),~~z_{j} \stackrel{ind}{\sim} \mr{Bin}(0.5).
 \end{align}
 
 \vspace{-.4cm}
 \noindent
-Each simulation draws $n=1000$ means $\eta_i =
+Each simulation draws means $\eta_i =
 \bm{x}_i'\bs{\beta}$, and two independent response samples 
-$\bm{y},\bm{\tilde y} \sim \mr{N}(\bs{\eta},\sigma^2\bm{I})$. Residual
-variance $\sigma^2$ and covariate correlation $\bs{\Sigma}$ are adjusted across
-runs.  In the first case, we define $\sigma^2$ through {\it signal-to-noise}
-ratios $\mr{sd}(\bs{\eta})/\sigma$ of $1/2$, $1$, and $2$.  In the latter
-case, multicollinearity is parametrized via $\Sigma_{jk} =
-\rho^{|j-k|}$, and we consider $\rho = 0, 0.5,~\text{and}~0.9$.
+$\bm{y},\bm{\tilde y} \sim \mr{N}(\bs{\eta},\sigma^2\bm{I})$. Multicollinearity is
+parametrized via $\Sigma_{jk} =
+\rho^{|j-k|}$ with $\rho = 0.5$.  We define $\sigma^2$ through {\it signal-to-noise} ratios
+$\mr{sd}(\bs{\eta})/\sigma$ of $1/2$, $1$, and $2$; for coefficient decay rates we consider
+${\sf d}$ of $10$, $50$, and $100$.\footnote{Results for many additional configurations, including different covariate sparsity and multicollinearity, are available in the supplement.}
 
 
 The regression in (\ref{simdgp}) is obviously {\it dense}:  true
@@ -659,6 +657,30 @@ Our sparse oracle comparator is the $C_p$ optimal $L_0$ penalized solution
 \ds{1}_{\{\beta_j\neq0\}}\right\},
 \end{equation} which is solvable here by searching through
 OLS regression on $\bm{X}_{\{1\ldots j\}}$ for $j=1\ldots p$.
+
+\begin{table}
+\footnotesize
+\begin{tabular}{cc|rrrrr}
+\multicolumn{2}{c}{~}&\multicolumn{4}{c}{\it \% Worse than oracle $C_p$  } &   \\
+\multicolumn{2}{c}{~}&\multicolumn{3}{c}{\scriptsize\it AICc}& \multicolumn{1}{c}{\scriptsize\it CV}&\\[-1ex]
+\multicolumn{2}{c}{~}&\multicolumn{3}{c}{\downbracefill}& \multicolumn{1}{c}{\it \downbracefill}&\\
+$\frac{\mr{sd}(\bs{\eta})}{\sigma}$& \textsf{d} & GL0 & GL2 & GL10 & \multicolumn{1}{c|}{MCP} & $C_p$ $R^2$ 
+\\[1ex]
+\hline\rule{0pt}{4ex}
+\!2 &  10 & 2.5 & \bf 1.3 & 3.8 & \bf 1.3 & .79\\
+2 & 50 & 7.8 & \bf 3.9 & 6.5 &\bf  3.9 & .77 \\
+2 & 100 & 12.0 & 8.0 & 8.0 &\bf 6.7 & .75\\
+1 & 10  & 8.3 & 6.2 & 14.6 &\bf 4.2 & .48\\
+1 & 50 & 27.3 &\bf 16.0 & 18.2 & 18.2 & .44\\
+1 & 100 & 35.0 & 27.5 & \bf 25.0 & 27.5 & .40 \\
+1/2 & 10 &33.3 &\bf  27.8 & 61.1 &\bf  27.8 & .18\\
+1/2 & 50 &\bf 71.4 & 92.9 & 100.0 &\bf 71.4 & .14\\
+1/2 & 100 &\bf 80.0 & 110.0 & 110.0 & 90.0 & .10
+\\\hline
+\end{tabular}
+\end{table}
+
+
 
 We consider {\tt gamlr} runs of GL with $\gamma$
 of 0 (lasso), 2, and 10 and marginal AL, as well as
@@ -721,7 +743,7 @@ are in the {\tt gamlr} package; there are
 The logistic regression model of player contribution is, for goal $i$ in
 season $s$ with away team $a$ and home team $h$,
 \begin{align}\label{hockeymod}
-\mr{logit}\left[\mr{p}(\text{home~team~scored~goal}~i)\right] = \alpha_0 +
+\mr{logit}\left[\mr{p}(\text{home~team~scored~goal}~i)\right] \\= \alpha_0 +
 \alpha_{sh} - \alpha_{sa} + \bm{u}_i'\bs{\phi} + \bm{x}_i'\bs{\beta}_0 +
 \bm{x}_i'\bs{\beta}_s, \end{align}  Vector $\bm{u}_i$ holds indicators for
 various special-teams scenarios (e.g., a home team power play), and
