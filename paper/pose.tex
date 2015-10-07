@@ -807,7 +807,10 @@ hockey's `plus-minus' (PM) statistic: number of goals {\it for} minus {\it
 against} each player's team while he is on the ice. To convert from player
 effects $\beta_{0j} + \beta_{sj}$ to the scale of `plus/minus', set the probability that a goal was scored by his team given player
 $j$ is on ice  (and no other information) as $p_j = e^{\beta_j}/(1+e^{\beta_j})$. The `partial
-plus/minus' (PPM) is \[ \mr{ppm}_j = N_j(p_j - (1-p_j)) = N_j(2p_j-1) \] where
+plus/minus' (PPM) is 
+\begin{equation}
+ \mr{ppm}_j = N_j(p_j - (1-p_j)) = N_j(2p_j-1)
+ \end{equation}  where
 $N_j$ is the  number of goals for which he was on-ice.  This measures 
 quality and quantity of contribution and lives on the same scale as PM.
 

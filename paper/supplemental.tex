@@ -42,29 +42,496 @@
 
 \pdfminorversion=4
 \begin{document}
-
+\setcounter{equation}{20}
+\setcounter{section}{6}
+\setcounter{table}{2}
+\setcounter{figure}{3}
 \sgl 
 
 \pagestyle{empty}
 
 ~
-\vskip 3cm
-
-\noindent {\huge \bf Supplemental Material} 
-
 \vskip .5cm
 
-\noindent{\Large One-step estimator paths for concave regularization
+\noindent {\LARGE \bf Supplemental material} 
 
-\vskip .2cm \noindent Matt Taddy}
+\vskip .25cm
+
+\noindent{\LARGE \it One-step estimator paths for concave regularization
+
+%\vskip .2cm \noindent Matt Taddy
+}
 
 
 \vskip 1cm
 
 
-\setstretch{1.4}
+\setstretch{1.3}
 
-\section{Simulation results}
+
+\section{Implementation via coordinate descent}
+\label{implement}
+
+We use Coordinate descent \citep[CD; e.g.,][]{luenberger_linear_2008} to minimize
+(3) at each step along the path. CD is a local optimization
+algorithm that cycles through minimization of the conditional objective for
+individual parameters when the remaining parameters are fixed. Algorithms of this type have have become popular in
+$L_1$ penalized estimation since the work by \citet{friedman_pathwise_2007} and
+\citet{wu_coordinate_2008}.
+
+Our CD routine, outlined in Algorithm \ref{bmove}, is a solver for penalized
+weighted-least squares problems as defined in equation (\ref{newton}) below.
+This applies directly in Gaussian regression, and for non-Gaussian models  we
+follow \citet{friedman_regularization_2010} and apply CD inside an outer loop
+of iteratively re-weighted-least-squares \citep[IRLS;
+e.g.,][]{green_iteratively_1984}. Given current parameter values
+$\bs{\hat\beta}$, the Newton-Raphson update for maximum likelihood estimation
+is $\bs{\beta} = \bs{\hat\beta} - \bm{H}^{-1}\bm{g}$, where $\bm{H}$ is the
+information matrix with elements $h_{jk} = \partial^2 l/\partial
+\beta_j\partial \beta_k |_{\bs{\hat\beta}}$ and $\bm{g}$ is coefficient
+gradient (see Appendix \ref{models}). For exponential family linear models we
+can write $\bm{H} = \bm{X}'\bm{V}\bm{X}$ and $\bm{g} = \bm{X}'\bm{V}(\bm{z} -
+\bs{\hat\eta})$, where $\bm{V} = \mr{diag}(\bm{v})$, $\bm{v} = [v_1\ldots
+v_n]$ are `weights', $\bm{z} = [z_1\ldots z_n]$ are transformed `response',
+and $\hat\eta_i = \hat\alpha + \bm{x}_i\bs{\hat\beta}$.  In Gaussian
+regression,  $v_i = 1$, $z_i=\hat\eta_i - y_i$, and the update is an exact
+solution. For binomial regression, $v_i = q_i(1-q_i)$ and $z_i = \hat\eta_i -
+(y_i-q_i)/v_i$, where $q_i = (1 + \exp[-\hat\eta_i])^{-1}$ is the  estimated
+probability of success.
+
+This yields $\bs{\beta} = (\bm{X}'\bm{V}\bm{X})^{-1}\bm{X}'\bm{V}\bm{z}$, such
+that the Newton update solves a weighted-least-squares problem.   Adding $L_1$
+costs,  the minimization objective from (3) becomes
+\begin{equation} \label{newton}  \argmin_{\alpha,\beta_1 \ldots \beta_p \in
+\ds{R}} \sum_i \frac{v_i}{2}(\alpha + \bm{x}_i'\bs{\beta} - z_i)^2  + n\sum_j \omega_j
+\lambda |\beta_j|. \end{equation} Our solver iterates between CD on
+(\ref{newton}) and,  for non-Gaussian models, updates to $\bm{v}$ and
+$\bm{z}$. Each $t^{th}$ segment IRLS routine initializes $[\hat \alpha,
+\bs{\hat \beta}]$ at solutions for $\lambda^{t-1}$, or at $[\hat \alpha,
+\bm{0}]$ for $t=1$.  In the {\tt gamlr} implementation, a full pass update of
+all parameters is done only at the first CD iteration; otherwise coordinates
+with currently inactive (zero) $\hat\beta_j$ are not updated. Once the descent
+converges for this {\it active set}, IRLS $\bm{v}$ and $\bm{z}$ are updated
+and we begin a new CD loop with a full pass update.  The routine stops when
+maximum squared change in $\beta_j$ scaled by its information over one of
+these full pass updates is less than some tolerance threshold, ${\tt thresh}$.
+The default in {\tt gamlr} uses a relative tolerance of $10^{-7}$ times null
+model deviance.  
+
+\vspace{.25cm}
+\begin{algorithm}[ht]
+\vspace{.25cm}
+\caption{Coordinate descent\label{bmove}}
+
+\vskip .15cm
+\hskip .5cm Set ${\tt vh_j} = \sum_i v_i(x_{ij} - \bar x_j)^2$ 
+and ${\tt vx_j} = \sum_i v_ix_{ij}$ for $j=1\ldots p$.
+
+\vskip .15cm
+\hskip .5cm while $\displaystyle \max_{j = 1\ldots p} {\tt vh_j}\Delta_j^2 > {\tt thresh}$:
+
+\vskip .15cm
+\hskip 1.5cm for {j=1\ldots p}:
+
+
+\vskip .15cm
+\hskip 2.5cm set ${\tt vg_j} = -\sum_i x_{ij}v_i(z_i-\hat\eta_i)$ and ${\tt ghb} = {\tt vg_j} - {\tt vh_j}\hat\beta_j$
+
+
+\vskip .25cm
+\hskip 2.5cm if $|{\tt ghb}| < n\lambda^t\omega^t_j$:~ $\Delta_j = -\hat\beta_j$
+
+\vskip .1cm
+\hskip 2.5cm else:~ $\Delta_j = -({\tt vg_j} - \mr{sign}({\tt ghb}) n\lambda^t\omega^t_j)/{\tt vh_j}$.
+
+\vskip .25cm
+\hskip 2.5cm  update $\hat\beta_j \stackrel{+}{=} \Delta_j$,
+$\hat\alpha \stackrel{+}{=} -{\tt vx_j}\Delta_j$, 
+and $\bs{\hat\eta} = \hat\alpha + \bm{X}'\bs{\hat\beta}$.
+
+\vskip .25cm
+
+\end{algorithm}
+
+
+\subsection{Descent convergence}
+
+ Despite the non-differentiability of $|\beta_j|$ at zero,
+\citet{tseng_convergence_2001} establishes local convergence for CD on
+(\ref{newton}) as a consequence of penalty separability: the
+non-differentiable part of our objective is a sum of functions on only a
+single coordinate.  Thus CD solves each weighted-least squares problem, and
+the full algorithm converges if IRLS does.  For non-Gaussian models,
+convergence of such nested $L_1$-penalized IRLS algorithms is shown
+in \cite{lee_proximal_2014}.
+
+\subsection{Quasi-Newton acceleration}
+\label{qn}
+
+Under high collinearity and large $\gamma$, one may wish to accelerate convergence via a quasi-Newton step
+\citep[e.g.,][]{lange_numerical_2010}. Acceleration is applied to $\bs{\theta}
+= [\alpha,\bs{\beta}]$, and a move is accepted only if it leads to a decrease
+in the objective. Suppose that $\bs{\hat\theta}^{(0)}$,
+$\bs{\hat\theta}^{(-1)}$, and $\bs{\hat\theta}^{(-2)}$ are the current,
+previous, and previous-to-previous parameter estimates.  Write
+$M(\bs{\hat\theta}^{(t)})$ as the implied CD update map $\bs{\hat\theta}^{(t)}
+\rightarrow \bs{\hat\theta}^{(t+1)}$, such that the algorithm converges at
+$\bs{\hat\theta} - M(\bs{\hat\theta}) = \bm{0}$.  With $\bm{u} =
+\bs{\hat\theta}^{(-1)} - \bs{\hat\theta}^{(-2)}$ and $\bm{v} =
+\bs{\hat\theta}^{(0)} - \bs{\hat\theta}^{(-1)}$, a secant approximation to the
+gradient of $M$ is $\partial M/\partial \hat\theta_l \approx
+\mr{v}_l/\mr{u}_l$.  An approximate Newton-Raphson step to solve for the root
+of $\bs{\hat\theta} - M(\bs{\hat\theta}) $  updates each coordinate $\hat
+\theta_l \gets \hat\theta_l^{(-1)} - (\hat\theta_l^{(-1)} -
+\hat\theta_l^{(0)})/(1-\mr{v}_l/\mr{u}_l)$ which can be re-written as
+$\hat\theta_l = (1-\mr{w}_l)\hat\theta_l^{(-1)} + \mr{w}_l\hat\theta_l^{(0)} $
+where $\mr{w}_l = \mr{u}_l/(\mr{u}_l - \mr{v}_l)$.
+
+
+
+\section{Gradient, curvature, and path starts}
+\label{models}
+
+The negative log likelihood objective in Gaussian regression is $
+l(\alpha,\bs{\beta}) = 0.5\sum_i (y_i -\eta_i)^2 $ with gradient
+$g_j(\bs{\beta}) = \partial l/\partial \beta_j = -\sum_i x_{ij}(y_i -
+\eta_i)$, and coordinate curvature $h_j(\bs{\beta}) = \partial^2 l/\partial
+\beta_j^2 = \sum_i x_{ij}^2$. In logistic regression, set $y_i = 1$ for
+`success' and $y_i = 0$ for `failure' and write $q_i = (1 +
+\exp[-\eta_i])^{-1}$ as the probability of success.  Then
+$l(\alpha,\bs{\beta}) = \sum_i -y_i\eta_i + \log(1 +
+  \exp[\eta_i])$,
+$
+g_j(\bs{\beta}) = \partial l/\partial \beta_j = -\sum_i
+x_{ij}(y_i - q_i)$, and
+$h_j(\bs{\beta}) = \partial^2 l/\partial \beta_j^2 = \sum_i
+x_{ij}^2q_i(1-q_i)
+$.
+In each case, it is implied that $\hat\alpha$ has been set
+to minimize $l(\alpha,\bs{\hat\beta})$. 
+
+For $L_1$ costs $c_j(|\beta_j|) = |\beta_j|$, the infimum $\lambda$ such
+that $\bs{\hat\beta} = \bm{0}$ is  available analytically as
+$\lambda^1 =
+n^{-1}\max\{|g_j(\bm{0})|,~j=1\ldots p\}$, the maximum mean
+absolute gradient for the null model with $\bs{\beta} = \bm{0}$.  This formula
+is used to obtain our starting values for the path algorithms.
+
+
+\section{False Discovery Control}
+
+A common goal in high-dimensional estimation is  support recovery -- having the set $\{j: \hat\beta_j \neq 0\} = \{j: \beta_j \neq 0\}$ for some `true' $\bs{\beta}$.
+For standard lasso estimated $\bs{\hat\beta}$, many authors have shown \citep[e.g.,][]{buhlmann_statistics_2011,zou_adaptive_2006} that to get exact support recovery asymptotically or with high probability requires an {\it irrepresentability condition} which limits the size of least-squares projections from `true support' onto spurious covariates.  
+\begin{definition} 
+The $(\theta,S,\bm{v})$-irrepresentable condition for $\theta\in[0,1]$ and $\bm{v}\in \ds{R}^s$ holds that, 
+\begin{equation}\label{irrep}
+|\bs{x}_j'\bm{X}_S(\bm{X}_S'\bm{X}_S)^{-1}\bm{v}| \leq \theta ~~\forall~j\notin S
+\end{equation}
+\end{definition}
+\noindent This is often presented with $\bm{v}=\bm{1}$.\footnote{\cite{wainwright_sharp_2009} shows that (\ref{irrep}) with $\theta=1$, $\bm{v}=\bm{1}$ is necessary for lasso sign recovery in the {\it noiseless} setting.} It
+can be a strict design restriction; for example,
+\citet{buhlmann_statistics_2011} show a single variable that is
+highly correlated with many columns of $\bm{X}_S$ leading to failure. Much
+of the literature on concave penalization has focused on achieving
+support recovery {\it without} such conditions; see, e.g.,
+\cite{fan_strong_2014} for a recent overview.  
+Our results will require irrepresentable conditions with $\bm{v} =
+\bs{\omega}_S$, which becomes less restrictive as one is able to shrink
+weights $\omega_j$ for $j\in S$.  See the remarks for more discussion.
+
+Our comparison of interest is between $\hat S = \{j:
+\hat\beta_j \neq 0\}$, for $\bs{\hat\beta}$ from weighted-$L_1$ penalized
+estimation, and $S = \{j:
+\beta^\nu_j \neq 0\}$ for $\bs{\beta}^\nu$ the $L_0$ penalized estimator from
+Theorem 3.1. Whether looking to an $L_0$ oracle or a sparse
+truth, our experience is that exact support recovery does not occur in
+practice   (e.g., see the simulation in Section 5).  Thus, we instead 
+focus on ability of the weighted-lasso to minimize {\it false discoveries}:
+$\hat\beta_j
+\neq 0$ when $\beta^\nu_j=0$. 
+
+\begin{theorem}
+Consider the setting of Theorem 3.1. 
+If $\omega_{S^c}^{\mr{min}} = 1$ and $\lambda > \sqrt{2\nu}$ then
+\begin{equation}\label{falsepos}
+\|\bm{X}_{S^c}'\bm{X}_S(\bm{X}_S'\bm{X}_S)^{-1}\bs{\omega}_S\|_{\infty} \leq 1 - \frac{\sqrt{2\nu}}{\lambda_t} ~~\Rightarrow~~\hat S \cap S^c = \varnothing.
+\end{equation}
+\end{theorem}
+\noindent The result follows directly from the sign recovery lemma \ref{signrecov}. 
+
+\vskip .25cm
+\noindent {\bf Remarks}
+\vskip .25cm
+\noindent $\bullet$~~ 
+From Theorem 7.4 in \cite{buhlmann_statistics_2011}, 
+the irrepresentability condition holds with 
+$|\bs{x}_j'\bm{X}_S(\bm{X}_S'\bm{X}_S)^{-1}\bs{\omega}_S|
+\leq \frac{\|\bs{\omega}_S\|}{\sqrt{s}}\theta_{\mr{adap}}(S)$ where $\theta_{\mr{adap}}(S)$ is their `adaptive restricted regression' coefficient.  Of interest here, they show that $\theta_{\mr{adap}}(S) \leq \sqrt{s}/\Lambda_{\mr{min}}(S)$ where $\Lambda_{\mr{min}}(S)$ is the minimum eigenvalue of $\bm{X}_S'\bm{X}_S/n$.  Thus, $(i)$ can be replaced by the restriction $\Lambda_{\mr{min}}(S) \geq \|\bs{\omega}_S\|(1 - \sqrt{2\nu}/(\omega_{S^c}^{\mr{min}}\lambda))^{-1} = \sqrt{s}L$, with $L$ from Theorem 3.1, and small values for $L$ appear key in both predictive performance and support recovery.
+
+\vskip .25cm
+\noindent $\bullet$~~ Without irrepresentability,  limits on false discovery are more pessimistic.  Convergence
+conditions imply that for $j \in S^c \cap \hat S$ we have
+$n\lambda \omega_j = |\bs{x}_j'(\bm{X}\bs{\hat\beta}-\bm{y})| \leq
+|\bs{x}_j'\bm{X}(\bs{\hat\beta}-\bs{\beta}^\nu)| + |\bs{x}_j'\bm{e}^S| \leq
+n\left(2\|\bs{\omega}_S\|/\phi(L,S) + \sqrt{2\nu}/\lambda\right) ~\forall~j$. 
+Dividing by $n\lambda\omega_j$ and counting yields
+\begin{equation}\label{pessimism}
+|S^c \cap \hat S| \leq \left|\frac{1}{\bs{\omega}_{S^c \cap \hat S}}\right|
+\left(\frac{2\|\omega_S\|}{\phi(L,S)} + \frac{\sqrt{2\nu}}{\lambda}\right)
+\end{equation}
+Without the ability to
+make $\omega_j$ very big for $j \in S^c$ (e.g., as in a thresholding procedure
+like that of \citealt{zhou_thresholding_2009}), the result in (\ref{pessimism}) has little to say about false discovery control.
+
+\subsection{Sign Recovery}
+
+\begin{lemma}\label{signrecov}
+Under the setting of Theorem 3.1, with $\hat S = \{j:\hat\beta_j \neq 0\}$, if $\omega_{S^c}^{\mr{min}}\lambda > \sqrt{2\nu}$ then
+\begin{equation}
+|\bs{x}_j'\bm{X}_S(\bm{X}_S'\bm{X}_S)^{-1}\bs{\omega}_S| \leq 1 - \frac{\sqrt{2\nu}}{\lambda\omega_j}~~\forall~j ~\in~S^c \Rightarrow \hat{S} \cap S^c = \varnothing.
+\end{equation}
+ If in addition
+$\left|(\bm{X}_S'\bm{X}_S)^{-1}\bm{X}_S'\bm{y}\right|_\infty > n\lambda\left|(\bm{X}_S'\bm{X}_S)^{-1}\bs{\omega}_S\right|_\infty$, then 
+$\mr{sgn}(\bs{\hat\beta}) = \mr{sgn}(\bs{\beta}^\nu)$.
+\end{lemma}
+\begin{proof} 
+The Karush-Kuhn-Tucker (KKT) conditions at weighted-$L_1$ minimization convergence imply that 
+\begin{equation}
+\bm{x}_j'\bm{X}(\bs{\hat\beta}-\bs{\beta}^\nu) + \bm{x}_j'\bm{e}^S = -n\lambda\zeta_j~~\text{for}~~j=1\dots p
+\end{equation} where $|\zeta_j| = \omega_j$ for $j\in\hat S$ and $|\zeta_j| \leq \omega_j$ for $j\in\hat S^c$.  Following  closely related proofs in \cite{wainwright_sharp_2006,wainwright_sharp_2009,zhou_adaptive_2009}, 
+$\hat{S} \cap S^c = \varnothing$ occurs if and only if these KKT conditions
+hold for projections restricted to $S$,
+\begin{equation}
+\bm{X}_S'\bm{X}_S(\bs{\hat\beta}_S-\bs{\beta}^\nu_S) + \bm{X}_S'\bm{e}^S =-n\lambda\bs{\zeta}_S ~~\Rightarrow~~ \bs{\hat\beta}_S-\bs{\beta}^\nu_S = -n\lambda(\bm{X}_S'\bm{X}_S)^{-1}\bs{\zeta}_S.
+\end{equation}
+Thus all of the spurious regressors in $S^c$ will have $\hat \beta_j = 0$
+if and only if
+\begin{equation}
+\bs{x}_j'\bm{X}_S(\bs{\hat\beta}_S-\bs{\beta}^\nu_S) - \bs{x}_j'\bm{e}^S 
+\leq n\lambda\zeta_j ~~\Leftarrow~~
+1 - \frac{|x_j'\bm{e}^S|}{n} \geq 1 - \frac{\sqrt{2\nu}}{\lambda\omega_j} \geq |\bs{x}_j'\bm{X}_S(\bm{X}_S'\bm{X}_S)^{-1}\bs{\omega}_S|.
+\end{equation}
+Finally, for sign recovery on $j\in S$ we need 
+$
+|\beta_j^\nu| - |\beta^\nu_j - \hat\beta_j| > 0 ~~\forall~j~\in~S
+$,
+and our stated condition follows from  $\bs{\beta^\nu}_S =
+(\bm{X}_S'\bm{X}_S)^{-1}\bm{X}_S'\bm{y}$ and $ \bs{\beta^\nu}_S-
+\bs{\hat\beta}_S = n\lambda (\bm{X}_S'\bm{X}_S)^{-1}\bs{\zeta}_S$.
+\end{proof}
+
+\section{Extra proofs}
+
+\subsection{Stagewise Regression}
+
+Theorem 3.1 uses the following simple result for stagewise regression -- iterative fitting of new covariates to the residuals of an existing linear model (as in, e.g., \citealt{goldberger_stepwise_1961}). 
+\begin{lemma}\label{SSElemma}
+Say $\mr{MSE}_S = \|\bm{X}\bs{\beta}^S-\bm{y}\|^2/n$ and 
+$\mr{cov}(\bs{x}_j,\bm{e}^S) = \bs{x}_j'(\bm{y}-\bm{X}\bs{\beta}^S)/n$ are sample variance and covariances.  Then for any $j \in 1\ldots p$, 
+\[
+\mr{cov}^2(\bs{x}_j,\bm{e}^S) \leq \mr{MSE}_S - \mr{MSE}_{S\cup j}
+\]
+\end{lemma}
+\begin{proof}
+From the well-known property on the correlation coefficient ($R^2$) for linear models,   
+in-sample correlation and variances are such that
+\[
+\frac{\mr{cov}^2(\bs{x}_j,\bm{e}^S)}{\mr{var}(\bs{x}_j)\mr{var}(\bm{e}^S)} = 1 - \frac{\mr{var}(\bm{e}^S-\tilde\beta_j\bs{x}_j)}{\mr{var}(\bm{e}^S)}
+\]
+where $\tilde\beta_j = \bs{x}_j'\bm{e}^S/(\bs{x}_j'\bs{x}_j)$ is the stagewise coefficient estimate.  Since $\mr{var}(\bs{x}_j)=1$, multiplying everything by $\mr{var}(\bm{e}^S)$ yields $\mr{cov}^2(\bs{x}_j,\bm{e}^S) =
+\mr{var}(\bm{e}^S) - \mr{var}(\bm{e}^S-\tilde\beta_j\bs{x}_j)
+\leq \mr{var}(\bm{e}^S) - \mr{var}(\bm{e}^{S\cup j})$.
+The last inequality holds because $\bm{e}^{S\cup j}$, residuals from OLS on $\bm{X}_{S\cup j}$, have the smallest-possible sum of squares for that set of covariates.  With $\mr{var}(\bm{e}^S) = \mr{MSE}_S$, etc, we are done.
+\end{proof}
+
+\subsection{Bayesian MAP}
+
+\begin{prop}\label{penprop}
+  $\bs{\hat\beta}$ solves (14) if and only if it is also in the
+  solution to (13).
+\end{prop}
+\begin{proof}
+  The conditional posterior mode for each $\tau_j$ given $\beta_j$
+  is $\tau(\beta_j) = \gamma s/(1 + \gamma|\beta_j|)$.  Any joint solution
+  $[\bs{\hat\beta},\bs{\hat\tau}]$ for (13) thus
+  consists of $\hat{\tau}_{j} = \tau(\hat\beta_{j})$;
+  otherwise, it is always possible to decrease the objective by
+  replacing $\hat\tau_{j}$. Setting each $\tau_j = 
+  \tau(\beta_j)$ in (13) and removing constant terms yields
+  (14).  Moreover, the solution to (13) solves
+  (14): otherwise, there would need to be a point on the profile
+  slice of (13) defined by $\tau_{j} =
+  \tau(\hat\beta_{j})$ that is lower than its minimum.
+\end{proof}
+
+For a Bayesian it is odd to be solving for $\bs{\tau}$ rather than
+marginalizing over its uncertainty.  However, recognizing the form of a gamma
+density  in (12), $\pi(\beta_j,\tau_j)$ integrates over $\tau_j$ to
+yield the marginal prior $ \pi(\beta_j) = 0.5s\left( 1+
+\gamma|\beta_j|\right)^{-(s+1)}$. This is the generalized double Pareto
+density, as in  \citet{armagan_generalized_2013}. Since $-\log \pi(\beta_j)
+\propto (s+1)\log(1 + \gamma|\beta_j|)$, the {\it profile} MAP solution to
+(13) is also the {\it marginal} MAP for
+$\bs{\beta}$ under $\mr{Ga}(s-1,1/\gamma)$ priors on each $\tau_j$.
+
+
+
+
+\section{Stability}
+
+A strong form of stability comes from convexity of the penalized objective in
+(1). This requires that the minimum eigenvalue of
+$\bm{H}(\bs{\beta})$, the Hessian matrix of second derivatives of
+$l(\bs{\beta})$, is greater than $|c''(\beta_j)| ~\forall j$.  For penalized
+least-squares under log costs, this amounts to requiring that the minimum
+eigenvalue of $\bm{H} = \bm{X}'\bm{X}$ is greater than
+$\lambda\gamma^2$.\footnote{ If $\nu$ is an eigenvalue of $\bm{H}$, then
+$(\bm{H} -
+\nu \bm{I})\bm{v} = 0$ for some nonzero $\bm{v}$; the negative log posterior
+Hessian at zero is $\bm{H} - \lambda\gamma^2\bm{I}$ and $(\bm{H} -
+\lambda\gamma^2\bm{I} + s\gamma^2\bm{I} -
+\nu \bm{I})\bm{v} = 0$ so that 
+$\nu - s\gamma^2$ is an eigenvalue of the minimization objective.  }  In the
+simple {\it standardized orthogonal covariate} case, this has an easy
+interpretation in the context of our Bayesian model from Section 4.1:
+for Gaussian regression, $h_j = \sum_i x_{ij}^2 = n$ and the objective is
+convex if prior variance on each $\tau_j$  is less than the number of
+observations.  For logistic regression you need $\mr{var}(\tau_j) < n/4$,
+since $\bm{H}$ now depends upon the coefficient values.
+
+In real examples, however, we cannot rely upon objective convexity. A more
+useful definition of stability requires continuity of the implied  coefficient
+function, $\hat\beta(\bm{y})$, in an imagined univariate regression problem
+(or for orthogonal covariates).  This is one of the key requirements of
+concave penalties listed by \citet{fan_variable_2001}. Many popular concave
+cost functions, such as the SCAD and MCP, have been engineered to have this
+continuity property. Conveniently, \cite{zou_one-step_2008} show that OSE LLA
+solutions have this property even if the target objective does not.  For
+example, even though the log penalty {\it does not} generally lead to
+continuous thresholding, their result implies that the GL solutions are
+continuous for $\gamma<\infty$.
+
+A theoretically richer form of stability is Lipschitz continuity of the
+implied prediction function, $\boldsymbol{\hat y} = \bm{X}\boldsymbol{\hat
+\beta}(\bm{y})$, which requires that   $
+\|\bm{\hat y}(\bm{y}_1)-\bm{\hat y}(\bm{y}_2)| \leq L\|\bm{y}_1-\bm{y}_2\| $
+for some finite constant $L$ on all possible $\bm{y}_1,\bm{y}_2$.
+\citet{zou_degrees_2007} establish Lipschitz continuity for $L_1$ estimated
+predictors as part of their derivation of a degrees-of-freedom estimator.
+Thus, conditional upon values for the coefficient-specific weights, POSE and
+GL are trivially Lipschitz continuous.  Unconditionally, we do not believe
+that the paths have this guarantee.  However, we'll see in the next section
+that a heuristic degrees-of-freedom estimator that takes such stability for
+granted performs well as the basis for model selection.
+
+Finally, the basic and most important type of stability is practical path continuity: by this, we mean that solutions change slowly enough along the path so that computational costs are kept within budget.   A regularization path can be built from a continuous thresholding function, or perhaps even be Lipschitz stable, but 
+none of that matters if it takes too long to fit.  For example, Figure \ref{nhltime} shows timings growing rapidly with large $\gamma$ for the hockey data  of Section 6, even though all of these specifications are theoretically stable by some criteria.
+
+\begin{figure}[bht]
+\vskip -.5cm
+\centering
+\includegraphics[width=5in]{graphs/nhl_time}
+\vskip -.25cm
+\caption{\label{nhltime} 
+Timings for the hockey data path fits of Section 6
+on a length-100 grid with $\lambda^{100} = 0.01\lambda^1$. }
+\vskip -.25cm
+\end{figure}
+
+
+
+\section{Information Criteria}
+
+
+We would like to choose a model that performs well in predicting new data.
+ `Good prediction' can be measured in a variety of ways.  A common and
+ coherent framework is to consider minimizing Kullback-Leibler (KL)
+ divergence.  Say $g(\bm{y})$ is the true data generating process, and
+ $f(\bm{y}; \bs{\eta},\phi)$ is the parametric density under study, which we
+ suppose here is a natural exponential family  with $\ds{E}[\bm{y}]=\bs{\eta}$
+ and dispersion $\phi$. Then we wish to minimize
+\begin{equation}
+\mr{KL}(\bs{\eta},\phi) = \ds{E}_g \log g(\bm{y}) - \ds{E}_g \log f(\bm{y}; \bs{\eta},\phi),
+\end{equation}
+the expected difference between log true density and our parametric approximation.  Since $\ds{E}_g \log g(\bm{y})$ is constant, this leads one to minimize 
+$Q(\bs{\eta},\phi) = -\ds{E}_g \log f(\bm{y}; \bs{\eta},\phi)$, the expected negative log likelihood.   There is no requirement that $g$ is a member of the family defined by $f$.
+
+If parameters are to be estimated as $[\bs{\eta}_{\bm{y}},\phi_{\bm{y}}]$, functions of random sample $\bm{y} \sim g$, then $Q(\bs{\eta}_{\bm{y}},\phi_{\bm{y}})$ is itself a random variable and one chooses estimators to minimize its expectation.  {\it Crucially, we imagine a double-sample expectation}, where the minimization objective is
+\begin{equation}\label{dualexpect}
+\ds{E}_{\bm{y}|g} \ds{E}_{\bm{\tilde y}|g} \log f(\bm{\tilde y}; \bs{\eta}_{\bm{y}},\phi_{\bm{y}}).
+\end{equation}
+The notation here indicates that inner and outer expectations are based on two {\it independent} random samples from $g$: $\bm{y}$ for training, upon which $\bs{\eta}_{\bm{y}},\phi_{\bm{y}}$ are calculated, and $\bm{\tilde y}$ for validation.  
+
+Information criteria (IC) are analytic approximations to metrics like
+(\ref{dualexpect}).\footnote{Not all IC target (\ref{dualexpect}).  For
+example, the `Bayesian' BIC, with  $c(df) =\log(n)df$
+\citep{schwarz_estimating_1978}, is derived
+\citep{kass_bayes_1995} as Laplace approximation to the negative log of the
+ {\it marginal likelihood}.  We include the BIC as a comparator to AIC and
+ AICc in our examples. }  They take the form
+\begin{equation}\label{ic}
+ -2\log f(\bm{y}; \bs{\eta}_{\bm{y}},\phi_{\bm{y}}) + c(df)
+ \end{equation} 
+where $c(df)$ is cost of the {\it degrees-of-freedom} used in
+$\bs{\eta}_{\bm{y}}$ -- e.g., for $\bm{y} \sim (\bs{\eta},\sigma^2\bm{I})$,
+\citet{efron_least_2004} defines $df =
+\sigma^{-2} \sum_i \mr{cov}(\eta_{\bm{y}i}, y_i)$. 
+
+Consider a Gaussian regression model where $\bs{\eta}_\bm{y}$ is an estimate
+for $\bs{\eta} = \ds{E}\bm{y}$ using $df$ degrees of freedom, and set $\phi_\bm{y} =
+\sigma^2_{\bm{y}} = \sum_i (y_i - \eta_{\bm{y}i})^2/n$. We'll derive
+\begin{equation}\label{aiccapprox}
+df\frac{n}{n-df-1}  \approx \ds{E}_{\bm{y}|g}\left[\log f(\bm{y}; \bs{\eta}_{\bm{y}},\phi_{\bm{y}}) - \ds{E}_{\bm{\tilde y}|g} \log f(\bm{\tilde y}; \bs{\eta}_{\bm{y}},\phi_{\bm{y}})
+\right],
+\end{equation}
+such that AICc's complexity penalty is the expected bias that results from taking the fitted log likelihood as an estimate for (\ref{dualexpect}).  First, by cancellation the inner term of (\ref{aiccapprox}) simplifies as 
+\begin{equation}
+\log f(\bm{y}; \bs{\eta}_{\bm{y}},\phi_{\bm{y}}) - \ds{E}_{\bm{\tilde y}|g} \log f(\bm{\tilde y}; \bs{\eta}_{\bm{y}},\phi_{\bm{y}}) = 
+\frac{\ds{E}_{\bm{\tilde y}|g} \sum_i (\tilde y_i - \eta_{\bm{y}i})^2}{2 \sigma^2_{\bm{y}}} - \frac{n}{2}.
+\end{equation}
+Now, assume that the {\it true} model is linear and that the data were generated
+from $\bm{y}\sim g(\bs{\eta}, \sigma^2\bm{I})$.  The \cite{mallows_comments_1973} $C_p$ formula holds that 
+$n\sigma^2_{\bm{y}} + 2 \sigma^2 df$ is an unbiased estimator for  expected 
+sum of square errors $\ds{E}_{\bm{\tilde y}|g} \sum_i (\tilde y_i - \eta_{\bm{y}i})^2/n$, such that
+\begin{equation}
+\frac{\ds{E}_{\bm{\tilde y}|g} \sum_i (\tilde y_i - \eta_{\bm{y}i})^2}{2 \sigma^2_{\bm{y}}} - \frac{n}{2} 
+ ~\approx~ \frac{n\sigma^2_{\bm{y}} + 2 \sigma^2 df}{2 \sigma^2_{\bm{y}}} - \frac{n}{2}
+ ~=~  df\frac{\sigma^2 }{\sigma^2_{\bm{y}}}.
+\end{equation}
+At this point, we see that the standard AIC approximation results from equating $\sigma^2 \approx \ds{E}_{\bm{y}|g}\sigma^2_{\bm{y}}$, so that $df\ds{E}_{\bm{y}|g}[\sigma^2/\sigma^2_{\bm{y}}] \approx df$.  This will underpenalize complexity whenever residual variance $\sigma^2_{\bm{y}}$ tends to be smaller than the true variance $\sigma^2$  -- that is, whenever the model is overfit.  In contrast, AICc applies the chi-squared goodness of fit result $
+{n\sigma^2_{\bm{y}}/\sigma^2} \sim \chi^2_{n-df-1}
+$
+to obtain 
+\begin{equation}
+\ds{E}_{\bm{y}|g}\left[\frac{\sigma^2 }{\sigma^2_{\bm{y}}}df\right]= 
+n\ds{E}_{\bm{y}|g}\left[\frac{1}{n\sigma^2_{\bm{y}}/\sigma^2}\right]df = 
+\frac{n}{n-df-1}df.
+\end{equation}
+Multiplying by $-2$ and subtracting from $-2\log f(\bm{y}; \bs{\eta}_{\bm{y}},\sigma_{\bm{y}})$ yields the AICc.
+
+
+\section{Hockey players}
+
+Ten-fold CV results are shown in Figure
+\ref{nhlcv} for $\gamma$ of 0, 1, and 10.  The OOS error minima are around the
+same in each case -- average deviance slightly above 1.16 -- but errors
+increase much faster away from optimality with larger $\gamma$.   We also see
+that AICc selection is always between the CV.min and CV.1se selctions:  at
+$\gamma=0$ AICc matches the CV.1se choice, while at $\gamma=10$ it has moved
+right to the CV.1se  selection.  Our heuristic might be
+over-estimating $df$ for large-$\gamma$ models (especially under this very
+collinear design), but one would also suspect that CV estimates of minimum
+deviance are biased downward more dramatically for larger $\gamma$ than for
+low-variance small-$\gamma$ estimators.
+
+
+\begin{figure}[h!]
+\includegraphics[width=\textwidth]{graphs/nhl_cv}
+\caption{\label{nhlcv} Hockey example 10-fold CV: mean OOS deviance $\pm 1$se, with minimum-error and 1SE selection rules marked with black dotted lines, and solid orange line showing AICc selection. }
+\end{figure}
+
+
+\section{Full Simulation results}
 
 Continuous-response data are simulated from
  the following $p=1000$ dimensional regression.
@@ -92,8 +559,14 @@ second reports false discovery and sensitivity with respect to the $L_0$
 oracle. 
 
 
+
+\setstretch{1}
+\bibliographystyle{chicago}
+\bibliography{pose}
+
+
 \begin{table}[p]\vspace{-.5cm}
-\caption[l]{\label{r2}\it Predictive $R^2$, for ${\sf s}=0.1$ and  ${\sf d}=10$.}
+\caption[l]{\it Predictive $R^2$, for ${\sf s}=0.1$ and  ${\sf d}=10$.}
 \vspace{-.5cm}
 \small\setstretch{1}
 \begin{center}
@@ -160,7 +633,7 @@ BIC & 0.09 & 0.12 & 0.08 & 0.12 & & \\
 \end{table}
 
 \begin{table}[p]\vspace{-.5cm}
-\caption[l]{\label{sens}\it False Discovery Rate $\mid$ Sensitivity, relative to $C_p$ model  for ${\sf s}=0.1$ and ${\sf d}=10$.}
+\caption[l]{\it False Discovery Rate $\mid$ Sensitivity, relative to $C_p$ model  for ${\sf s}=0.1$ and ${\sf d}=10$.}
 \vspace{-.5cm}
 \small\setstretch{1}
 \begin{center}
@@ -227,7 +700,7 @@ BIC & 0.13 $\mid$ 0.43 & 0.05 $\mid$ 0.40 & 0.02 $\mid$ 0.29 & 0.21 $\mid$ 0.46 
 \end{table}
 
 \begin{table}[p]\vspace{-.5cm}
-\caption[l]{\label{r2}\it Predictive $R^2$, for ${\sf s}=0.1$ and  ${\sf d}=50$.}
+\caption[l]{\it Predictive $R^2$, for ${\sf s}=0.1$ and  ${\sf d}=50$.}
 \vspace{-.5cm}
 \small\setstretch{1}
 \begin{center}
@@ -294,7 +767,7 @@ BIC & 0 & 0 & 0 & 0.01 & & \\
 \end{table}
 
 \begin{table}[p]\vspace{-.5cm}
-\caption[l]{\label{sens}\it False Discovery Rate $\mid$ Sensitivity, relative to $C_p$ model  for ${\sf s}=0.1$ and ${\sf d}=50$.}
+\caption[l]{\it False Discovery Rate $\mid$ Sensitivity, relative to $C_p$ model  for ${\sf s}=0.1$ and ${\sf d}=50$.}
 \vspace{-.5cm}
 \small\setstretch{1}
 \begin{center}
@@ -361,7 +834,7 @@ BIC & 0.00 $\mid$ 0.00 & 0.00 $\mid$ 0.01 & 0.00 $\mid$ 0.00 & 0.09 $\mid$ 0.04 
 \end{table}
 
 \begin{table}[p]\vspace{-.5cm}
-\caption[l]{\label{r2}\it Predictive $R^2$, for ${\sf s}=0.1$ and  ${\sf d}=100$.}
+\caption[l]{\it Predictive $R^2$, for ${\sf s}=0.1$ and  ${\sf d}=100$.}
 \vspace{-.5cm}
 \small\setstretch{1}
 \begin{center}
@@ -428,7 +901,7 @@ BIC & 0 & 0 & 0 & 0 & & \\
 \end{table}
 
 \begin{table}[p]\vspace{-.5cm}
-\caption[l]{\label{sens}\it False Discovery Rate $\mid$ Sensitivity, relative to $C_p$ model  for ${\sf s}=0.1$ and ${\sf d}=100$.}
+\caption[l]{\it False Discovery Rate $\mid$ Sensitivity, relative to $C_p$ model  for ${\sf s}=0.1$ and ${\sf d}=100$.}
 \vspace{-.5cm}
 \small\setstretch{1}
 \begin{center}
@@ -495,7 +968,7 @@ BIC & 0.00 $\mid$ 0.00 & 0.00 $\mid$ 0.00 & 0.00 $\mid$ 0.00 & 0.00 $\mid$ 0.01 
 \end{table}
 
 \begin{table}[p]\vspace{-.5cm}
-\caption[l]{\label{r2}\it Predictive $R^2$, for ${\sf s}=0.5$ and  ${\sf d}=10$.}
+\caption[l]{\it Predictive $R^2$, for ${\sf s}=0.5$ and  ${\sf d}=10$.}
 \vspace{-.5cm}
 \small\setstretch{1}
 \begin{center}
@@ -562,7 +1035,7 @@ BIC & 0.06 & 0.07 & 0.02 & 0.08 & & \\
 \end{table}
 
 \begin{table}[p]\vspace{-.5cm}
-\caption[l]{\label{sens}\it False Discovery Rate $\mid$ Sensitivity, relative to $C_p$ model  for ${\sf s}=0.5$ and ${\sf d}=10$.}
+\caption[l]{\it False Discovery Rate $\mid$ Sensitivity, relative to $C_p$ model  for ${\sf s}=0.5$ and ${\sf d}=10$.}
 \vspace{-.5cm}
 \small\setstretch{1}
 \begin{center}
@@ -629,7 +1102,7 @@ BIC & 0.22 $\mid$ 0.28 & 0.05 $\mid$ 0.23 & 0.00 $\mid$ 0.09 & 0.32 $\mid$ 0.29 
 \end{table}
 
 \begin{table}[p]\vspace{-.5cm}
-\caption[l]{\label{r2}\it Predictive $R^2$, for ${\sf s}=0.5$ and  ${\sf d}=50$.}
+\caption[l]{\it Predictive $R^2$, for ${\sf s}=0.5$ and  ${\sf d}=50$.}
 \vspace{-.5cm}
 \small\setstretch{1}
 \begin{center}
@@ -696,7 +1169,7 @@ BIC & 0 & 0 & 0 & 0 & & \\
 \end{table}
 
 \begin{table}[p]\vspace{-.5cm}
-\caption[l]{\label{sens}\it False Discovery Rate $\mid$ Sensitivity, relative to $C_p$ model  for ${\sf s}=0.5$ and ${\sf d}=50$.}
+\caption[l]{\it False Discovery Rate $\mid$ Sensitivity, relative to $C_p$ model  for ${\sf s}=0.5$ and ${\sf d}=50$.}
 \vspace{-.5cm}
 \small\setstretch{1}
 \begin{center}
@@ -763,7 +1236,7 @@ BIC & 0.00 $\mid$ 0.00 & 0.00 $\mid$ 0.00 & 0.00 $\mid$ 0.00 & 0.07 $\mid$ 0.01 
 \end{table}
 
 \begin{table}[p]\vspace{-.5cm}
-\caption[l]{\label{r2}\it Predictive $R^2$, for ${\sf s}=0.5$ and  ${\sf d}=100$.}
+\caption[l]{\it Predictive $R^2$, for ${\sf s}=0.5$ and  ${\sf d}=100$.}
 \vspace{-.5cm}
 \small\setstretch{1}
 \begin{center}
@@ -830,7 +1303,7 @@ BIC & 0 & 0 & 0 & 0 & & \\
 \end{table}
 
 \begin{table}[p]\vspace{-.5cm}
-\caption[l]{\label{sens}\it False Discovery Rate $\mid$ Sensitivity, relative to $C_p$ model  for ${\sf s}=0.5$ and ${\sf d}=100$.}
+\caption[l]{\it False Discovery Rate $\mid$ Sensitivity, relative to $C_p$ model  for ${\sf s}=0.5$ and ${\sf d}=100$.}
 \vspace{-.5cm}
 \small\setstretch{1}
 \begin{center}
@@ -897,7 +1370,7 @@ BIC & 0.00 $\mid$ 0.00 & 0.00 $\mid$ 0.00 & 0.00 $\mid$ 0.00 & 0.20 $\mid$ 0.00 
 \end{table}
 
 \begin{table}[p]\vspace{-.5cm}
-\caption[l]{\label{r2}\it Predictive $R^2$, for ${\sf s}=1$ and  ${\sf d}=10$.}
+\caption[l]{\it Predictive $R^2$, for ${\sf s}=1$ and  ${\sf d}=10$.}
 \vspace{-.5cm}
 \small\setstretch{1}
 \begin{center}
@@ -964,7 +1437,7 @@ BIC & 0.1 & 0.1 & 0.09 & 0.11 & & \\
 \end{table}
 
 \begin{table}[p]\vspace{-.5cm}
-\caption[l]{\label{sens}\it False Discovery Rate $\mid$ Sensitivity, relative to $C_p$ model  for ${\sf s}=1$ and ${\sf d}=10$.}
+\caption[l]{\it False Discovery Rate $\mid$ Sensitivity, relative to $C_p$ model  for ${\sf s}=1$ and ${\sf d}=10$.}
 \vspace{-.5cm}
 \small\setstretch{1}
 \begin{center}
@@ -1031,7 +1504,7 @@ BIC & 0.03 $\mid$ 0.08 & 0.00 $\mid$ 0.06 & 0.00 $\mid$ 0.06 & 0.04 $\mid$ 0.12 
 \end{table}
 
 \begin{table}[p]\vspace{-.5cm}
-\caption[l]{\label{r2}\it Predictive $R^2$, for ${\sf s}=1$ and  ${\sf d}=50$.}
+\caption[l]{\it Predictive $R^2$, for ${\sf s}=1$ and  ${\sf d}=50$.}
 \vspace{-.5cm}
 \small\setstretch{1}
 \begin{center}
@@ -1098,7 +1571,7 @@ BIC & 0.03 & 0.03 & 0.01 & 0.03 & & \\
 \end{table}
 
 \begin{table}[p]\vspace{-.5cm}
-\caption[l]{\label{sens}\it False Discovery Rate $\mid$ Sensitivity, relative to $C_p$ model  for ${\sf s}=1$ and ${\sf d}=50$.}
+\caption[l]{\it False Discovery Rate $\mid$ Sensitivity, relative to $C_p$ model  for ${\sf s}=1$ and ${\sf d}=50$.}
 \vspace{-.5cm}
 \small\setstretch{1}
 \begin{center}
@@ -1165,7 +1638,7 @@ BIC & 0.06 $\mid$ 0.04 & 0.00 $\mid$ 0.02 & 0.00 $\mid$ 0.02 & 0.03 $\mid$ 0.04 
 \end{table}
 
 \begin{table}[p]\vspace{-.5cm}
-\caption[l]{\label{r2}\it Predictive $R^2$, for ${\sf s}=1$ and  ${\sf d}=100$.}
+\caption[l]{\it Predictive $R^2$, for ${\sf s}=1$ and  ${\sf d}=100$.}
 \vspace{-.5cm}
 \small\setstretch{1}
 \begin{center}
@@ -1232,7 +1705,7 @@ BIC & 0.01 & 0.01 & 0 & 0.01 & & \\
 \end{table}
 
 \begin{table}[p]\vspace{-.5cm}
-\caption[l]{\label{sens}\it False Discovery Rate $\mid$ Sensitivity, relative to $C_p$ model  for ${\sf s}=1$ and ${\sf d}=100$.}
+\caption[l]{\it False Discovery Rate $\mid$ Sensitivity, relative to $C_p$ model  for ${\sf s}=1$ and ${\sf d}=100$.}
 \vspace{-.5cm}
 \small\setstretch{1}
 \begin{center}
@@ -1297,10 +1770,6 @@ BIC & 0.05 $\mid$ 0.01 & 0.00 $\mid$ 0.01 & 0.00 $\mid$ 0.00 & 0.12 $\mid$ 0.02 
 \end{center}
 \vspace{-1cm}
 \end{table}
-
-
-
-
 
 
 
