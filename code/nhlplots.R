@@ -92,6 +92,16 @@ dev.off()
 
 
 ## selection
+pdf(file="nhl_aicc.pdf",width=3.1,height=3)
+par(mfrow=c(1,1),mai=c(.8,.8,.1,.1))
+image(log(lambda[nlambda:1]),log(c(v[2]/2,v[2:9])),-log(maic[,1:9]),
+		yaxt="n",col=grey(seq(0,1,length=255)^20),
+		ylab="", xlab="", main="")
+axis(2,at=log(vaxis),labels=vaxis,las=2)
+mtext(side=1,"log lambda",font=3, line = 2.5)
+mtext(side=2,"gamma",font=3, line=3)
+dev.off()
+
 pdf(file="nhl_ic.pdf",width=7,height=3)
 par(mfrow=c(1,2),mai=c(.9,.3,.6,0),omi=c(0,.75,0,1.2))
 

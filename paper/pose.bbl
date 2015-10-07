@@ -108,6 +108,13 @@ Friedman, J.~H. (2008).
 \newblock Fast sparse regression and classification.
 \newblock Technical Report, Dept. of Statistics, Stanford University.
 
+\bibitem[\protect\citeauthoryear{Gramacy, Taddy, and Tian}{Gramacy
+  et~al.}{2015}]{gramacy_hockey_2015}
+Gramacy, R., M.~Taddy, and S.~Tian (2015).
+\newblock Hockey performance via regression.
+\newblock {\em to appear in the Handbook of statistical methods for design and
+  analysis in sports\/}.
+
 \bibitem[\protect\citeauthoryear{Gramacy, Jensen, and Taddy}{Gramacy
   et~al.}{2013}]{gramacy_estimating_2013}
 Gramacy, R.~B., S.~T. Jensen, and M.~Taddy (2013).

@@ -295,7 +295,7 @@ Unfortunately, such penalties can overwhelm the convex likelihood and produce a
 concave minimization objective; see Figure \ref{solution}.
 This  makes computation difficult.  For example,  one run of SCAD via the
 \texttt{ncvreg} R package \citep{breheny_coordinate_2011} for the simulation in
-Section \ref{sec:sim} requires around 10 minutes, compared to 1-2 seconds for 
+Section \ref{sec:sim} requires around 10 minutes, compared to less than a second for 
 lasso (or gamma lasso).  The most efficient exact solver that we've found is the
 \texttt{sparsenet} of \citet{mazumder_sparsenet_2011}, also implemented in R,
 which first fits a lasso path and, for
@@ -637,113 +637,139 @@ We consider samples of size $n=1000$ from
 \vspace{-.4cm}
 \noindent
 Each simulation draws means $\eta_i =
-\bm{x}_i'\bs{\beta}$, and two independent response samples 
+\bm{x}_i'\bs{\beta}$, and two response samples (train and test)
 $\bm{y},\bm{\tilde y} \sim \mr{N}(\bs{\eta},\sigma^2\bm{I})$. Multicollinearity is
 parametrized via $\Sigma_{jk} =
 \rho^{|j-k|}$ with $\rho = 0.5$.  We define $\sigma^2$ through {\it signal-to-noise} ratios
 $\mr{sd}(\bs{\eta})/\sigma$ of $1/2$, $1$, and $2$; for coefficient decay rates we consider
-${\sf d}$ of $10$, $50$, and $100$.\footnote{Results for many additional configurations, including different covariate sparsity and multicollinearity, are available in the supplement.}
+${\sf d}$ of $10$, $50$, and $100$.
 
-
-The regression in (\ref{simdgp}) is obviously {\it dense}:  true
+The system in (\ref{simdgp}) is obviously {\it dense}:  true
 coefficients are all nonzero.  However, they decay in magnitude along the
 index $j$ and
 it will be useless to estimate many of them in a $p=n$ regression.
 Our sparse oracle comparator is the $C_p$ optimal $L_0$ penalized solution
 
-\vspace{-.3cm}
+\vspace{-.75cm}
 \begin{equation}\label{l0oracle}
 \bs{\beta}^{\star} = \argmin_{\bs{\beta}} \left\{ \|\bm{y}-\bm{X}\bs{\beta}\|^2 + 2\sigma^2\sum_j
 \ds{1}_{\{\beta_j\neq0\}}\right\},
 \end{equation} which is solvable here by searching through
-OLS regression on $\bm{X}_{\{1\ldots j\}}$ for $j=1\ldots p$.
+OLS on $\bm{X}_{\{1\ldots j\}}$ for $j=1\ldots p$ (since coefficients are ordered).
 
 \begin{table}
+\vspace{-.2cm}
 \footnotesize
-\begin{tabular}{cc|rrrrr}
+\begin{tabular}{cc|rrrr|c}
 \multicolumn{2}{c}{~}&\multicolumn{4}{c}{\it \% Worse than oracle $C_p$  } &   \\
 \multicolumn{2}{c}{~}&\multicolumn{3}{c}{\scriptsize\it AICc}& \multicolumn{1}{c}{\scriptsize\it CV}&\\[-1ex]
 \multicolumn{2}{c}{~}&\multicolumn{3}{c}{\downbracefill}& \multicolumn{1}{c}{\it \downbracefill}&\\
 $\frac{\mr{sd}(\bs{\eta})}{\sigma}$& \textsf{d} & GL0 & GL2 & GL10 & \multicolumn{1}{c|}{MCP} & $C_p$ $R^2$ 
 \\[1ex]
-\hline\rule{0pt}{4ex}
-\!2 &  10 & 2.5 & \bf 1.3 & 3.8 & \bf 1.3 & .79\\
-2 & 50 & 7.8 & \bf 3.9 & 6.5 &\bf  3.9 & .77 \\
-2 & 100 & 12.0 & 8.0 & 8.0 &\bf 6.7 & .75\\
-1 & 10  & 8.3 & 6.2 & 14.6 &\bf 4.2 & .48\\
-1 & 50 & 27.3 &\bf 16.0 & 18.2 & 18.2 & .44\\
-1 & 100 & 35.0 & \bf 26.8 & \bf 26.8 & \bf 26.8 & .41 \\
-1/2 & 10 &33.3 &\bf 27.8 & 61.1 &\bf  27.8 & .18\\
-1/2 & 50 &\bf 71.4 & 92.9 & 100.0 &\bf 71.4 & .14\\
-1/2 & 100 &\bf 80.0 & 110.0 & 110.0 & 90.0 & .10
-\\\hline
+\hline\rule{0pt}{3ex}
+\!2 &  10 & 2 & \bf 1 & 4 & \bf 1 & .79\\
+2 & 50 & 8 & \bf 4 & 6 &\bf  4 & .77 \\
+2 & 100 & 12 & 8 & 8 &\bf 7 & .75\\
+1 & 10  & 8 & 6 & 15 &\bf 4 & .48\\
+1 & 50 & 27 &\bf 16 & 18 & 18 & .44\\
+1 & 100 & 35 & \bf 27 & \bf 27 & \bf 27 & .41 \\
+1/2 & 10 &33 &\bf 28 & 61 &\bf  28 & .18\\
+1/2 & 50 &\bf 71 & 93 & 100 &\bf 71 & .14\\
+1/2 & 100 &\bf 80 & 110 & 110 & 90 & .10
+\\[1ex]\hline
 \end{tabular}
+\caption{\label{tab:sim} Average out-of-sample $R^2$, reported as  \% worse than the $C_p$ oracle, across 1000 different samples from (\ref{simdgp}).   GL$\gamma$ columns denote {\tt gamlr} with AICc penalty selection, while MCP is {\tt sparsenet} with 5-fold CV selection. The best results are bolded.}
 \end{table}
 
 
-
-We consider {\tt gamlr} runs of GL with $\gamma$
-of 0 (lasso), 2, and 10 and marginal AL, as well as
-{\tt sparsenet}'s MCP penalized regression.  Covariate penalties are
-standardized by $\mr{sd}(\bs{x}_j)$, and paths run through 100
-$\lambda$ values down to $\lambda^{100} = 0.01\lambda^1$. On an Intel Xeon
-E5-2670 core, 5-fold CV with $\mr{sd}(\bm{\eta})/\sigma=1$
-and $\rho=1/2$ requires   1-2 seconds for lasso and marginal  AL, 2 and 3
-seconds for GL with $\gamma=2$ and $\gamma=10$, and 15-20 seconds
-for Sparsenet.
-\footnote{{\tt ncvreg} SCAD required ten minutes for a single run and is thus
-impractical for the applications under consideration.  But, in a small study,
-CV.min selected SCAD performs quite well in prediction --  similarly to the
-best CV.min methods for each data configuration -- with relatively high values
-for both false discovery and sensitivity. }
+Table \ref{tab:sim} shows  predictive performance, 
+measured through out-of-sample (OOS) $R^2 = 1 -
+\mr{var}(\bm{\tilde y} - \bm{\hat y})/\mr{var}(\bm{\tilde y})$, for {\tt
+gamlr} runs of GL with $\gamma$ of 0 (lasso), 2, and 10. For penalty
+selection, we use AICc with the GL $df$ from Section \ref{sec:select}. Results
+are compared to the oracle as well as {\tt sparsenet}'s MCP penalized
+regression, which applies 5-fold CV to optimize out-of-sample error over a
+large grid of potential penalty sizes ($\lambda$) and concavities (analogous
+to our $\gamma$).
 
 
-Figures \ref{simpaths} and \ref{simcv} illustrate GL paths for a single
-dataset, with  $\mr{sd}(\bm{\eta})/\sigma=1$ and $\rho=1/2$. In Figure
-\ref{simpaths}, increasing $\gamma$ leads to `larger shouldered' paths where
-estimates move quickly to MLE for the nonzero-coefficients. Degrees of
-freedom, calculated as in (\ref{edf}), are along the top of each plot; equal
-$\lambda$ have higher $df^t$ for higher $\gamma$ since there is less shrinkage
-of $\hat\beta_j\neq0$.  Figure \ref{simcv} shows CV and AICc error estimates.
-The two criteria roughly track each other, although AICc more heavily
-penalizes over-fit and at $\gamma=10$ their minima do not match.  Notice that
-as $\gamma$ increases, the CV error increases more quickly after it's minimum;
-this indicates that the consequences of over-fit are worse under faster
-diminishing-bias.
+Note that Table \ref{tab:sim} represents only a small portion of our
+simulation study.  The supplemental material includes results for hundreds of
+additional configurations: varying levels of sparsity (different $z_i$
+distribution) or multicollinearity (different $\bs{\Sigma}$) in $\bm{x}$, as
+well as for different prediction algorithms: various CV selection rules, AIC,
+and BIC applied to the GL paths as well as to additional adaptive lasso
+schemes.  Moreover, the supplement includes results on sensitivity and false
+discovery rates with respect to the support used in the oracle $C_p$ scheme,
+along with  plots for coefficient estimates, information criteria,
+and OOS error rates along $\lambda$.
 
+Insights from the simulations (including supplement):
 
-\begin{figure*}[tb]
-{\small \hskip 2.5cm$\bs{\gamma=0}$\hskip 4cm$\bs{\gamma=2}$\hskip 4cm$\bs{\gamma=10}$}
+$\bullet$~~ One of the three GL $\gamma$-specifications is always able to provide performance near to (never more than 1.5\% worse, and sometimes better) that of the computationally intensive routine of CV-selected MCP (over a grid in penalty size and scale).  A single {\tt gamlr} run requires a fraction of a second; {\tt sparsenet} with 5-fold CV requires 15-20 seconds per run.  
 
-~~~\includegraphics[width=6in]{graphs/sim_paths}
-\caption{\label{simpaths} Regularization paths for simulation example.
-Degrees of freedom $df^t$ are along the top. }
-\vskip .3cm
-{\small \hskip 2.5cm$\bs{\gamma=0}$\hskip 4cm$\bs{\gamma=2}$\hskip 4cm$\bs{\gamma=10}$}
+$\bullet$~~  AICc and 5-fold CV give roughly the same performance for the GL0 (lasso) and GL2; AICc is often much better than CV for the less stable GL10 paths.  For prediction, AICc is a massive improvement over either BIC or the uncorrected AIC;  the
+latter leads to negative $R^2$ in many configurations.
 
-~~~\includegraphics[width=6in]{graphs/sim_cv}
-\caption{\label{simcv} 5-fold CV and AICc for a simulation example. 
-Points-and-bars show mean OOS MSE $\pm 1$se.  }
-\vspace{-.25cm}
-\end{figure*}
+$\bullet$~~  Selected GL2 fits had often half the number of nonzero
+coefficients as for the selected lasso fit; GL10 leads to even more sparsity,
+sometimes returning less than 10\% of the number of nonzero coefficients given by
+lasso.  The results suggest that running {\tt gamlr} with small $\gamma$
+(e.g., as in GL2) can provide much additional information compression without
+hurting performance.  Even the very sparse $\gamma=10$ fits do nearly as well
+as best except in the low signal settings, where all but lasso suffer.
+Increasing $\gamma$ also leads to lower false discovery rates with respect to
+the $C_p$ oracle.
+
+$\bullet$~~ As $\gamma$ increases, the CV error increases more quickly after
+it's minimum; this is predicted by Theorem \ref{thm:sparseapprox}, and indicates that the consequences of over-fit are worse under
+faster diminishing-bias. The computation times also increase, although a
+single run at $\gamma=10$ still requires less than a second.
+
+$\bullet$~~  Investigation of AICc values finds that minimization of this
+criteria {\it across} GL0 and GL2 would have consistently chosen the rule that
+does best in Table \ref{tab:sim}.  Thus AICc selection on just two GL paths,
+with combined compute time still less than a second,  yields the best or near
+best predictor in all scenarios.
 
 \section{Hockey example}
-\label{sec:nhl}
+\label{sec:nhl}\vskip -.1cm
 
 
-This section attempts to quantify the
+
+\begin{table*}[t]\footnotesize\setstretch{1}
+\makebox[\linewidth]{
+\begin{tabular}{l|lcc|lcc|lcc|}
+\multicolumn{1}{c}{} & \multicolumn{3}{l}{\normalsize \it ~~~$\gamma=0$} & \multicolumn{3}{l}{\normalsize \it ~~~$\gamma=1$} &  \multicolumn{3}{l}{\normalsize \it ~~~$\gamma=10$}\\
+%\multicolumn{1}{c}{} & \multicolumn{3}{r|}{} & \multicolumn{3}{r|}{} &  \multicolumn{3}{r|}{}\\
+\multicolumn{1}{c}{}  &     &    PPM & PM &    &   PPM & PM        &   & PPM & PM \\
+\cline{3-4}\cline{6-7}\cline{9-10}\rule{0pt}{3ex}
+1 & Ondrej Palat & 33.8 & 38 & Sidney Crosby & 29.2 & 52 & Sidney Crosby & 32.6 & 52 \\
+2 & Sidney Crosby & 31.2 & 52 & Ondrej Palat & 29 & 38 & Jonathan Toews & 22.8 & 35 \\
+3 & Henrik Lundqvist & 25.8 & 9 & Jonathan Toews & 21.4 & 35 & Joe Thornton & 22 & 34 \\
+4 & Jonathan Toews & 24 & 35 & Joe Thornton & 21 & 34 & Anze Kopitar & 22 & 39 \\
+5 & Andrei Markov & 23.1 & 34 & Andrei Markov & 20.9 & 34 & Andrei Markov & 20.7 & 34 \\
+6 & Joe Thornton & 21.4 & 34 & Henrik Lundqvist & 19.8 & 9 & Alex Ovechkin & 18.1 & 16 \\
+7 & Anze Kopitar & 20.6 & 39 & Anze Kopitar & 19.5 & 39 & Pavel Datsyuk & 16.6 & 13 \\
+8 & Tyler Toffoli & 18.9 & 31 & Pavel Datsyuk & 16.1 & 13 & Ryan Getzlaf & 15.8 & 16 \\
+9 & Pavel Datsyuk & 17.7 & 13 & Logan Couture & 15.9 & 29 & Henrik Sedin & 15.2 & 7 \\
+10 & Ryan Nugent-hopkins & 17.4 & 18 & Alex Ovechkin & 15.8 & 16 & Marian Hossa & 14.9 & 21 \\[-1ex]
+\multicolumn{1}{c}{} & \multicolumn{3}{r|}{} & \multicolumn{3}{r|}{} &  \multicolumn{3}{r|}{}\\
+ \multicolumn{1}{c}{} & \multicolumn{3}{r|}{\it 305 nonzero effects} & \multicolumn{3}{r|}{\it 204 nonzero effects} &  \multicolumn{3}{r|}{\it 64 nonzero effects}
+\end{tabular}}
+\caption{\label{nhleffects} Top 10 AICc selected player `partial plus-minus' (PPM) values for the 2013-2014 season.}
+\end{table*}
+
+We close with an example analysis: measuring the
 performance of hockey players.  It extends  analysis in
-\cite{gramacy_estimating_2013}.  The current version includes data about who
-was on the ice for every goal in the National Hockey League (NHL) back to the
-2002-2003 season, including playoffs.  The data
-are in the {\tt gamlr} package; there are
-69449 goals and 2439 players.
+\cite{gramacy_estimating_2013,gramacy_hockey_2015}.  The  data include every goal in the National Hockey League (NHL) back to the
+2002-2003 season: 69,449 goals and 2439 players.
 
 
-The logistic regression model of player contribution is, for goal $i$ in
-season $s$ with away team $a$ and home team $h$,
+For goal $i$ in
+season $s$ with away team $a$ and home team $h$, say that $q_{i}$ is the probability that the home team scored this goal.  Our regression model is then
 \begin{align}\label{hockeymod}
-\mr{logit}\left[\mr{p}(\text{home~team~scored~goal}~i)\right] \\= \alpha_0 +
+\mr{logit}\left[q_{i}\right] = \alpha_0 +
 \alpha_{sh} - \alpha_{sa} + \bm{u}_i'\bs{\phi} + \bm{x}_i'\bs{\beta}_0 +
 \bm{x}_i'\bs{\beta}_s, \end{align}  Vector $\bm{u}_i$ holds indicators for
 various special-teams scenarios (e.g., a home team power play), and
@@ -758,95 +784,36 @@ scenarios, and team-season fixed effects -- a player's $\beta_{0j}$ or $\beta_{s
 only need be nonzero if that player effects play above or below the team
 average for a given season.
 
-We estimate gamma lasso paths of $\bs{\beta}$ for the model in
-(\ref{hockeymod}) {\it with  $\bs{\alpha}$ and $\bs{\phi}$ left unpenalized}.
-In contrast to the default for most analyses, our coefficient costs are {\it
-not} scaled by covariate standard deviation.  Doing the usual standardization
-would have favored players with little ice time.  The algorithm is run for
-$\log_{10}\gamma = -5 \ldots 2$, plus the $\gamma=0$ lasso.\footnote{On this
-data, $\gamma=\infty$ subset selection yields perfect separation and infinite
-likelihood.}
-
-Joint $[\gamma,\lambda]$ surfaces for AICc and BIC are in Figure \ref{nhlic}.
-AICc favors denser models with low $\lambda$ but not-to-big $\gamma$,
-while the BIC  prefers very sparse but relatively unbiased  models with large
-$\lambda$ and small $\gamma$.  Both criteria are strongly adverse to any model
-at $\gamma=100$, which is where timings explode in Figure
-\ref{nhltime}.  Ten-fold CV results are shown in Figure
-\ref{nhlcv} for $\gamma$ of 0, 1, and 10.  The OOS error minima are around the
-same in each case -- average deviance slightly above 1.16 -- but errors
-increase much faster away from optimality with larger $\gamma$.   We also see
-that AICc selection is always between the CV.min and CV.1se selctions:  at
-$\gamma=0$ AICc matches the CV.1se choice, while at $\gamma=10$ it has moved
-right to the CV.1se  selection.  Our heuristic from Section \ref{sss}.2 might be
-over-estimating $df$ for large-$\gamma$ models (especially under this very
-collinear design), but one would also suspect that CV estimates of minimum
-deviance are biased downward more dramatically for larger $\gamma$ than for
-low-variance small-$\gamma$ estimators.
+We estimate GL paths of $\bs{\hat\beta}$ from (\ref{hockeymod}) with
+$\bs{\alpha}$ and $\bs{\phi}$ left {\it unpenalized}. Coefficient costs are
+{\it not} scaled by covariate standard deviation, since this would have
+favored players with little ice time.   The AICc surface
+is shown in Figure \ref{nhlic}; it selects denser models with low $\lambda$ but
+not-to-big $\gamma$.  See the supplement for additional study, including comparison to BIC and CV.
 
 
-
-\begin{figure*}[tb]
-\begin{center}\vskip -.5cm
-~~~~~~~~\includegraphics[width=5in]{graphs/nhl_ic}
-\caption{ \label{nhlic} Hockey example AICc and BIC surfaces, rising from white to black on log scale.
+\begin{figure}[h]
+\begin{center}
+\includegraphics[width=0.35\textwidth]{graphs/nhl_aicc}
+\vskip -.4cm
+\caption{ \label{nhlic} Hockey AICc, rising from white to black.
 }
 \end{center}
-% \end{figure}
-% \begin{figure}[htb]
-\includegraphics[width=6.3in]{graphs/nhl_cv}
-\caption{\label{nhlcv} Hockey example 10-fold CV: mean OOS deviance $\pm 1$se, with minimum-error and 1SE selection rules marked with black dotted lines, and solid orange line showing AICc selection. }
-\end{figure*}
+\vskip -.25cm
+\end{figure}
 
-
-\begin{table*}[tb]\footnotesize\setstretch{1}
-\makebox[\linewidth]{
-\begin{tabular}{l|lcc|lcc|lcc|}
-\multicolumn{1}{c}{} & \multicolumn{3}{l}{\normalsize \it ~~~lasso} & \multicolumn{3}{l}{\normalsize \it ~~~$\gamma=1$} &  \multicolumn{3}{l}{\normalsize \it ~~~$\gamma=10$}\\
-%\multicolumn{1}{c}{} & \multicolumn{3}{r|}{} & \multicolumn{3}{r|}{} &  \multicolumn{3}{r|}{}\\
-\multicolumn{1}{c}{}  &     &    PPM & PM &    &   PPM & PM        &   & PPM & PM \\
-\cline{3-4}\cline{6-7}\cline{9-10}
-1 & Ondrej Palat & 33.8 & 38 & Sidney Crosby & 29.2 & 52 & Sidney Crosby & 32.6 & 52 \\
-2 & Sidney Crosby & 31.2 & 52 & Ondrej Palat & 29 & 38 & Jonathan Toews & 22.8 & 35 \\
-3 & Henrik Lundqvist & 25.8 & 9 & Jonathan Toews & 21.4 & 35 & Joe Thornton & 22 & 34 \\
-4 & Jonathan Toews & 24 & 35 & Joe Thornton & 21 & 34 & Anze Kopitar & 22 & 39 \\
-5 & Andrei Markov & 23.1 & 34 & Andrei Markov & 20.9 & 34 & Andrei Markov & 20.7 & 34 \\
-6 & Joe Thornton & 21.4 & 34 & Henrik Lundqvist & 19.8 & 9 & Alex Ovechkin & 18.1 & 16 \\
-7 & Anze Kopitar & 20.6 & 39 & Anze Kopitar & 19.5 & 39 & Pavel Datsyuk & 16.6 & 13 \\
-8 & Tyler Toffoli & 18.9 & 31 & Pavel Datsyuk & 16.1 & 13 & Ryan Getzlaf & 15.8 & 16 \\
-9 & Pavel Datsyuk & 17.7 & 13 & Logan Couture & 15.9 & 29 & Henrik Sedin & 15.2 & 7 \\
-10 & Ryan Nugent-hopkins & 17.4 & 18 & Alex Ovechkin & 15.8 & 16 & Marian Hossa & 14.9 & 21 \\
-11 & Gabriel Landeskog & 16.6 & 36 & Marian Hossa & 14.4 & 21 & Alexander Semin & 14.7 & -1 \\
-12 & Logan Couture & 16.5 & 29 & Alexander Semin & 14.2 & -1 & Jaromir Jagr & 14.5 & 28 \\
-13 & Alex Ovechkin & 15.8 & 16 & Matt Moulson & 13.9 & 22 & Logan Couture & 14.2 & 29 \\
-14 & Marian Hossa & 15.4 & 21 & Tyler Toffoli & 13.3 & 31 & Matt Moulson & 13.7 & 22 \\
-15 & Alexander Semin & 14.8 & -1 & David Perron & 12.7 & 2 & Mikko Koivu & 13 & 12 \\
-16 & Zach Parise & 14.7 & 21 & Mikko Koivu & 12.5 & 12 & Joe Pavelski & 12.6 & 33 \\
-17 & Frans Nielsen & 13.5 & 8 & Frans Nielsen & 12.3 & 8 & Steven Stamkos & 12.6 & 24 \\
-18 & Mikko Koivu & 13.4 & 12 & Ryan Getzlaf & 12.1 & 16 & Frans Nielsen & 12.5 & 8 \\
-19 & Matt Moulson & 13.4 & 22 & Ryan Nugent-hopkins & 11.9 & 18 & Marian Gaborik & 12.3 & 29 \\
-20 & David Perron & 13.1 & 2 & Jaromir Jagr & 11.8 & 28 & Zach Parise & 12.2 & 21 \\
-\multicolumn{1}{c}{} & \multicolumn{3}{r|}{} & \multicolumn{3}{r|}{} &  \multicolumn{3}{r|}{}\\
- \multicolumn{1}{c}{} & \multicolumn{3}{r|}{\it 305 nonzero effects} & \multicolumn{3}{r|}{\it 204 nonzero effects} &  \multicolumn{3}{r|}{\it 64 nonzero effects}
-\end{tabular}}
-\caption{\label{nhleffects} Top 20 AICc selected player `partial plus-minus' (PPM) values for the 2013-2014 season, under $\gamma = 0,1,10$.  The number of nonzero player effects for each $\gamma$ are noted along the bottom.}
-\end{table*}
-
-The motivating application for this example was to devise a better versions of
+The original goal with this dataset was to build a better version of
 hockey's `plus-minus' (PM) statistic: number of goals {\it for} minus {\it
 against} each player's team while he is on the ice. To convert from player
-effects $\beta_{0j} + \beta_{sj}$ to the scale of `plus/minus', we first state
-that in absence of any other relevant information about each goal (not team,
-home/away, etc), the probability a goal was scored by his team given player
-$j$ is on ice becomes $p_j = e^{\beta_j}/(1+e^{\beta_j})$ and our `partial
+effects $\beta_{0j} + \beta_{sj}$ to the scale of `plus/minus', set the probability that a goal was scored by his team given player
+$j$ is on ice  (and no other information) as $p_j = e^{\beta_j}/(1+e^{\beta_j})$. The `partial
 plus/minus' (PPM) is \[ \mr{ppm}_j = N_j(p_j - (1-p_j)) = N_j(2p_j-1) \] where
 $N_j$ is the  number of goals for which he was on-ice.  This measures 
-quality and quantity of contribution, controlling for
-confounding information, and lives on the same scale as PM.
+quality and quantity of contribution and lives on the same scale as PM.
 
 Table \ref{nhleffects} contains the estimated PPM values for the 2013-2014
 season under various $\gamma$ levels, using AICc selection.  We see that, even
-if changing concavity ($\gamma$) has little effect on minimum CV errors,
+if changing concavity ($\gamma$) has little effect on minimum CV errors (see supplement),
 larger $\gamma$  yield more sparse models and different conclusions about
 player contribution. At the $\gamma=0$ lasso, there are 305 nonzero player
 effects (individuals measurably different from their team's average ability)
@@ -857,22 +824,15 @@ guys  drop in rank while more proven stars (e.g., Sidney Crosby and Jonathan
 Toews) move up the list.  Finally, at $\gamma=10$ only big-name stars remain
 amongst the 64 nonzero player effects.
 
+
 \section{Discussion}
 \label{discussion}
 
 
-Concave penalized estimation in Big data, where exact solvers are too
-computationally expensive, reduces largely to weighted-$L_1$ penalization.
-This review has covered a number of topics that we think relevant for such
-schemes.  Apart from the simulation study, we have not provided extensive
-comparison of the many available weighting mechanisms. However, we feel that
-path adaptation is an intuitively reasonable source of weights. In any case,
-POSE has the advantage that using a regularization path to supply penalty
-weights is computationally efficient. To scale for truly Big data, $L_1$
-weights need be constructed at practically no cost on top of a standard lasso
-run. Beyond {\tt gamlr} and marginal regression adaptive lasso, we have found
-no other software for sparse diminishing bias estimation where this standard
-is met.
+Concave penalized estimation for Big Data, where exact solvers are too
+ expensive, reduces largely to weighted-$L_1$ penalization.
+Path adaptation is an intuitively reasonable source of weights, and we are able to show that POSE -- particularly {\tt gamlr} with AICc selection -- provides diminishing-bias sparse compressed sensing
+no more cost than a  standard lasso.  We know of no other software that meets this standard.
 
 
 
