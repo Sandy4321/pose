@@ -1,22 +1,25 @@
-\documentclass[twoside]{article}
-\usepackage{aistats2016}
-%\usepackage[accepted]{aistats2016}
-
+\documentclass[12pt]{article}
 \usepackage{amssymb,amsmath,natbib,graphicx,amsthm,
   setspace,sectsty,anysize,times,dsfont,enumerate}
 
 \usepackage[svgnames]{xcolor}
 
 \usepackage{lscape,arydshln,relsize,rotating,multirow}
+\usepackage{caption}
+\captionsetup{%
+  font=small,
+  labelfont=normalfont,
+  singlelinecheck=false,
+  justification=justified
+}
 \usepackage{algorithm,algorithmic}
 
-
-\newtheorem{prop}{\bf Proposition}[section]
-\newtheorem{theorem}{\bf Theorem}[section]
-\newtheorem{definition}{\bf Definition}[section]
-\newtheorem{lemma}{\bf Lemma}[section]
-\newtheorem{corollary}{\bf Corollary}[section]
-\DeclareMathOperator*{\argmin}{argmin}
+\graphicspath{{graphs/}}
+\newtheorem{prop}{\sc Proposition}[section]
+\newtheorem{theorem}{\sc Theorem}[section]
+\newtheorem{definition}{\sc Definition}[section]
+\newtheorem{lemma}{\sc Lemma}[section]
+\newtheorem{corollary}{\sc Corollary}[section]
 
 \marginsize{1.1in}{.9in}{.3in}{1.4in}
 
@@ -30,21 +33,39 @@
 \newcommand{\bm}[1]{\mathbf{#1}}
 \newcommand{\ds}[1]{\mathds{#1}}
 \newcommand{\indep}{\perp\!\!\!\perp}
+\DeclareMathOperator*{\argmin}{argmin}
+\newcommand{\norm}[1]{|\!|#1|\!|_{1}}
+\newcommand{\code}[1]{{\smaller\sf#1}}
+\newcommand{\e}[1]{{\footnotesize$\times10$}{$^{#1}$}}
 
+\usepackage[bottom,hang,flushmargin]{footmisc}
 
+\pdfminorversion=4
 \begin{document}
 
-\twocolumn[
+\sgl 
 
-\aistatstitle{One-step estimator paths for concave regularization}
+\pagestyle{empty}
 
-%\aistatsauthor{ Matt Taddy}
+~
+\vskip 3cm
 
-%\aistatsaddress{The  University of Chicago Booth School of Business}
- 
-]
+\noindent {\LARGE \bf One-step estimator paths for concave regularization} 
 
-\begin{abstract}
+\vskip 1cm
+
+\noindent{\Large Matt Taddy}
+
+{\large
+\vskip .5cm \noindent
+{The  University of Chicago Booth School of Business}\\
+\texttt{faculty.chicagobooth.edu/matt.taddy}}
+
+
+
+\vskip 2cm
+
+{\noindent 
 The statistics literature of the past 15 years has established many favorable
  properties for sparse diminishing-bias regularization: techniques which can
  roughly be understood as providing estimation under penalty functions
@@ -63,8 +84,13 @@ The statistics literature of the past 15 years has established many favorable
  standard information criteria can be applied in penalty selection. The
  methods are illustrated in extensive simulations and in application of
  logistic regression to evaluating the performance of hockey players.
- \end{abstract}
+}
 
+
+\newpage
+\dbl
+\pagestyle{plain}
+\vskip 1cm
 \section{Introduction}
 \label{intro}
 
