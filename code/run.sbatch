@@ -10,22 +10,20 @@ module load parallel
 
 for RHO in {0, 0.5, 0.9}; do
     for S2N in {0.5, 1, 2}; do
+        for DECAY in {10, 50, 100, 200}; do
 
-        OUT=sim-rho$RHO-s2n$S2N
-        mkdir -p results/$OUT
-        rm -rf results/$OUT/*
+            OUT=sim-rho$RHO-s2n$S2N-decay        
+            LOG=results/$OUT-sbatch.log
+            echo `date` > $LOG
+            echo "$SLURM_NNODES nodes" >> $LOG
         
-        LOG=results/$OUT/an_sbatch_$SLURM_JOBID.log
-        echo `date` > $LOG
-        echo "$SLURM_NNODES nodes" >> $LOG
+            export para="parallel --delay .2 -j $SLURM_NTASKS --joblog results/$OUT/para.log"
+            export srun="srun --exclusive -N1 -c1 --ntasks=1"  
         
-        export para="parallel --delay .2 -j $SLURM_NTASKS --joblog results/$OUT/para.log"
-        export srun="srun --exclusive -N1 -c1 --ntasks=1"  
+            $para $srun "Rscript code/simrun.R {1} $RHO $S2N $DECAY $OUT > results/$OUT-r.log" ::: {1..1000}
         
-        $para $srun "Rscript code/simrun.R {1} $RHO $S2N $OUT > results/$OUT/r.log" ::: {1..1000}
-        
-        echo "done @" `date` >> $LOG
-
+            echo "done @" `date` >> $LOG
+        done
     done
 done
 

@@ -1,8 +1,5 @@
 ## fits
 
-## draw the data
-d <- dgp(id=id, s2n=s2n, rho=rho)
-
 ## gamma lasso
 tgl0 <- system.time(gl0 <- cv.gamlr(d$x, d$y.train))[[3]]
 tgl2 <- system.time(gl2 <- cv.gamlr(d$x, d$y.train, gamma=2))[[3]]
@@ -11,6 +8,7 @@ tgl10 <- system.time(gl10 <- cv.gamlr(d$x, d$y.train, gamma=10))[[3]]
 ## marginal adaptive lasso
 tmrgal <- system.time({
 	wmrg <- 1/abs(cor(as.matrix(d$x),d$y.train))
+    wmrg <- wmrg/min(wmrg)
 	mrgal <- cv.gamlr(d$x,d$y.train,varweight=wmrg) })[[3]]
 
 ## sparsenet 

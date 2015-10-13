@@ -14,8 +14,7 @@
 # For all, report prediction error on left-out true y,
 # and prediction error on Cp rule, and selection error on Cp.
 
-dgp <- function(id, n=1e3, p=n, 
-		s2n=1, rho=0.9, decay=50){
+dgp <- function(id, n=1e3, p=n, s2n, rho, decay, prob=1){
 
 	## fixed 
 	xvar <- matrix(ncol=p,nrow=p)
@@ -27,17 +26,22 @@ dgp <- function(id, n=1e3, p=n,
 
 	## random
 	require(Matrix)
-	set.seed(id*2739)
+	set.seed(id*5807)
 	x <- rnorm(p*n)
-	z <- rbinom(n*p, size=1, prob=.5)
 	x <- matrix(x, nrow=n)%*%C
-	x <- Matrix(x*z, sparse=TRUE)
+	if(prob<1){
+		z <- rbinom(n*p, size=1, prob=.5)	
+		x <- Matrix(x*z, sparse=TRUE)
+	}
 	mu = as.vector(as.matrix(x%*%beta))
 	sigma <- sd(mu)/s2n
 	y <- c(mu,mu) + rnorm(2*n,sd=sigma)
 	list(x=x,mu=mu,sigma=sigma,
 		y.train=y[1:n],y.validate=y[n+1:n]) }
 
+
+## draw the data
+d <- dgp(id=id, s2n=s2n, rho=rho, decay=decay)
 
 
 

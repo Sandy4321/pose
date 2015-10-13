@@ -1,54 +1,35 @@
-plotfunction=function(rho, s2n, prob, decay){
-png(filename=sprintf("Plots/rho%g-s2n%g-s%g-decay%g.png",rho, s2n, prob, decay))
-op=par(oma=c(0,0,3,0),mfrow=c(1,3),xpd=NA)
-  Lgl0=read.table(sprintf("results/sim-rho%g-s2n%g-prob%g-decay%g-Lgl0.txt",
-                         rho, s2n, prob, decay),sep="|")
-  for(i in 1:dim(Lgl0)[1]){
-    for(j in 1:dim(Lgl0)[2]){
-      if (Lgl0[i,j]==0)
-        Lgl0[i,j]=NA
-    }
-  }
-  Lgl0=colMeans(Lgl0, na.rm=T)
-  
-  Lgl2=read.table(sprintf("results/sim-rho%g-s2n%g-prob%g-decay%g-Lgl2.txt",
-                          rho, s2n, prob, decay),sep="|")
-  for(i in 1:dim(Lgl2)[1]){
-    for(j in 1:dim(Lgl2)[2]){
-      if (Lgl2[i,j]==0)
-        Lgl2[i,j]=NA
-    }
-  }
-  Lgl2=colMeans(Lgl2, na.rm=T)
-  
-  Lgl10=read.table(sprintf("results/sim-rho%g-s2n%g-prob%g-decay%g-Lgl10.txt",
-                           rho, s2n, prob, decay),sep="|")
-  for(i in 1:dim(Lgl10)[1]){
-    for(j in 1:dim(Lgl10)[2]){
-      if (Lgl10[i,j]==0)
-        Lgl10[i,j]=NA
-    }
-  }
-  Lgl10=colMeans(Lgl10, na.rm=T)
+rho=.5
+s2n=1
+prob=1
+decay=50
 
-  Lmrg=read.table(sprintf("results/sim-rho%g-s2n%g-prob%g-decay%g-Lmrg.txt",
-                          rho, s2n, prob, decay),sep="|")
-  for(i in 1:dim(Lmrg)[1]){
-    for(j in 1:dim(Lmrg)[2]){
-      if (Lmrg[i,j]==0)
-        Lmrg[i,j]=NA
-    }
-  }
-  Lmrg=colMeans(Lmrg, na.rm=T)
-plot(Lgl0, ylim=range(c(Lgl0, Lgl2, Lgl10, Lmrg),na.rm=T), xlab="", ylab="",type="l",col=1,main="L")
-par(new=T)
-plot(Lgl2, ylim=range(c(Lgl0, Lgl2, Lgl10, Lmrg),na.rm=T),axes = FALSE, xlab = "", ylab = "",type="l",col=2)
-par(new=T)
-plot(Lgl10, ylim=range(c(Lgl0, Lgl2, Lgl10, Lmrg),na.rm=T),axes = FALSE, xlab = "", ylab = "",type="l",col=3)
-par(new=T)
-plot(Lmrg, ylim=range(c(Lgl0, Lgl2, Lgl10, Lmrg),na.rm=T),axes = FALSE, xlab = "", ylab = "",type="l",col=4)
+getLavg <- function(mod, rho, s2n, prob, decay){
+  Ltab=as.matrix(read.table(sprintf("results/sim-rho%g-s2n%g-prob%g-decay%g-L%s.txt",
+                         rho, s2n, prob, decay, mod),sep="|"))
+  Ltab[Ltab==0] <- NA
+  Lavg <- colMeans(Ltab, na.rm=TRUE)
+  Lexist <- colSums(!is.na(Ltab))
+  return(Lavg/Lexist)
+}
+
+
+Lgl0 <- getLavg("gl0",rho,s2n,prob,decay)
+Lgl2 <- getLavg("gl2",rho,s2n,prob,decay)
+Lgl10 <- getLavg("gl10",rho,s2n,prob,decay)
+Lmrg <- getLavg("mrg",rho,s2n,prob,decay)
+
+plot(Lgl0, ylim=range(c(Lgl0, Lgl2, Lgl10, Lmrg),na.rm=T), 
+  xlab="", ylab="",type="l",col=1,log="y", xlim=c(1,60))
+lines(Lgl2, col=2)
+lines(Lgl10, col=3)
+lines(Lmrg, col=4)
 legend("topleft",legend=c("Lasso","GL2", "GL10", "AL"),lty=c(1,1,1,1),col=c(1,2,3,4),bty="n")
 
+
+
+#pdf(file=sprintf("plots/rho%g-s2n%g-s%g-decay%g.pdf",rho, s2n, prob, decay), width=8, height=4)
+
+par(oma=c(0,0,3,0),mfrow=c(1,3),xpd=NA)
 
 wmingl0=read.table(sprintf("results/sim-rho%g-s2n%g-prob%g-decay%g-wmingl0.txt",
                            rho, s2n, prob, decay),sep="|")
@@ -96,7 +77,7 @@ plot(cpineqgl10, ylim=range(c(cpineqgl0, cpineqgl2, cpineqgl10, cpineqmrg),na.rm
 par(new=T)
 plot(cpineqmrg, ylim=range(c(cpineqgl0, cpineqgl2, cpineqgl10, cpineqmrg),na.rm=T),axes = FALSE, xlab = "", ylab = "",type="l",col=4)
 mtext(sprintf("rho=%s s2n=%s s=%s decay=%s",rho, s2n, prob, decay), outer = TRUE)
-dev.off()
+#dev.off()
 }
 
 
