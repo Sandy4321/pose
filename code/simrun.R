@@ -17,22 +17,22 @@ fill <- function(v){ c(v, rep(tail(v,1),100-length(v)) )}
 
 ## basic properties
 write(d$sigma, sprintf("results/%s-sigma.txt",OUT),append=TRUE)
-times <- paste(round(c(tgl0,tgl2,tgl10,tmrgal,tsnet),1),collapse="|")
+times <- paste(round(c(tgl0,tgl1,tgl10,tmrgal,tsnet),1),collapse="|")
 write(times, sprintf("results/%s-times.txt",OUT),append=TRUE)
 write(paste(gl0$gamlr$lambda,collapse="|"),
         sprintf("results/%s-lambda.txt",OUT),append=TRUE)
 
 ## prediction
 e0 <- predict(gl0$gamlr,d$x,select=0)-d$y.val
-e2 <- predict(gl2$gamlr,d$x,select=0)-d$y.val
-e10 <- predict(gl2$gamlr,d$x,select=0)-d$y.val
+e1 <- predict(gl1$gamlr,d$x,select=0)-d$y.val
+e10 <- predict(gl10$gamlr,d$x,select=0)-d$y.val
 emrg <- predict(mrgal$gamlr,d$x,select=0)-d$y.val
 ecp <- predict(cpbest,as.data.frame(as.matrix(d$x)))-d$y.val
 esnet1se <- predict(snet,as.matrix(d$x),which="parms.1se")-d$y.val
 esnetmin <- predict(snet,as.matrix(d$x),which="parms.min")-d$y.val
 
 mse0 <- apply(e0^2,2,mean)
-mse2 <- apply(e2^2,2,mean)
+mse1 <- apply(e1^2,2,mean)
 mse10 <- apply(e10^2,2,mean)
 msemrg <- apply(emrg^2,2,mean)
 msecp <- mean(ecp^2)
@@ -43,10 +43,10 @@ seg0 <- c(onese=gl0$seg.1se,min=gl0$seg.min,
           aicc=which.min(AICc(gl0$gamlr)),
           aic=which.min(AIC(gl0$gamlr)),
           bic=which.min(BIC(gl0$gamlr)))
-seg2 <- c(onese=gl2$seg.1se,min=gl2$seg.min,
-          aicc=which.min(AICc(gl2$gamlr)),
-          aic=which.min(AIC(gl2$gamlr)),
-          bic=which.min(BIC(gl2$gamlr)))
+seg1 <- c(onese=gl1$seg.1se,min=gl1$seg.min,
+          aicc=which.min(AICc(gl1$gamlr)),
+          aic=which.min(AIC(gl1$gamlr)),
+          bic=which.min(BIC(gl1$gamlr)))
 seg10 <- c(onese=gl10$seg.1se,min=gl10$seg.min,
            aicc=which.min(AICc(gl10$gamlr)),
            aic=which.min(AIC(gl10$gamlr)),
@@ -55,14 +55,14 @@ segmrg <- c(onese=mrgal$seg.1se,min=mrgal$seg.min,
             aicc=which.min(AICc(mrgal$gamlr)),
             aic=which.min(AIC(mrgal$gamlr)),
             bic=which.min(BIC(mrgal$gamlr)))
-write(paste(c(segmrg,seg0,seg2,seg10),collapse="|"),
+write(paste(c(segmrg,seg0,seg1,seg10),collapse="|"),
       sprintf("results/%s-seg.txt",OUT),append=TRUE)
 
 MSE <- c(cp=msecp,
          snet1se=msesnet1se,
          snetmin=msesnetmin,
          mrg=msemrg[segmrg],gl0=mse0[seg0],
-         gl2=mse2[seg2],gl10=mse10[seg10])
+         gl1=mse1[seg1],gl10=mse10[seg10])
 write(paste(round(MSE,2),collapse="|"),
       sprintf("results/%s-mse.txt",OUT),append=TRUE)
 
@@ -73,7 +73,7 @@ write(paste(round(R2,2),collapse="|"),
 
 MSElong <- c( 
   mrg=fill(msemrg),gl0=fill(mse0),
-  gl2=fill(mse2),gl10=fill(mse10))
+  gl1=fill(mse1),gl10=fill(mse10))
 write(paste(round(MSElong,2),collapse="|"),
       sprintf("results/%s-mselong.txt",OUT),append=TRUE)
 
@@ -92,7 +92,7 @@ getw <- function(fit){
   w <- matrix(1, nrow=nrow(b),ncol=ncol(b))
   if(gam!=0) w[,-1] <- 1/(1+gam*abs(as.matrix(b)[,-ncol(b)]))
   return(w) }
-w2 <- getw(gl2)
+w1 <- getw(gl1)
 w10 <- getw(gl10)
 
 nu <- d$sigma^2/nrow(d$x)
@@ -114,7 +114,7 @@ writeE <- function(W,lam,f){
 
 writeE(wmrg,mrgal$gamlr$lambda,"mrg")
 writeE(w0,gl0$gamlr$lambda,"gl0")
-writeE(w2,gl2$gamlr$lambda,"gl2")
+writeE(w1,gl1$gamlr$lambda,"gl1")
 writeE(w10,gl10$gamlr$lambda,"gl10")
 
 source("code/simsens.R")

@@ -686,24 +686,61 @@ OLS on $\bm{X}_{\{1\ldots j\}}$ for $j=1\ldots p$ (since coefficients are ordere
 \begin{table}
 \vspace{-.2cm}
 \footnotesize
-\begin{tabular}{cc|rrrr|c}
-\multicolumn{2}{c}{~}&\multicolumn{4}{c}{\it \% Worse than oracle $C_p$  } &   \\
-\multicolumn{2}{c}{~}&\multicolumn{3}{c}{\scriptsize\it AICc}& \multicolumn{1}{c}{\scriptsize\it CV}&\\[-1ex]
-\multicolumn{2}{c}{~}&\multicolumn{3}{c}{\downbracefill}& \multicolumn{1}{c}{\it \downbracefill}&\\
-$\frac{\mr{sd}(\bs{\eta})}{\sigma}$& \textsf{d} & GL0 & GL2 & GL10 & \multicolumn{1}{c|}{MCP} & $C_p$ $R^2$ 
-\\[1ex]
+\begin{center}
+\begin{tabular}{ccc|cc|cc|cc|cc|c|c}
+\hline &&&\multicolumn{9}{|c|}{~}\\[-1ex]
+\multicolumn{3}{c}{~}&\multicolumn{9}{|c|}{\bf \% Worse than oracle $\boldsymbol{C_p}$  } &   \\[1ex]
+& &
+& \multicolumn{2}{c}{lasso} 
+& \multicolumn{2}{c}{GL $\gamma=1$} 
+& \multicolumn{2}{c}{GL $\gamma=10$} 
+& \multicolumn{2}{c}{marginal AL} 
+& \multicolumn{1}{c|}{~} & \\[-0.5ex]
+$\mr{sd}(\bs{\eta})/\sigma$ & {\sf d} & $\rho$ 
+& ~~~\scriptsize\it AICc & \multicolumn{1}{c}{\scriptsize\it CV~~~}
+& ~~~\scriptsize\it AICc & \multicolumn{1}{c}{\scriptsize\it CV~~~}
+& ~~~\scriptsize\it AICc & \multicolumn{1}{c}{\scriptsize\it CV~~~}
+& ~~~\scriptsize\it AICc & \multicolumn{1}{c}{\scriptsize\it CV~~~} 
+& \multicolumn{1}{c|}{ MCP} & $C_p$ $R^2$ \\[.5ex]
 \hline\rule{0pt}{3ex}
-\!2 &  10 & 2 & \bf 1 & 4 & \bf 1 & .79\\
-2 & 50 & 8 & \bf 4 & 6 &\bf  4 & .77 \\
-2 & 100 & 12 & 8 & 8 &\bf 7 & .75\\
-1 & 10  & 8 & 6 & 15 &\bf 4 & .48\\
-1 & 50 & 27 &\bf 16 & 18 & 18 & .44\\
-1 & 100 & 35 & \bf 27 & \bf 27 & \bf 27 & .41 \\
-1/2 & 10 &33 &\bf 28 & 61 &\bf  28 & .18\\
-1/2 & 50 &\bf 71 & 93 & 100 &\bf 71 & .14\\
-1/2 & 100 &\bf 80 & 110 & 110 & 90 & .10
-\\[1ex]\hline
+& & \it  0  & 3 & 3 & 2 & 2 & 4 & 3 & 2 & 2 & {\bf 1} & \it  0.79 \\
+ & \it  10  & \it  0.5  & 5 & 5 & 4 & 3 & 5 & 5 & 8 & 8 & {\bf 2} & \it  0.79 \\
+& & \it  0.9  & 7 & 6 & 5 & 5 & 7 & 6 & 10 & 10 & {\bf 3} & \it  0.79 \\[1ex]
+\cline{2-3}\rule{0pt}{3ex}
+& & \it  0  & 6 & 5 & 5 & {\bf 4} & 6 & 7 & 5 & 5 & {\bf 4} & \it  0.77 \\
+\it  2  & \it  50  & \it  0.5  & 11 & 8 & 8 & 7 & 10 & 10 & 14 & 13 & {\bf 5} & \it  0.77 \\
+& & \it  0.9  & 14 & 10 & 10 & 8 & 12 & 11 & 45 & 45 & {\bf 7} & \it  0.77 \\[1ex]
+\cline{2-3}\rule{0pt}{3ex}
+& & \it  0  & 9 & 6 & 7 & 6 & 7 & 8 & 8 & 7 & {\bf 5} & \it  0.75 \\
+ & \it  100  & \it  0.5  & 18 & 9 & 11 & {\bf 8} & 12 & 11 & 21 & 17 & 9 & \it  0.75 \\
+& & \it  0.9  & 23 & 11 & 13 & {\bf 9} & 14 & 12 & 56 & 56 & 10 & \it  0.75 \\[1ex]
+\cline{2-3}\hline\rule{0pt}{3ex}
+& & \it  0  & 8 & 8 & 7 & 6 & 14 & 9 & 9 & 10 & {\bf 5} & \it  0.48 \\
+ & \it  10  & \it  0.5  & 16 & 16 & 12 & 11 & 20 & 16 & 17 & 17 & {\bf 6} & \it  0.48 \\
+& & \it  0.9  & 22 & 22 & 18 & 17 & 27 & 21 & {\bf 9} & {\bf 9} & 10 & \it  0.48 \\[1ex]
+\cline{2-3}\rule{0pt}{3ex}
+& & \it  0  & 19 & {\bf 17} & {\bf 17} & 18 & 25 & 26 & {\bf 17} & 18 & {\bf 17} & \it  0.44 \\
+\it  1  & \it  50  & \it  0.5  & 38 & 32 & 28 & 28 & 30 & 40 & 39 & 38 & {\bf 25} & \it  0.44 \\
+& & \it  0.9  & 69 & 68 & 57 & 46 & 70 & 59 & 46 & 46 & {\bf 31} & \it  0.44 \\[1ex]
+\cline{2-3}\rule{0pt}{3ex}
+& & \it  0  & 26 & {\bf 20} & 24 & 30 & 33 & 51 & 22 & 22 & {\bf 20} & \it  0.40 \\
+ & \it  100  & \it  0.5  & 64 & 57 & {\bf 42} & 66 & 45 & 95 & 51 & 47 & 56 & \it  0.40 \\
+& & \it  0.9  & 86 & 88 & 89 & 87 & 93 & 89 & {\bf 65} & 66 & 85 & \it  0.40 \\[1ex]
+\cline{2-3}\hline\rule{0pt}{3ex}
+& & \it  0  & 26 & 27 & 28 & {\bf 23} & 59 & 30 & 43 & 57 & {\bf 23} & \it  0.18 \\
+ & \it  10  & \it  0.5  & 49 & 51 & 44 & 41 & 79 & 55 & 69 & 76 & {\bf 28} & \it  0.18 \\
+& & \it  0.9  & 44 & 44 & 43 & 42 & 49 & 43 & {\bf 28} & {\bf 28} & 39 & \it  0.18 \\[1ex]
+\cline{2-3}\rule{0pt}{3ex}
+& & \it  0  & {\bf 53} & 56 & 89 & 82 & 101 & 91 & 72 & 91 & 57 & \it  0.13 \\
+\it  0.5  & \it  50  & \it  0.5  & {\bf 90} & 94 & 99 & 98 & 101 & 99 & 106 & 117 & 94 & \it  0.13 \\
+& & \it  0.9  & 78 & 79 & 80 & 78 & 88 & 79 & 82 & 80 & {\bf 75} & \it  0.13 \\[1ex]
+\cline{2-3}\rule{0pt}{3ex}
+& & \it  0  & {\bf 61} & 67 & 106 & 98 & 101 & 100 & 85 & 115 & 68 & \it  0.09 \\
+ & \it  100  & \it  0.5  & {\bf 94} & 97 & 101 & 101 & 101 & 101 & 118 & 132 & 98 & \it  0.09 \\
+& & \it  0.9  & {\bf 86} & 88 & 91 & 88 & 98 & 90 & 95 & 92 & 87 & \it  0.09 \\[1ex]
+\hline
 \end{tabular}
+\end{center}
 \caption{\label{tab:sim} Average out-of-sample $R^2$, reported as  \% worse than the $C_p$ oracle, across 1000 different samples from (\ref{simdgp}).   GL$\gamma$ columns denote {\tt gamlr} with AICc penalty selection, while MCP is {\tt sparsenet} with 5-fold CV selection. The best results are bolded.}
 \end{table}
 

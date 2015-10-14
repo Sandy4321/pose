@@ -1,6 +1,6 @@
 #!/bin/bash
 ## run with `sbatch -N[#machines] code/run.sbatch'
-#SBATCH --time=12:0:0
+#SBATCH --time=36:0:0
 #SBATCH --mem-per-cpu=2000
 #SBATCH --output=%j.err
 #SBATCH --constraint=ib
@@ -8,7 +8,7 @@
 
 module load parallel
 
-npartask=$(($nn * 16)) 
+npartask=$(($SLURM_NNODES * 16)) 
 
 for RHO in 0 0.5 0.9; do
     for S2N in 0.5 1 2; do
