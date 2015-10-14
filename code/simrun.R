@@ -99,7 +99,7 @@ nu <- d$sigma^2/nrow(d$x)
 
 S <- 1:sCp
 writeE <- function(W,lam,f){  
-  wsnorm <- apply(W[S,],2,
+  wsnorm <- lam*apply(W[S,],2,
                   function(w) sqrt(sum(w^2)))/sqrt(sCp)
   wmin <- apply(W[-S,],2,min)
   L <- round(wsnorm/(wmin - sqrt(2*nu)/lam),2)
