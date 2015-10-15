@@ -4,8 +4,9 @@ id <- as.integer(args[1])
 rho <- as.numeric(args[2])
 s2n <- as.numeric(args[3])
 decay <- as.numeric(args[4])
+sparse <- TRUE
 
-OUT=paste("sim-rho",rho,"-s2n",s2n,"-decay",decay,collapse='',sep='')
+OUT=paste("sim-sparse-rho",rho,"-s2n",s2n,"-decay",decay,collapse='',sep='')
 print(sessionInfo())
 
 source("code/simdata.R")

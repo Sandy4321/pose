@@ -10,7 +10,7 @@ RHO=$1
 S2N=$2
 DECAY=$3
 
-OUT=sim-rho$RHO-s2n$S2N-decay$DECAY        
+OUT=sim-sparse-rho$RHO-s2n$S2N-decay$DECAY        
 LOG=results/$OUT-sbatch.log
 echo `date` > $LOG
 echo "job id $SLURM_JOBID" >> $LOG

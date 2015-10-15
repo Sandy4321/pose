@@ -29,9 +29,10 @@ dgp <- function(id, n=1e3, p=n, s2n, rho, decay, sparse=FALSE){
 	set.seed(id*5807)
 	x <- rnorm(p*n)
 	x <- matrix(x, nrow=n)%*%C
-	if(prob<1){
-		z <- rbinom(n*p, size=1, prob=.5)	
-		x <- Matrix(x*z, sparse=TRUE)
+	if(sparse){
+        z <- rbinom(n*p, size=1, prob=1/(1+exp(-x)))
+		x <- matrix(z, nrow=n)
+		x <- Matrix(x, sparse=TRUE)
 	}
 	mu = as.vector(as.matrix(x%*%beta))
 	sigma <- sd(mu)/s2n
@@ -41,7 +42,7 @@ dgp <- function(id, n=1e3, p=n, s2n, rho, decay, sparse=FALSE){
 
 
 ## draw the data
-d <- dgp(id=id, s2n=s2n, rho=rho, decay=decay)
+d <- dgp(id=id, s2n=s2n, rho=rho, decay=decay, sparse=sparse)
 
 
 
