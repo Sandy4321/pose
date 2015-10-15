@@ -1,8 +1,7 @@
 ## weight and theory plots
-
 getit <- function(rho, s2n, decay, what, mod){
-    fname <- sprintf("results/sim-rho%g-s2n%g-decay%g-%s%s.txt",
-            rho, s2n, decay, what, mod)
+    fname <- sprintf("results/sim-%srho%g-s2n%g-decay%g-%s%s.txt",
+            sparse, rho, s2n, decay, what, mod)
     #print(fname)
     lines <- readLines(fname)
     parsed <- sapply(lines, strsplit, split="\\|",USE.NAMES=F)
@@ -29,45 +28,66 @@ getavg <- function(rho, s2n, decay,what,mod){
 }
 
 
-Lgl0 <- getavg(rho,s2n,decay,"L","gl0")
-Lgl1 <- getavg(rho,s2n,decay,"L","gl1")
-Lgl10 <- getavg(rho,s2n,decay,"L","gl10")
-Lmrg <- getavg(rho,s2n,decay,"L","mrg")
+plotweights <- function(rho,s2n,decay){
+  Lgl0 <- getavg(rho,s2n,decay,"L","gl0")
+  Lgl1 <- getavg(rho,s2n,decay,"L","gl1")
+  Lgl10 <- getavg(rho,s2n,decay,"L","gl10")
+  Lmrg <- getavg(rho,s2n,decay,"L","mrg")
+  
+  lam <- getavg(rho,s2n,decay,"lambda","")
+  wsnormgl0 <- getavg(rho,s2n,decay,"wsnorm","gl0")/lam
+  wsnormgl1 <- getavg(rho,s2n,decay,"wsnorm","gl1")/lam
+  wsnormgl10 <- getavg(rho,s2n,decay,"wsnorm","gl10")/lam
+  wsnormmrg <- getavg(rho,s2n,decay,"wsnorm","mrg")/lam
+  
+  wmingl0 <- getavg(rho,s2n,decay,"wmin","gl0")
+  wmingl1 <- getavg(rho,s2n,decay,"wmin","gl1")
+  wmingl10 <- getavg(rho,s2n,decay,"wmin","gl10")
+  wminmrg <- getavg(rho,s2n,decay,"wmin","mrg")
+  
+  pdf(sprintf("weights-r%g-s%g-d%g.pdf",rho,s2n,decay), width=9, height=3)
+  par(mfrow=c(1,3),mai=c(.7,.7,.1,.1))
+  
+  plot(wmingl0, ylim=range(c(wmingl0, wmingl1, wmingl10, wminmrg),na.rm=T), bty="n",
+    xlab="", ylab="w-min",type="l",col=1, xlim=c(1,100), cex.lab=1.5, log="y", lwd=1.5)
+  lines(wmingl1, col=2, lwd=1.5)
+  lines(wmingl10, col=3, lwd=1.5)
+  lines(wminmrg, col=4, lwd=1.5)
+  
+  plot(wsnormgl0, ylim=range(c(wsnormgl0, wsnormgl1, wsnormgl10, wsnormmrg),na.rm=T), bty="n",
+    xlab="", ylab="w-norm",type="l",col=1, log="y", xlim=c(1,100), cex.lab=1.5, lwd=1.5)
+  lines(wsnormgl1, col=2, lwd=1.5)
+  lines(wsnormgl10, col=3, lwd=1.5)
+  lines(wsnormmrg, col=4, lwd=1.5)
+  
+  plot(Lgl0, ylim=range(c(Lgl0, Lgl1, Lgl10, Lmrg),na.rm=T), bty="n",
+    xlab="", ylab="L",type="l",col=1,log="y", xlim=c(1,100), cex.lab=1.5, lwd=1.5)
+  lines(Lgl1, col=2, lwd=1.5)
+  lines(Lgl10, col=3, lwd=1.5)
+  lines(Lmrg, col=4, lwd=1.5)
+  
+  legend("topright",legend=c("Lasso","GL1", "GL10", "AL"),
+      lwd=2, lty=c(1,1,1,1),col=c(1,2,3,4),bty="n", cex=1.3)
+  
+  mtext(side=1, "path segment", outer=TRUE, line=-2)
+  dev.off()
+}
 
-wsnormgl0 <- getavg(rho,s2n,decay,"wsnorm","gl0")
-wsnormgl1 <- getavg(rho,s2n,decay,"wsnorm","gl1")
-wsnormgl10 <- getavg(rho,s2n,decay,"wsnorm","gl10")
-wsnormmrg <- getavg(rho,s2n,decay,"wsnorm","mrg")
+sparse <- "sparse-"
+for(s2n in c(2,1,0.5)){
+  for(decay in c(10,50,100,200)){
+    for(rho in c(0,0.5,.9)){
+        plotweights(rho,s2n,decay)
+    }
+  }
+}
 
-wmingl0 <- getavg(rho,s2n,decay,"wmin","gl0")
-wmingl1 <- getavg(rho,s2n,decay,"wmin","gl1")
-wmingl10 <- getavg(rho,s2n,decay,"wmin","gl10")
-wminmrg <- getavg(rho,s2n,decay,"wmin","mrg")
 
-pdf(sprintf("weights-r%g-s%g-d%g.pdf",rho,s2n,decay), width=9, height=3)
-par(mfrow=c(1,3),mai=c(.7,.7,.1,.1))
-
-plot(wmingl0, ylim=range(c(wmingl0, wmingl1, wmingl10, wminmrg),na.rm=T), bty="n",
-  xlab="", ylab="w-min",type="l",col=1, xlim=c(1,100), cex.lab=1.5, log="y", lwd=1.5)
-lines(wmingl1, col=2, lwd=1.5)
-lines(wmingl10, col=3, lwd=1.5)
-lines(wminmrg, col=4, lwd=1.5)
-
-plot(wsnormgl0, ylim=range(c(wsnormgl0, wsnormgl1, wsnormgl10, wsnormmrg),na.rm=T), bty="n",
-  xlab="", ylab="w-norm",type="l",col=1, log="y", xlim=c(1,100), cex.lab=1.5, lwd=1.5)
-lines(wsnormgl1, col=2, lwd=1.5)
-lines(wsnormgl10, col=3, lwd=1.5)
-lines(wsnormmrg, col=4, lwd=1.5)
-
-plot(Lgl0, ylim=range(c(Lgl0, Lgl1, Lgl10, Lmrg),na.rm=T), bty="n",
-  xlab="", ylab="L",type="l",col=1,log="y", xlim=c(1,100), cex.lab=1.5, lwd=1.5)
-lines(Lgl1, col=2, lwd=1.5)
-lines(Lgl10, col=3, lwd=1.5)
-lines(Lmrg, col=4, lwd=1.5)
-
-legend("topright",legend=c("Lasso","GL1", "GL10", "AL"),
-    lwd=2, lty=c(1,1,1,1),col=c(1,2,3,4),bty="n", cex=1.3)
-
-mtext(side=1, "path segment", outer=TRUE, line=-2)
-dev.off()
-
+sparse <- ""
+for(s2n in c(2,1,0.5)){
+  for(decay in c(10,50,100,200)){
+    for(rho in c(0,0.5,.9)){
+        plotweights(rho,s2n,decay)
+    }
+  }
+}

@@ -1,9 +1,10 @@
 
 segs <- c("CV.1se","CV.min","AICc","AIC","BIC")
+sparse <- "sparse-"
 
 getit <- function(f, rho, s2n, decay){
-	fname <- sprintf("results/sim-rho%g-s2n%g-decay%g-%s.txt",
-			rho, s2n, decay, f)
+	fname <- sprintf("results/sim-%srho%g-s2n%g-decay%g-%s.txt",
+			sparse, rho, s2n, decay, f)
 	#print(fname)
 	lines <- readLines(fname)
 	parsed <- sapply(lines, strsplit, split="\\|",USE.NAMES=F)
@@ -52,49 +53,33 @@ printit <- function(means, rho, s2n, decay, cpline){
 }
 
 
-printmse <- function(rho, s2n, decay){
-	means <- round(colMeans(getit("mse", rho=rho, s2n=s2n, decay),na.rm=TRUE),1)
-	minm <- paste(min(means[-1]))
-	means <- sapply(means,as.character)
-	means[means==minm] <- sprintf("{\\bf %s}",minm)
-	cpline = sprintf("\\multirow{2}{*}{$C_p$ mse = %s}", means["Cp"])
-	printit(means, rho, s2n, decay, cpline)
-}
-
-printr2 <- function(rho, s2n, decay){
-	means <- round(colMeans(getit("r2", rho=rho, s2n=s2n, decay),na.rm=TRUE),2)
-	minm <- paste(max(means[-1]))
-	means <- sapply(means,as.character)
-	means[means==minm] <- sprintf("{\\bf %s}",minm)
-	cpline = sprintf("\\multirow{2}{*}{$C_p ~ R^2$ = %s}", means["Cp"])
-	printit(means, rho, s2n, decay, cpline)
+printr2 <- function(decay){
+	for(s2n in c(2,1,0.5)){
+		for(rho in c(0,0.5,0.9)){
+			means <- round(colMeans(getit("r2", rho=rho, s2n=s2n, decay),na.rm=TRUE),2)
+			ismax <- which(means==max(means[-1]))
+			means[-ismax] <- sprintf("%.2f",means[-ismax])
+			means[ismax] <- sprintf("{\\bf %s}",means[ismax])
+			cpline = sprintf("\\multirow{2}{*}{$C_p ~ R^2$ = %s}", means["Cp"])
+			printit(means, rho, s2n, decay, cpline)
+		}
+	}
 }
 
 
-printfdrsens <- function(rho, s2n, decay){
-	fdr <- round(colMeans(getit("fdr", rho=rho, s2n=s2n, decay),na.rm=TRUE),1)
-	sens <- round(colMeans(getit("sens", rho=rho, s2n=s2n, decay),na.rm=TRUE),1)
-	means <- sprintf( "%.02f $\\mid$ %.02f", fdr/100, sens/100)
-	names(means) <- names(fdr)
-	avg <- fdr+(100-sens)
-	sCp <- mean(getit("s",rho=rho,s2n=s2n)[,1])
-	#means[avg==min(avg[-1])] <- sprintf("{\\bf %s}",means[avg==min(avg[-1])])
-	cpline = sprintf("\\multirow{2}{*}{$\\bar{s}_{C_p}$ = %.01f}",sCp)
-	printit(means, rho, s2n, decay, cpline)
+printsens <- function(decay){
+	for(s2n in c(2,1,0.5)){
+		for(rho in c(0,0.5,0.9)){
+			fdr <- round(colMeans(getit("fdr", rho=rho, s2n=s2n, decay),na.rm=TRUE),1)
+			sens <- round(colMeans(getit("sens", rho=rho, s2n=s2n, decay),na.rm=TRUE),1)
+			means <- sprintf( "%.02f $\\mid$ %.02f", fdr/100, sens/100)
+			names(means) <- names(fdr)
+			avg <- fdr+(100-sens)
+			sCp <- mean(getit("s",rho=rho,s2n=s2n, decay)[,1])
+			#means[avg==min(avg[-1])] <- sprintf("{\\bf %s}",means[avg==min(avg[-1])])
+			cpline = sprintf("\\multirow{2}{*}{$\\bar{s}_{C_p}$ = %.01f}",sCp)
+			printit(means, rho, s2n, decay, cpline)
+		}
+	}
 }
 
-
-decay=10
-
-for(s2n in c(2,1,0.5))
-	for(rho in c(0,0.5,0.9))
-	 printmse(rho=rho, s2n=s2n, decay=decay)
-
-
-for(s2n in c(2,1,0.5))
-	for(rho in c(0,0.5,0.9))
-	 printr2(rho=rho, s2n=s2n, decay=decay)
-
-for(s2n in c(2,1,0.5))
-	for(rho in c(0,0.5,0.9))
-	 printfdrsens(rho=rho, s2n=s2n, decay=decay)
