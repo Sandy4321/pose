@@ -534,10 +534,14 @@ low-variance small-$\gamma$ estimators.
 \section{Full Simulation results}
 
 Continuous-response data are simulated from
- the following $p=1000$ dimensional regression.
+ the following $p=1000$ dimensional regressions.
 \begin{align}
-\label{simdgp}
-y \sim \mr{N}\left(\bm{x}'\bs{\beta},\sigma^2\right)~~\text{where}~~\bm{x} = \bm{u}*\bm{z},~~\bm{u}\sim \mr{N}\left(\bm{0},\bs{\Sigma}\right),~~z_{j} \stackrel{ind}{\sim} \mr{Bin}({\sf s}),~~\beta_j = \frac{1}{j}\exp\left(-\frac{j}{{\sf d}}\right).
+\label{simdgp-both}
+y &\sim \mr{N}\left(\bm{x}'\bs{\beta},\sigma^2\right) ~~\text{where}~~
+\beta_j = \frac{1}{j}\exp\left(-\frac{j}{{\sf d}} \right)\text{for}~~j=1\dots p~~\text{and}\\
+% \textit{dense design:~~~} x_j=z_j ~~ \textit{sparse design:~~~} 
+% x_j \stackrel{ind}{\sim} \mr{Bern}\left( 1/(1+e^{-z_j})\right)\\
+% \bm{z} \sim \mr{N}\left(\bm{0},\bs{\Sigma}\right)
 \end{align}
 
 \vspace{-.4cm}
@@ -558,11 +562,86 @@ For each data generating process, a first table records out-of-sample $R^2 = 1 -
 second reports false discovery and sensitivity with respect to the $L_0$
 oracle. 
 
+% dense version of paper table
+\begin{table}
+\vspace{-.2cm}
+\footnotesize
+\begin{center}
+\begin{tabular}{ccc|cc|cc|cc|cc|c|c}
+\hline &&&\multicolumn{9}{|c|}{~}\\[-1ex]
+\multicolumn{3}{c}{~}&\multicolumn{9}{|c|}{\bf \% Worse than oracle $\boldsymbol{C_p}$  } &   \\[1ex]
+& &
+& \multicolumn{2}{c}{lasso} 
+& \multicolumn{2}{c}{GL $\gamma=1$} 
+& \multicolumn{2}{c}{GL $\gamma=10$} 
+& \multicolumn{2}{c}{marginal AL} 
+& \multicolumn{1}{c|}{~} & \\[-0.5ex]
+$\mr{sd}(\bs{\eta})/\sigma$ & {\sf d} & $\rho$ 
+& ~~~\scriptsize\it AICc & \multicolumn{1}{c}{\scriptsize\it CV~~~}
+& ~~~\scriptsize\it AICc & \multicolumn{1}{c}{\scriptsize\it CV~~~}
+& ~~~\scriptsize\it AICc & \multicolumn{1}{c}{\scriptsize\it CV~~~}
+& ~~~\scriptsize\it AICc & \multicolumn{1}{c}{\scriptsize\it CV~~~} 
+& \multicolumn{1}{c|}{ MCP} & $C_p$ $R^2$ \\[.5ex]
+\hline\rule{0pt}{3ex}
+& & \it  0  & 3 & 3 & 2 & 2 & 2 & {\bf 1} & 2 & 2 & {\bf 1} & \it  0.79 \\
+ & \it  10  & \it  0.5  & 5 & 5 & 4 & 4 & 3 & {\bf 2} & 8 & 8 & {\bf 2} & \it  0.79 \\
+& & \it  0.9  & 7 & 6 & 6 & 5 & 4 & 4 & 10 & 10 & {\bf 3} & \it  0.79 \\[1ex]
+\cline{2-3}\rule{0pt}{3ex}
+& & \it  0  & 6 & 5 & 5 & {\bf 4} & 5 & 5 & 5 & 5 & {\bf 4} & \it  0.77 \\
+\it  2  & \it  50  & \it  0.5  & 11 & 8 & 9 & 7 & {\bf 6} & {\bf 6} & 14 & 14 & {\bf 6} & \it  0.77 \\
+& & \it  0.9  & 14 & 10 & 11 & 9 & {\bf 7} & {\bf 7} & 44 & 44 & {\bf 7} & \it  0.77 \\[1ex]
+\cline{2-3}\rule{0pt}{3ex}
+& & \it  0  & 9 & 6 & 7 & {\bf 5} & 7 & 7 & 8 & 7 & {\bf 5} & \it  0.75 \\
+ & \it  100  & \it  0.5  & 18 & {\bf 9} & 13 & {\bf 9} & {\bf 9} & {\bf 9} & 21 & 17 & {\bf 9} & \it  0.75 \\
+& & \it  0.9  & 23 & 11 & 16 & 10 & 10 & {\bf 9} & 56 & 56 & 11 & \it  0.75 \\[1ex]
+\cline{2-3}\rule{0pt}{3ex}
+& & \it  0  & 11 & {\bf -1} & 6 & 0 & 3 & 7 & 6 & 2 & {\bf -1} & \it  0.67 \\
+ & \it  200  & \it  0.5  & 47 & {\bf 5} & 20 & 7 & 6 & 74 & 30 & 21 & {\bf 5} & \it  0.67 \\
+& & \it  0.9  & 90 & 39 & 84 & 42 & {\bf 7} & 92 & 66 & 67 & 58 & \it  0.68 \\[1ex]
+\cline{2-3}\hline\rule{0pt}{3ex}
+& & \it  0  & 9 & 9 & 7 & 7 & 8 & 6 & 9 & 10 & {\bf 5} & \it  0.48 \\
+ & \it  10  & \it  0.5  & 16 & 16 & 14 & 13 & 10 & 9 & 18 & 18 & {\bf 7} & \it  0.48 \\
+& & \it  0.9  & 23 & 22 & 20 & 19 & 16 & 14 & {\bf 10} & {\bf 10} & 11 & \it  0.48 \\[1ex]
+\cline{2-3}\rule{0pt}{3ex}
+& & \it  0  & 19 & {\bf 17} & 18 & {\bf 17} & 27 & 23 & {\bf 17} & 18 & {\bf 17} & \it  0.44 \\
+\it  1  & \it  50  & \it  0.5  & 38 & 32 & 32 & 29 & 28 & 34 & 39 & 38 & {\bf 25} & \it  0.44 \\
+& & \it  0.9  & 70 & 68 & 70 & 54 & 66 & 56 & 46 & 46 & {\bf 31} & \it  0.44 \\[1ex]
+\cline{2-3}\rule{0pt}{3ex}
+& & \it  0  & 26 & {\bf 20} & 24 & 25 & 45 & 52 & 22 & 22 & {\bf 20} & \it  0.40 \\
+ & \it  100  & \it  0.5  & 64 & 57 & 56 & 61 & 51 & 95 & 51 & {\bf 47} & 57 & \it  0.40 \\
+& & \it  0.9  & 86 & 88 & 90 & 88 & 89 & 88 & {\bf 65} & 67 & 85 & \it  0.40 \\[1ex]
+\cline{2-3}\rule{0pt}{3ex}
+& & \it  0  & 35 & {\bf 21} & 27 & 47 & 66 & 94 & 23 & {\bf 21} & {\bf 21} & \it  0.34 \\
+ & \it  200  & \it  0.5  & 84 & 87 & 93 & 94 & 84 & 99 & 58 & {\bf 52} & 87 & \it  0.34 \\
+& & \it  0.9  & 91 & 93 & 95 & 93 & 96 & 94 & {\bf 81} & 83 & 93 & \it  0.34 \\[1ex]
+\cline{2-3}\hline\rule{0pt}{3ex}
+& & \it  0  & 27 & 28 & 27 & {\bf 24} & 48 & 25 & 44 & 56 & {\bf 24} & \it  0.17 \\
+ & \it  10  & \it  0.5  & 50 & 52 & 46 & 45 & 63 & 41 & 71 & 77 & {\bf 29} & \it  0.17 \\
+& & \it  0.9  & 44 & 45 & 44 & 43 & 42 & 42 & 29 & {\bf 28} & 38 & \it  0.18 \\[1ex]
+\cline{2-3}\rule{0pt}{3ex}
+& & \it  0  & {\bf 55} & 57 & 74 & 71 & 101 & 94 & 72 & 90 & 58 & \it  0.13 \\
+\it  0.5  & \it  50  & \it  0.5  & {\bf 90} & 95 & 98 & 96 & 101 & 100 & 108 & 117 & 95 & \it  0.13 \\
+& & \it  0.9  & 79 & 80 & 81 & 79 & 79 & 77 & 83 & 81 & {\bf 76} & \it  0.13 \\[1ex]
+\cline{2-3}\rule{0pt}{3ex}
+& & \it  0  & {\bf 62} & 69 & 96 & 93 & 102 & 101 & 84 & 112 & 68 & \it  0.09 \\
+ & \it  100  & \it  0.5  & {\bf 94} & 98 & 101 & 100 & 102 & 101 & 118 & 132 & 98 & \it  0.09 \\
+& & \it  0.9  & {\bf 87} & 89 & 92 & 88 & 95 & 89 & 95 & 92 & {\bf 87} & \it  0.09 \\[1ex]
+\cline{2-3}\rule{0pt}{3ex}
+& & \it  0  & {\bf 54} & 65 & 110 & 100 & 102 & 104 & 99 & 157 & 67 & \it  0.04 \\
+ & \it  200  & \it  0.5  & {\bf 92} & 98 & 102 & 102 & 102 & 103 & 142 & 169 & 98 & \it  0.04 \\
+& & \it  0.9  & {\bf 91} & 94 & 99 & 95 & 101 & 99 & 108 & 103 & 95 & \it  0.05 \\[1ex]
+\hline
+\end{tabular}
+\end{center}
+\caption{\label{tab:simdense} The dense design version for Table 1 from the main paper.  Average out-of-sample $R^2$, reported as  \% worse than the $C_p$ oracle, across 1000 different samples from (\ref{simdgp-both}) under the dense design. }  
+\end{table}
+
 
 
 \setstretch{1}
 \bibliographystyle{chicago}
 \bibliography{pose}
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % dense R2
