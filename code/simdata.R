@@ -14,7 +14,7 @@
 # For all, report prediction error on left-out true y,
 # and prediction error on Cp rule, and selection error on Cp.
 
-dgp <- function(id, n=1e3, p=n, s2n, rho, decay, prob=1){
+dgp <- function(id, n=1e3, p=n, s2n, rho, decay, sparse=FALSE){
 
 	## fixed 
 	xvar <- matrix(ncol=p,nrow=p)

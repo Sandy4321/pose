@@ -1,83 +1,73 @@
-rho=.5
-s2n=1
-prob=1
-decay=50
+## weight and theory plots
 
-getLavg <- function(mod, rho, s2n, prob, decay){
-  Ltab=as.matrix(read.table(sprintf("results/sim-rho%g-s2n%g-prob%g-decay%g-L%s.txt",
-                         rho, s2n, prob, decay, mod),sep="|"))
-  Ltab[Ltab==0] <- NA
-  Lavg <- colMeans(Ltab, na.rm=TRUE)
-  Lexist <- colSums(!is.na(Ltab))
-  return(Lavg/Lexist)
+getit <- function(rho, s2n, decay, what, mod){
+    fname <- sprintf("results/sim-rho%g-s2n%g-decay%g-%s%s.txt",
+            rho, s2n, decay, what, mod)
+    #print(fname)
+    lines <- readLines(fname)
+    parsed <- sapply(lines, strsplit, split="\\|",USE.NAMES=F)
+    lens <- sapply(parsed,length)
+    nc<- 100
+    misfits <- which(lens!=nc)
+    if(length(misfits)>0){
+        warning(length(misfits)," overwritten line dropped")
+        #print(misfits)
+        parsed <- parsed[-misfits] }
+    parsed <- lapply(parsed, as.numeric)
+    mat <- do.call(rbind, parsed)
+    colnames(mat) <- paste("seg",1:100,sep=".")
+    return(mat)
 }
 
 
-Lgl0 <- getLavg("gl0",rho,s2n,prob,decay)
-Lgl2 <- getLavg("gl2",rho,s2n,prob,decay)
-Lgl10 <- getLavg("gl10",rho,s2n,prob,decay)
-Lmrg <- getLavg("mrg",rho,s2n,prob,decay)
-
-plot(Lgl0, ylim=range(c(Lgl0, Lgl2, Lgl10, Lmrg),na.rm=T), 
-  xlab="", ylab="",type="l",col=1,log="y", xlim=c(1,60))
-lines(Lgl2, col=2)
-lines(Lgl10, col=3)
-lines(Lmrg, col=4)
-legend("topleft",legend=c("Lasso","GL2", "GL10", "AL"),lty=c(1,1,1,1),col=c(1,2,3,4),bty="n")
-
-
-
-#pdf(file=sprintf("plots/rho%g-s2n%g-s%g-decay%g.pdf",rho, s2n, prob, decay), width=8, height=4)
-
-par(oma=c(0,0,3,0),mfrow=c(1,3),xpd=NA)
-
-wmingl0=read.table(sprintf("results/sim-rho%g-s2n%g-prob%g-decay%g-wmingl0.txt",
-                           rho, s2n, prob, decay),sep="|")
-wmingl0=colMeans(wmingl0, na.rm=T)
-
-wmingl2=read.table(sprintf("results/sim-rho%g-s2n%g-prob%g-decay%g-wmingl2.txt",
-                           rho, s2n, prob, decay),sep="|")
-wmingl2=colMeans(wmingl2, na.rm=T)
-
-wmingl10=read.table(sprintf("results/sim-rho%g-s2n%g-prob%g-decay%g-wmingl10.txt",
-                            rho, s2n, prob, decay),sep="|")
-wmingl10=colMeans(wmingl10, na.rm=T)
-
-wminmrg=read.table(sprintf("results/sim-rho%g-s2n%g-prob%g-decay%g-wminmrg.txt",
-                           rho, s2n, prob, decay),sep="|")
-wminmrg=colMeans(wminmrg, na.rm=T)
-plot(wmingl0, ylim=range(c(wmingl0, wmingl2, wmingl10, wminmrg),na.rm=T), xlab="", ylab="",type="l",col=1,main="w min")
-par(new=T)
-plot(wmingl2, ylim=range(c(wmingl0, wmingl2, wmingl10, wminmrg),na.rm=T),axes = FALSE, xlab = "", ylab = "",type="l",col=2)
-par(new=T)
-plot(wmingl10, ylim=range(c(wmingl0, wmingl2, wmingl10, wminmrg),na.rm=T),axes = FALSE, xlab = "", ylab = "",type="l",col=3)
-par(new=T)
-plot(wminmrg, ylim=range(c(wmingl0, wmingl2, wmingl10, wminmrg),na.rm=T),axes = FALSE, xlab = "", ylab = "",type="l",col=4)
-
-cpineqgl0=read.table(sprintf("results/sim-rho%g-s2n%g-prob%g-decay%g-cpineqgl0.txt",
-                             rho, s2n, prob, decay),sep="|")
-cpineqgl0=colMeans(cpineqgl0, na.rm=T)
-
-cpineqgl2=read.table(sprintf("results/sim-rho%g-s2n%g-prob%g-decay%g-cpineqgl2.txt",
-                             rho, s2n, prob, decay),sep="|")
-cpineqgl2=colMeans(cpineqgl2, na.rm=T)
-
-cpineqgl10=read.table(sprintf("results/sim-rho%g-s2n%g-prob%g-decay%g-cpineqgl10.txt",
-                              rho, s2n, prob, decay),sep="|")
-cpineqgl10=colMeans(cpineqgl10, na.rm=T)
-
-cpineqmrg=read.table(sprintf("results/sim-rho%g-s2n%g-prob%g-decay%g-cpineqmrg.txt",
-                             rho, s2n, prob, decay),sep="|")
-cpineqmrg=colMeans(cpineqmrg, na.rm=T)
-plot(cpineqgl0, ylim=range(c(cpineqgl0, cpineqgl2, cpineqgl10, cpineqmrg),na.rm=T), xlab="", ylab="",type="l",col=1,main="Cp")
-par(new=T)
-plot(cpineqgl2, ylim=range(c(cpineqgl0, cpineqgl2, cpineqgl10, cpineqmrg),na.rm=T),axes = FALSE, xlab = "", ylab = "",type="l",col=2)
-par(new=T)
-plot(cpineqgl10, ylim=range(c(cpineqgl0, cpineqgl2, cpineqgl10, cpineqmrg),na.rm=T),axes = FALSE, xlab = "", ylab = "",type="l",col=3)
-par(new=T)
-plot(cpineqmrg, ylim=range(c(cpineqgl0, cpineqgl2, cpineqgl10, cpineqmrg),na.rm=T),axes = FALSE, xlab = "", ylab = "",type="l",col=4)
-mtext(sprintf("rho=%s s2n=%s s=%s decay=%s",rho, s2n, prob, decay), outer = TRUE)
-#dev.off()
+getavg <- function(rho, s2n, decay,what,mod){
+  tab=getit(rho,s2n,decay,what,mod)
+  tab[tab<=0] <- NA
+  avg <- colMeans(tab, na.rm=TRUE)
+  exist <- colSums(!is.na(tab))
+  return(avg/exist)
 }
 
+
+Lgl0 <- getavg(rho,s2n,decay,"L","gl0")
+Lgl1 <- getavg(rho,s2n,decay,"L","gl1")
+Lgl10 <- getavg(rho,s2n,decay,"L","gl10")
+Lmrg <- getavg(rho,s2n,decay,"L","mrg")
+
+wsnormgl0 <- getavg(rho,s2n,decay,"wsnorm","gl0")
+wsnormgl1 <- getavg(rho,s2n,decay,"wsnorm","gl1")
+wsnormgl10 <- getavg(rho,s2n,decay,"wsnorm","gl10")
+wsnormmrg <- getavg(rho,s2n,decay,"wsnorm","mrg")
+
+wmingl0 <- getavg(rho,s2n,decay,"wmin","gl0")
+wmingl1 <- getavg(rho,s2n,decay,"wmin","gl1")
+wmingl10 <- getavg(rho,s2n,decay,"wmin","gl10")
+wminmrg <- getavg(rho,s2n,decay,"wmin","mrg")
+
+pdf(sprintf("weights-r%g-s%g-d%g.pdf",rho,s2n,decay), width=9, height=3)
+par(mfrow=c(1,3),mai=c(.7,.7,.1,.1))
+
+plot(wmingl0, ylim=range(c(wmingl0, wmingl1, wmingl10, wminmrg),na.rm=T), bty="n",
+  xlab="", ylab="w-min",type="l",col=1, xlim=c(1,100), cex.lab=1.5, log="y", lwd=1.5)
+lines(wmingl1, col=2, lwd=1.5)
+lines(wmingl10, col=3, lwd=1.5)
+lines(wminmrg, col=4, lwd=1.5)
+
+plot(wsnormgl0, ylim=range(c(wsnormgl0, wsnormgl1, wsnormgl10, wsnormmrg),na.rm=T), bty="n",
+  xlab="", ylab="w-norm",type="l",col=1, log="y", xlim=c(1,100), cex.lab=1.5, lwd=1.5)
+lines(wsnormgl1, col=2, lwd=1.5)
+lines(wsnormgl10, col=3, lwd=1.5)
+lines(wsnormmrg, col=4, lwd=1.5)
+
+plot(Lgl0, ylim=range(c(Lgl0, Lgl1, Lgl10, Lmrg),na.rm=T), bty="n",
+  xlab="", ylab="L",type="l",col=1,log="y", xlim=c(1,100), cex.lab=1.5, lwd=1.5)
+lines(Lgl1, col=2, lwd=1.5)
+lines(Lgl10, col=3, lwd=1.5)
+lines(Lmrg, col=4, lwd=1.5)
+
+legend("topright",legend=c("Lasso","GL1", "GL10", "AL"),
+    lwd=2, lty=c(1,1,1,1),col=c(1,2,3,4),bty="n", cex=1.3)
+
+mtext(side=1, "path segment", outer=TRUE, line=-2)
+dev.off()
 
