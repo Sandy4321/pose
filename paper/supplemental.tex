@@ -531,17 +531,16 @@ low-variance small-$\gamma$ estimators.
 \end{figure}
 
 
-\section{Full Simulation results}
+\section{Full simulation results}
 
 Continuous-response data are simulated from
- the following $p=1000$ dimensional regressions.
+ a $p=1000$ dimensional linear model
 \begin{align}
 \label{simdgp-both}
 y &\sim \mr{N}\left(\bm{x}'\bs{\beta},\sigma^2\right) ~~\text{where}~~
-\beta_j = \frac{1}{j}\exp\left(-\frac{j}{{\sf d}} \right)\text{for}~~j=1\dots p~~\text{and}\\
-% \textit{dense design:~~~} x_j=z_j ~~ \textit{sparse design:~~~} 
-% x_j \stackrel{ind}{\sim} \mr{Bern}\left( 1/(1+e^{-z_j})\right)\\
-% \bm{z} \sim \mr{N}\left(\bm{0},\bs{\Sigma}\right)
+\beta_j = \frac{1}{j}\exp\left(-\frac{j}{{\sf d}} \right)\text{for}~~j=1\dots p~~\text{and,~given~}\bm{z} \sim \mr{N}\left(\bm{0},\bs{\Sigma}\right)\notag,\\
+&\text{either}~~\textit{dense design:~~} x_j=z_j ~~\text{or}~~ \textit{sparse design:~~} 
+x_j \stackrel{ind}{\sim} \mr{Bern}\left( 1/(1+e^{-z_j})\right).
 \end{align}
 
 \vspace{-.4cm}
@@ -554,13 +553,33 @@ runs.  In the first case, we define $\sigma^2$ through {\it signal-to-noise}
 ratios $\mr{sd}(\bs{\eta})/\sigma$ of $1/2$, $1$, and $2$.  In the latter
 case, multicollinearity is parametrized via $\Sigma_{jk} =
 \rho^{|j-k|}$, and we consider $\rho = 0, 0.5,~\text{and}~0.9$.
-We also consider variation in the sparsity ${\sf s}$, which controls the number of nonzero elements in $\bm{X}$, and decay ${\sf d}$, which controls the speed at which the ordered coefficients diminish.
+Finally, the coefficient decay rate ${\sf d}$ controls the effective sparsity: how much $\bs{\beta}$ is \textit{measurably} different from zero. See Figure \ref{fig:betadecay} for illustration; we consider
+${\sf d}$ of $10$, $50$, $100$, and $200$.
 
-Results over a set of 1000 datasets are presented in the following tables.  
-For each data generating process, a first table records out-of-sample $R^2 = 1 -
-\mr{var}(\bm{\tilde y} - \bs{\eta}_\bm{y})/\mr{var}(\bm{\tilde y})$, while the
-second reports false discovery and sensitivity with respect to the $L_0$
+\begin{figure}[h]\centering
+\includegraphics[width=.8\textwidth]{graphs/betadecay}
+\caption{\label{fig:betadecay} The linear model coefficients for our simulation in \ref{simdgp-both}.}
+\end{figure}
+% pdf("betadecay.pdf",width=8,height=3.5)
+% par(mai=c(.9,.9,.1,.1))
+% j <- 1:1000
+% b <- function(d){ ((-1)^j)*exp(-j/d) }
+% plot(j, b(10), bty="n",xlab="index",ylab="beta", ylim=c(-1,1))
+% points(j, b(50), col="grey20")
+% points(j, b(100), col="grey50")
+% points(j, b(200), col="grey80")
+% legend("topright", bty="n", fill=paste("grey",c(0,20,50,80),sep=""),legend=c(10,50,100,200),title="decay",border=0)
+% dev.off()
+
+Results for both sparse and dense designs, over a set of 1000 datasets, are presented in the following tables.  We first report out-of-sample $R^2 = 1 -
+\mr{var}(\bm{\tilde y} - \bs{\eta}_\bm{y})/\mr{var}(\bm{\tilde y})$, followed by tables showing false discovery and sensitivity with respect to the $C_p$
 oracle. 
+
+
+\setstretch{1}
+\bibliographystyle{chicago}
+\bibliography{pose}
+
 
 % dense version of paper table
 \begin{table}
@@ -635,12 +654,6 @@ $\mr{sd}(\bs{\eta})/\sigma$ & {\sf d} & $\rho$
 \end{center}
 \caption{\label{tab:simdense} The dense design version for Table 1 from the main paper.  Average out-of-sample $R^2$, reported as  \% worse than the $C_p$ oracle, across 1000 different samples from (\ref{simdgp-both}) under the dense design. }  
 \end{table}
-
-
-
-\setstretch{1}
-\bibliographystyle{chicago}
-\bibliography{pose}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%

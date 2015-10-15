@@ -81,8 +81,8 @@ The statistics literature of the past 15 years has established many favorable
  diminishing-bias regularization at no extra cost over the fastest lasso
  algorithms. Moreover, our `gamma lasso' implementation of POSE is accompanied
  by a reliable heuristic for the fit degrees of freedom, so that
- standard information criteria can be applied in penalty selection. The
- methods are illustrated in extensive simulations and in application of
+ standard information criteria can be applied in penalty selection. Our contribution also includes novel results on the distance between weighted-$L_1$ and infeasible oracle $L_0$ penalized predictors; this allows us to build intuition about our POSE algorithms and other fast-to-compute diminishing-bias regularization schemes (such as the adaptive lasso).  The
+ methods and results are illustrated in extensive simulations and in application of
  logistic regression to evaluating the performance of hockey players.
 }
 
@@ -653,11 +653,12 @@ for accurate support recovery or avoiding false discovery; see, e.g.,
 \section{Simulation experiment}
 \label{sec:sim}
 
-We consider samples of size $n=1000$ from
+We consider samples of size $n=1000$ from the $p=1000$ dimensional linear model
 \begin{align}
 \label{simdgp}
-&y \sim \mr{N}\left(\bm{x}'\bs{\beta},\sigma^2\right)~\text{where}~\beta_j = \frac{\exp\left(-\frac{j}{\sf d}\right)}{j},~j=1\ldots p,\notag\\
-&\text{and}~\bm{x} = \bm{u}*\bm{z},~~\bm{u}\sim \mr{N}\left(\bm{0},\bs{\Sigma}\right),~~z_{j} \stackrel{ind}{\sim} \mr{Bin}(0.5).
+y \sim &~ \mr{N}\!\left(\bm{x}'\bs{\beta},\sigma^2\right)~~\text{where}~~
+\beta_j = \frac{(-1)^j}{j}\exp\left(-\frac{j}{{\sf d}} \right)\\
+&\text{and}~x_j \stackrel{ind}{\sim} \mr{Bernoulli}\left( 1/(1+e^{-z_j})\right) \text{for}~~j=1\dots p,~~\text{given}~~\bm{z} \sim \mr{N}\left(\bm{0},\bs{\Sigma}\right).\notag 
 \end{align}
 
 \vspace{-.4cm}
@@ -666,17 +667,16 @@ Each simulation draws means $\eta_i =
 \bm{x}_i'\bs{\beta}$, and two response samples (train and test)
 $\bm{y},\bm{\tilde y} \sim \mr{N}(\bs{\eta},\sigma^2\bm{I})$. Multicollinearity is
 parametrized via $\Sigma_{jk} =
-\rho^{|j-k|}$ with $\rho = 0.5$.  We define $\sigma^2$ through {\it signal-to-noise} ratios
-$\mr{sd}(\bs{\eta})/\sigma$ of $1/2$, $1$, and $2$; for coefficient decay rates we consider
-${\sf d}$ of $10$, $50$, and $100$.
+\rho^{|j-k|}$ with $\rho = 0.5$, and the error variance $\sigma^2$ is specified through {\it signal-to-noise} ratios
+$\mr{sd}(\bs{\eta})/\sigma$ of $1/2$, $1$, and $2$. Finally, the coefficient decay  ${\sf d}$ controls how quickly $\beta_j$ goes to zero; we consider
+${\sf d}$ of $10$, $50$, $100$, and $200$.
+
 
 The system in (\ref{simdgp}) is obviously {\it dense}:  true
 coefficients are all nonzero.  However, they decay in magnitude along the
 index $j$ and
 it will be useless to estimate many of them in a $p=n$ regression.
 Our sparse oracle comparator is the $C_p$ optimal $L_0$ penalized solution
-
-\vspace{-.75cm}
 \begin{equation}\label{l0oracle}
 \bs{\beta}^{\star} = \argmin_{\bs{\beta}} \left\{ \|\bm{y}-\bm{X}\bs{\beta}\|^2 + 2\sigma^2\sum_j
 \ds{1}_{\{\beta_j\neq0\}}\right\},
@@ -797,9 +797,9 @@ discovery rates with respect to the support used in the oracle $C_p$ scheme,
 along with  plots for coefficient estimates, information criteria,
 and OOS error rates along $\lambda$.
 
-Insights from the simulations (including supplement):
+Insights from the simulations:
 
-$\bullet$~~ One of the three GL $\gamma$-specifications is always able to provide performance near to (never more than 1.5\% worse, and sometimes better) that of the computationally intensive routine of CV-selected MCP (over a grid in penalty size and scale).  A single {\tt gamlr} run requires a fraction of a second; {\tt sparsenet} with 5-fold CV requires 15-20 seconds per run.  
+$\bullet$~~ AICc selection for one of the three GL $\gamma$-specifications is always able to provide performance near to that of the computationally intensive routine of CV-selected MCP (over a grid in penalty size and scale).  The best GL OOS $R^2$ is never more than 4\% worse than MCP overall and never more than 2\% worse for all but the ${\sf d}=200$ (dense regression) specifications; GL also occasionally outperforms MCP.  A single {\tt gamlr} run requires a fraction of a second; {\tt sparsenet} with 5-fold CV requires 15-20 seconds per run.  
 
 $\bullet$~~  AICc and 5-fold CV give roughly the same performance for the GL0 (lasso) and GL2; AICc is often much better than CV for the less stable GL10 paths.  For prediction, AICc is a massive improvement over either BIC or the uncorrected AIC;  the
 latter leads to negative $R^2$ in many configurations.
@@ -927,7 +927,7 @@ amongst the 64 nonzero player effects.
 
 Concave penalized estimation for Big Data, where exact solvers are too
  expensive, reduces largely to weighted-$L_1$ penalization.
-Path adaptation is an intuitively reasonable source of weights, and we are able to show that POSE -- particularly {\tt gamlr} with AICc selection -- provides diminishing-bias sparse compressed sensing
+Path adaptation is an intuitively reasonable source of weights, and we are able to show that POSE -- particularly {\tt gamlr} with AICc selection -- provides high quality diminishing-bias sparse regression
 no more cost than a  standard lasso.  We know of no other software that meets this standard.
 
 
