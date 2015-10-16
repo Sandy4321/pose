@@ -3,7 +3,7 @@
 ## gamma lasso
 tgl0 <- system.time(gl0 <- cv.gamlr(d$x, d$y.train))[[3]]
 tgl1 <- system.time(gl1 <- cv.gamlr(d$x, d$y.train, gamma=1))[[3]]
-tgl10 <- system.time(gl10 <- cv.gamlr(d$x, d$y.train, gamma=4))[[3]]
+tgl10 <- system.time(gl10 <- cv.gamlr(d$x, d$y.train, gamma=10))[[3]]
 
 ## marginal adaptive lasso
 tmrgal <- system.time({
