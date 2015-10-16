@@ -4,12 +4,11 @@
 id <- 0
 rho <- 0.5
 s2n <- 1
+decay <- 100
+sparse <- TRUE
 
 source("code/simdata.R")
 library(gamlr)
-
-## draw the data
-d <- dgp(id=id, s2n=s2n, rho=rho)
 
 ## gamma lasso
 gl0 <- cv.gamlr(d$x, d$y.train)
@@ -22,7 +21,10 @@ par(mfrow=c(1,3),
     omi=c(.2,.2,0,0))
 for(mod in list(gl0,gl1,gl10)){
     plot(mod$g, xlab="", ylab="", select=FALSE, 
-        col=rgb(.5,.5,.5,.5), xlim=c(-3.5,-.5))
+        col=rgb(.5,.5,.5,.5), xlim=c(-3.15,max(log(gl0$gam$lam))), df=FALSE)
+    dfi <- c(1,20,40,60,80)
+    axis(3, at = log(mod$gamlr$lambda)[dfi], 
+        labels = round(mod$gamlr$df[dfi]), tick = FALSE, line = -0.5)
      }
 mtext(side=1, "log lambda", 
     font=3, outer=TRUE, cex=.7)
@@ -36,8 +38,12 @@ par(mfrow=c(1,3),
     omi=c(.2,.2,0,.2))
 for(mod in list(gl0,gl1,gl10)){
     plot(mod, xlab="", ylab="", col="grey50",
-        ylim=c(11,20), xlim=c(-3.5,-.5), select=FALSE) 
-    lines( log(mod$g$lam), exp(AICc(gl0$g)/nrow(d$x)), lwd=2)
+        ylim=c(12,30), xlim=c(-3.15,max(log(gl0$gam$lam))), 
+        select=FALSE, df=FALSE) 
+    lines( log(mod$g$lam), exp(AICc(mod$g)/nrow(d$x)), lwd=2)
+    dfi <- c(1,20,40,60,80)
+    axis(3, at = log(mod$gamlr$lambda)[dfi], 
+        labels = round(mod$gamlr$df[dfi]), tick = FALSE, line = -0.5)
 }
 mtext(side=1, "log lambda", 
     font=3, outer=TRUE, cex=.7)

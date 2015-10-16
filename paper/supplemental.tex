@@ -538,7 +538,7 @@ Continuous-response data are simulated from
 \begin{align}
 \label{simdgp-both}
 y &\sim \mr{N}\left(\bm{x}'\bs{\beta},\sigma^2\right) ~~\text{where}~~
-\beta_j = \frac{1}{j}\exp\left(-\frac{j}{{\sf d}} \right)\text{for}~~j=1\dots p~~\text{and,~given~}\bm{z} \sim \mr{N}\left(\bm{0},\bs{\Sigma}\right)\notag,\\
+\beta_j = (-1)^j\exp\left(-\frac{j}{{\sf d}} \right)\text{for}~~j=1\dots p~~\text{and,~given~}\bm{z} \sim \mr{N}\left(\bm{0},\bs{\Sigma}\right)\notag,\\
 &\text{either}~~\textit{dense design:~~} x_j=z_j ~~\text{or}~~ \textit{sparse design:~~} 
 x_j \stackrel{ind}{\sim} \mr{Bern}\left( 1/(1+e^{-z_j})\right).
 \end{align}
@@ -571,10 +571,10 @@ ${\sf d}$ of $10$, $50$, $100$, and $200$.
 % legend("topright", bty="n", fill=paste("grey",c(0,20,50,80),sep=""),legend=c(10,50,100,200),title="decay",border=0)
 % dev.off()
 
+
 Results for both sparse and dense designs, over a set of 1000 datasets, are presented in the following tables.  We first report out-of-sample $R^2 = 1 -
 \mr{var}(\bm{\tilde y} - \bs{\eta}_\bm{y})/\mr{var}(\bm{\tilde y})$, followed by tables showing false discovery and sensitivity with respect to the $C_p$
 oracle. 
-
 
 \setstretch{1}
 \bibliographystyle{chicago}
