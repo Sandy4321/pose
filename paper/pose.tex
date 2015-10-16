@@ -81,7 +81,7 @@ The statistics literature of the past 15 years has established many favorable
  diminishing-bias regularization at no extra cost over the fastest lasso
  algorithms. Moreover, our `gamma lasso' implementation of POSE is accompanied
  by a reliable heuristic for the fit degrees of freedom, so that
- standard information criteria can be applied in penalty selection. Our contribution also includes novel results on the distance between weighted-$L_1$ and infeasible oracle $L_0$ penalized predictors; this allows us to build intuition about our POSE algorithms and other fast-to-compute diminishing-bias regularization schemes (such as the adaptive lasso).  The
+ standard information criteria can be applied in penalty selection. We also provide novel results on the distance between weighted-$L_1$ and $L_0$ penalized predictors; this allows us to build intuition about POSE and other diminishing-bias regularization schemes.  The
  methods and results are illustrated in extensive simulations and in application of
  logistic regression to evaluating the performance of hockey players.
 }
@@ -164,17 +164,17 @@ A path of one-step estimators (POSE; Algorithm \ref{posealgo})
 provides $L_1$ penalized regression  on a grid of decreasing
 penalties, but adapts coefficient-specific weights to decrease as a function
 of the coefficient estimated in the previous path step.  POSE takes advantage
-of the natural match between path algorithms and one-step estimation: OSE
+of a natural match between path algorithms and one-step estimation: OSE
 relies upon inputs being close to the optimal solution, which is precisely the
-setting where path algorithms are most efficient.  We formalize `close' with a novel result in Theorem \ref{thm:sparseapprox} that relates weighted-$L_1$ to $L_0$ regularization.
+setting where path algorithms are most efficient.  We formalize `close' with a  result in Theorem \ref{thm:sparseapprox} that relates weighted-$L_1$ to $L_0$ regularization.
 
 This framework allows us to provide 
 \begin{itemize}
 \item a {\it path} of coefficient fits, each element of which corresponds to sparse diminishing-bias regularization estimation under a different level of penalization; where
-\item obtaining the path of coefficient fits requires no more computation than  a state-of-the-art $L_1$ regularization path algorithm; and
-\item there are reliable closed-form rules for selection of the optimal penalty level along this path.
+\item obtaining the path of coefficient fits requires {\it no more computation} than  a state-of-the-art $L_1$ regularization path algorithm; and
+\item there are good closed-form rules for selection of the optimal penalty level along this path.
 \end{itemize}
-The last capability here is derived from a Bayesian interpretation for our \textit{gamma lasso} implementation of POSE from which we are able to construct heuristic information criteria for penalty selection.
+The last capability here is derived from a Bayesian interpretation for our \textit{gamma lasso} implementation of POSE, from which we are able to construct information criteria for penalty selection.
 We view such tools as an essential ingredient for practical applicability in large-scale industrial machine learning where, e.g., cross-validation is not always viable or advisable.
 
 
@@ -227,12 +227,12 @@ practical application of penalized estimation requires a {\it regularization
 path}: a $p \times T$ field of $\bs{\hat\beta}$ estimates, say $\bs{\hat\beta}\vert_{\lambda}$, obtained while
 moving from high to low penalization along $\lambda^1 > \lambda^2 \ldots >
 \lambda^T$.  These paths begin at $\lambda^1$ set to infimum $\lambda$ such that
-(\ref{pendev}) is minimized at $\bs{\hat\beta}\vert_{\lambda} = \bm{0}$, and proceed down to some pre-specified $\lambda^T$ (e.g., $\lambda^T=
+(\ref{pendev}) is minimized at $\bs{\hat\beta}\vert_{\lambda} = \bm{0}$, and move to a pre-specified $\lambda^T$ (e.g., $\lambda^T=
 0.01\lambda^1$).
 
-Our path of one-step estimators (POSE) framework is in  Algorithm \ref{posealgo}.   In this, we are assuming a penalty specification such that $\lim_{b\to 0} c'(|b|) = 1$ and that the cost function is differentiable for $b\neq 0$.  
+Our path of one-step estimators (POSE) framework is in  Algorithm \ref{posealgo}.   
 
-{
+{\vskip .25cm
 \begin{algorithm}[hb]
 \caption{\label{posealgo} POSE }
 \vskip .2cm
@@ -258,9 +258,11 @@ $0 < \delta < 1$.
 l(\alpha,\bs{\beta}) + n\sum_j \lambda^t\omega^t_j|\beta_j| \label{l1pen}
 \end{align}
 \vskip -.3cm
-\end{algorithm}}
+\end{algorithm}\vskip .25cm}
 
-Section \ref{sec:weighted} will detail how POSE relates to concave regularization.  However, for some quick intuition, consider POSE with a concave cost function (such as the log penalty in Figure \ref{solution}).
+In this, we are assuming a penalty specification such that $\lim_{b\to 0} c'(|b|) = 1$ and that the cost function is differentiable for $b\neq 0$.  
+
+Section \ref{sec:weighted} details how POSE relates to concave regularization.  For some quick intuition, consider POSE with a concave cost function (e.g., the log penalty in Figure \ref{solution}).
 The derivative $c'(|\hat\beta|)$ will be positive but decreasing with larger values of  $\hat\beta$, such that the \textit{weight} on the $L_1$ penalty for $\hat\beta_j^{t}$ will \textit{diminish} with the size of $|\hat\beta_j^{t}|$.  This implies that coefficient estimates later in the path will be less biased towards zero if that coefficient has a large value earlier in the path.
 
 
@@ -341,8 +343,7 @@ weighted $L_1$ penalized loss. An exact LLA solver iterates between updating
 $c'(\hat\beta)$ and solving the implied $L_1$ penalized minimization problem.
 \citet{zou_one-step_2008} present numerical and theoretical evidence that LLA
 can provide near-optimal solutions even if you {\it stop it
-after one iteration}. This is an example of one-step estimation (OSE), a
-technique inspired by \cite{bickel_one-step_1975} that amounts to taking as
+after one iteration}. This is an example of one-step estimation \cite[OSE;][]{bickel_one-step_1975}, wherein you take as
 your estimator the first step of an iterative approximation to some objective.
 Early-stopping can be as good  as the full solution {\it if} the
 initial estimates are good enough.
@@ -363,13 +364,13 @@ probability an oracle estimator.   Zhang (2010,2013)
 weights $\omega_j = 1/|\hat\beta^0_j|$, where $\hat\beta^0_j$ is an initial
 guess at the coefficient value.  The original AL paper advocates using MLE
 estimates for initial values, while
-\cite{huang_adaptive_2008} suggest using marginal regression coefficients
-$\hat\beta^0_j = \mr{cor}(\bm{x}_j,\bm{y})$.
+\cite{huang_adaptive_2008} suggest using marginal correlations
+$\hat\beta^0_j = \mr{cor}(\bm{x}_j,\bm{y})$; this marginal AL algorithm is included in our simulations of Section \ref{sec:sim}.
 
-The main point here is that OSE LLA, or a two-step estimator starting from
+The main point is that OSE LLA, or a two-step estimator starting from
 $\bs{\hat\beta}=0$, or any version of the adaptive lasso, are all  interpretable as weighted-$L_1$ 
 penalization with weights equal to something like $c'(\beta^0)$ for initial
-coefficient guess $\beta^0$. POSE and GL take advantage of an  available
+coefficient guess $\beta^0$. The algorithms proposed in Section \ref{sec:algos}, POSE and GL, take advantage of an  available
 source of initial values in any path estimation algorithm -- the solved values
 from the previous path iteration.  Our  simulations in Section \ref{sec:sim}
 show that this efficient strategy works as well or better than  expensive
@@ -397,7 +398,7 @@ S$.  Moreover, $\bm{e}^S = \bm{y}-\bm{X}\bs{\beta}^S =
 \bm{X}_S(\bm{X}_S'\bm{X}_S)^{-1}\bm{X}_S'$ the projection matrix from OLS on $S$.  
 Use $|\cdot|$ and $\|\cdot\|$ for $L_1$ and $L_2$ norms.
 
-We use the following result for iterative \textit{stagewise} regression, with proof in the supplemental appendix. 
+We use the following result for iterative \textit{stagewise} regression; proof is in the supplement. 
 \begin{lemma}\label{SSElemma}
 Say $\mr{MSE}_S = \|\bm{X}\bs{\beta}^S-\bm{y}\|^2/n$ and 
 $\mr{cov}(\bs{x}_j,\bm{e}^S) = \bs{x}_j'(\bm{y}-\bm{X}\bs{\beta}^S)/n$ are sample variance and covariances.  Then for any $j \in 1\ldots p$, 
@@ -418,8 +419,8 @@ $
 \phi^2(L,S) = \min_{\{\bm{v}: \bm{v}\neq \bm{0},~|\bm{v}_{S^c}| \leq L\sqrt{s}\|\bm{v}_S\|\}}\frac{\|\bm{X}\bm{v}\|^2}{n\|\bm{v}\|^2}$.
 \end{definition}
 
-Finally,  we bound the distance between prediction rules
-from $L_0$ and weighted-$L_1$ penalized estimation.  
+\noindent Finally,  we bound the distance between prediction
+from $L_0$ and weighted-$L_1$ regularization.  
 
 \begin{theorem} \label{thm:sparseapprox}  Consider squared-error loss
 $l(\bs{\beta}) =
@@ -427,20 +428,19 @@ $l(\bs{\beta}) =
 Write $\bs{\hat\beta}$ as solution to the weighted-$L_1$ minimization $l(\bs{\beta}) + n\lambda\sum_j\omega_j|\beta_j|$. 
 
 Then  
-$\omega^{\mr{min}}_{S^c}\lambda > \sqrt{2\nu}$ while $\phi^2(L,S) > 0$ implies
+$\omega^{\mr{min}}_{S^c}\lambda > \sqrt{2\nu}$ while $\phi^2(L,S) > 0$, with 
+ $L = \frac{\|\bs{\omega}_S\|}{\sqrt{s}}\left(\omega^{\mr{min}}_{S^c}-\sqrt{2\nu}/\lambda\right)^{-1}$, implies
 \begin{equation} \label{sparseineq}
 \frac{\|\bm{X}(\bs{\hat\beta}-\bs{\beta}^\nu)\|^2}{n}\leq
-\frac{4\lambda^2 \|\bs{\omega}_S\|^2}{\phi^2(L, S)}
+\frac{4\lambda^2 \|\bs{\omega}_S\|^2}{\phi^2(L, S)}.
 \end{equation} 
-with 
- $L = \frac{\|\bs{\omega}_S\|}{\sqrt{s}}\left(\omega^{\mr{min}}_{S^c}-\sqrt{2\nu}/\lambda\right)^{-1}$ for the RE.
 \end{theorem}
 
 \begin{proof}
 From the definitions of $\bs{\hat\beta}$ and $\bs{\beta}^\nu = \bs{\beta}^S$, 
-\begin{align}\label{predconv}&
-\frac{1}{2}\|\bm{X}\bs{\hat \beta}-\bm{y}\|^2 +  n\lambda\sum_j\omega_j|\hat\beta_j|  \\ &= \frac{\|\bm{X}(\bs{\hat\beta}-\bs{\beta}^\nu)\|^2}{2} + \frac{\|\bm{e}^S\|^2}{2} - \bm{\hat y}'\bm{e}^S+ n\lambda\sum_j\omega_j|\hat\beta_j|\notag\\
-&\hspace{3cm}\leq~~\frac{1}{2}\|\bm{e}^S\|^2 + n\lambda\sum_{j\in S}\omega_j|\beta^S_j|\notag
+\begin{align}\label{predconv}
+\frac{1}{2}\|\bm{X}\bs{\hat \beta}-\bm{y}\|^2 +  n\lambda\sum_j\omega_j|\hat\beta_j|   &= \frac{\|\bm{X}(\bs{\hat\beta}-\bs{\beta}^\nu)\|^2}{2} + \frac{\|\bm{e}^S\|^2}{2} - \bm{\hat y}'\bm{e}^S+ n\lambda\sum_j\omega_j|\hat\beta_j| 
+\\&\leq~~\frac{1}{2}\|\bm{e}^S\|^2 + n\lambda\sum_{j\in S}\omega_j|\beta^S_j|\notag
 \end{align}
   Since $\bm{\hat y}'\bm{e}^S = \bm{\hat y}'(\bm{I}-\bm{H}^S)\bm{y} =
 \bs{\hat\beta}'\bm{X}'(\bm{y}-\bm{X}\bs{\beta}^\nu) = 
@@ -452,11 +452,11 @@ $,
 \leq \mr{MSE}_S - \mr{MSE}_{S\cup j} < 2\nu ~~~\forall~j
 \end{equation}
 so that $|\bm{\hat y}'\bm{e}^S| = |\bs{\hat\beta}_{S^c}\bm{X}_{S^c}'(\bm{y}-\bm{X}\bs{\beta}^\nu)| < n\sqrt{2\nu}|\bs{\hat\beta}_{S^c}|$.  Applying this inside (\ref{predconv}),
-\begin{align}\label{predconvineq}&
+\begin{align}\label{predconvineq}
 \frac{1}{2}\|\bm{X}(\bs{\hat\beta}-\bs{\beta}^\nu)\|^2
-  + n\left(\omega^{\mr{min}}_{S^c}\lambda-\sqrt{2\nu}\right)|\bs{\hat\beta}_{S^c}|\\
-  &~\leq~ n\lambda\sum_{j\in S}\omega_j|\hat\beta_{j}-\beta^\nu_j|
-  ~\leq~ n\lambda\|\bs{\omega}_S\|\|\bs{\hat\beta}_{S}-\bs{\beta}^\nu_S\|.\notag
+  + n\left(\omega^{\mr{min}}_{S^c}\lambda-\sqrt{2\nu}\right)|\bs{\hat\beta}_{S^c}|
+  ~\leq~ n\lambda\sum_{j\in S}\omega_j|\hat\beta_{j}-\beta^\nu_j|
+  ~\leq~ n\lambda\|\bs{\omega}_S\|\|\bs{\hat\beta}_{S}-\bs{\beta}^\nu_S\|.
 \end{align}
 Given $\omega^{\mr{min}}_{S^c}\lambda > \sqrt{2\nu}$,
 difference $\bs{\hat\beta}-\bs{\beta}^\nu$ is in the RE support for 
@@ -472,14 +472,14 @@ Dividing each side by $\sqrt{n}\|\bm{X}(\bs{\hat\beta}-\bs{\beta}^\nu)\|/2$ and 
 \noindent {\bf Remarks}
 
 
-\noindent \vskip .1cm \noindent $\bullet$~~  Theorem \ref{thm:sparseapprox} is finite sample exact.  Distinguishing it from
+\noindent \vskip .2cm \noindent $\bullet$~~  Theorem \ref{thm:sparseapprox} is finite sample exact.  Distinguishing it from
 related results in the literature, it is  also completely
 \textit{non-parametric} -- it makes no reference to the true distribution of
 $\bm{y}|\bm{X}$.  Indeed, if we make such assumptions, Theorem
 \ref{thm:sparseapprox} provides bounds on the distance between a
 weighted-lasso and optimal prediction.  The next remark is an example.
 
-\noindent \vskip .1cm \noindent $\bullet$~~ Assume that $\bm{y} \sim
+\noindent \vskip .2cm \noindent $\bullet$~~ Assume that $\bm{y} \sim
 (\bs{\eta},\sigma^2\bm{I})$ --  $y_i$ independent with mean $\mu_i$ and shared
 variance $\sigma^2$.  The $C_p$ formula of
 \cite{mallows_comments_1973} gives 
@@ -495,7 +495,7 @@ $\omega^{\mr{min}}_{S^c} > (\sigma/\lambda)\sqrt{2/n}$, comparison to $C_p$
 suggests we can use larger $\gamma$  with large $n$ or small $\sigma$.
 
 
-\noindent \vskip .1cm \noindent $\bullet$~~  Plausibility of the restricted eigenvalue assumption
+\noindent \vskip .2cm \noindent $\bullet$~~  Plausibility of the restricted eigenvalue assumption
 $\phi(L,S) > 0$ depends  upon $L$.  It is less restrictive if we can reduce
 $\|\bs{\omega}_S\|$ without making $\omega^{\mr{min}}_{S_c}$ small.
 \textit{This is a key motivation for the POSE algorithm:} if covariates with
@@ -506,12 +506,11 @@ $S_c$ get nonzero $\hat\beta$, then larger $\gamma$ can lead to over-fit.  For
 this reason it is essential that we have tools for choosing  optimal
 $\lambda$.
 
-\noindent \vskip .1cm \noindent $\bullet$~~ In the supplemental material,  we also adapt standard
+\noindent \vskip .2cm \noindent $\bullet$~~ In the supplemental material,  we also adapt standard
 results from \cite{wainwright_sharp_2006,wainwright_sharp_2009} to show how
 reducing $\|\bs{\omega}_S\|$ without making $\omega^{\mr{min}}_{S_c}$ small
 can lead to lower false discovery rates with respect to the $L_0$ oracle.
-However, such results depend upon design restrictions that are less realistic
-in practice.
+Unfortunately, this relies upon fairly strict design restrictions.
 
 
 \section{Penalty selection}
@@ -574,10 +573,10 @@ $\mr{Ga}(s,1/\gamma)$ hyperprior with `shape' $s$ and `scale' $\gamma$ for
 each $\tau_j$, such that $\ds{E}[\tau_j] = s\gamma$ and $\mr{var}(\tau_j) =
 s\gamma^2$.  The {\it joint} coefficient-scale prior is
 \begin{align}\label{glprior}
-\pi(\beta_j,\tau_j) &= \mr{La}\left(\beta_j ;~ \tau_j\right)
-\mr{Ga}\left(\tau_j;~ s,\gamma^{-1}\right) \\&= \frac{ 1}{2\Gamma({s})} 
+\pi(\beta_j,\tau_j) = \mr{La}\left(\beta_j ;~ \tau_j\right)
+\mr{Ga}\left(\tau_j;~ s,\gamma^{-1}\right) = \frac{ 1}{2\Gamma({s})} 
 \left(\frac{\tau_j}{\gamma}\right)^{s}
-               \exp\left[-\tau_j(\gamma^{-1}+|\beta_j|)\right].\notag
+               \exp\left[-\tau_j(\gamma^{-1}+|\beta_j|)\right].
 \end{align}
 The gamma hyperprior is conjugate here, implying a $\mr{Ga}\left(s+1, ~1/\gamma +
 |\beta_j|\right)$ posterior for $\tau_j \mid \beta_j$ with conditional
@@ -588,14 +587,15 @@ Consider joint MAP estimation of $[\bs{\tau},\bs{\beta}]$ under the prior in
    negative logs and removing constants, this is equivalent to solving
 \begin{equation}\label{gljoint}
 \argmin_{\beta_j\in\ds{R},~\tau_j \in \ds{R}^{+}}\!\!
-\frac{l(\bs{\beta})}{\phi} + \sum_j \left[\tau_j(\gamma^{-1}+|\beta_j|) - s\log(\tau_j)\right],
+\frac{l(\bs{\beta})}{\phi} + \sum_j \left[\tau_j(\gamma^{-1}+|\beta_j|) - s\log(\tau_j)\right].
 \end{equation}
-and is straightforward to show (supplemental) that this is equivalent 
+It is straightforward to show (supplement) that the $\bs{\beta}$ which solves (\ref{gljoint})  is also the solutions 
 to the log-penalized objective 
 \begin{equation}\label{logobj}
-\min_{\beta_j\in\ds{R}}~~
-\phi^{-1}l(\bs{\beta}) + \sum_j  s\log(1+\gamma|\beta_j|).
+\argmin_{\beta_j\in\ds{R}}~~
+\phi^{-1}l(\bs{\beta}) + \sum_j  s\log(1+\gamma|\beta_j|),
 \end{equation}
+such that the log penalty is interpretable as a {\it profile} MAP estimate.
 
 \subsection{Degrees of freedom}
 
@@ -620,13 +620,13 @@ leading to the GL degrees of freedom
 \label{edf} df^t = \sum_j \mr{Ga}(|g_{j}|;~n\lambda^t/(\gamma\phi),
 1/\gamma), \end{equation} where $\mr{Ga}(~\cdot~;~\mr{shape}, 1/\mr{scale})$
 is the Gamma cumulative distribution function and $g_j$ is an estimate of  the
-$j^{th}$ coefficient gradient evaluated at $\hat\beta_j=0$.\footnote{Note that the number of unpenalized variables (e.g., 1 for $\alpha$) should also be added to the total  estimation $df$. }
-
-For  orthogonal covariates,  $g_j$ is just the marginal gradient at zero.
-In the non-orthogonal case, where $g_{j} = g_j(0)$ becomes a
-function of all of the elements of $\bs{\hat\beta}$, we plug in the most recent
-$g_j$ at which $\hat\beta^t_j=0$:  this
-requires no extra computation and has the advantage of maintaining $df =
+$j^{th}$ coefficient gradient evaluated at $\hat\beta_j=0$.\footnote{Note that
+the number of unpenalized variables (e.g., 1 for $\alpha$) should also be
+added to the total  estimation $df$. } For  orthogonal covariates,  $g_j$ is
+just the marginal gradient at zero. In the non-orthogonal case, where $g_{j} =
+g_j(0)$ becomes a function of all of the elements of $\bs{\hat\beta}$, we plug
+in the most recent $g_j$ at which $\hat\beta^t_j=0$:  this requires no extra
+computation and has the advantage of maintaining $df =
 \hat p^t$ for $\gamma = 0$.
 
 \subsection{Selection via information criteria}
@@ -641,12 +641,11 @@ l(\bs{\hat\beta}) + k(df)
 where $k$ is the cost on the degrees-of-freedom associated with
  $\bs{\hat\beta}$ and $l$ is the negative log likelihood.  The AIC of
 \cite{akaike_information_1973} uses $k(df) = df$ while the BIC of \cite{schwarz_estimating_1978}
-uses $k(df) = \log(n)df/2$.
-
-As detailed in \cite{flynn_efficiency_2013}, the corrected AICc with $k(df) =
-df\times n/(n-df-1)$ does a better job than the AIC or BIC in choosing the
-optimal model for prediction when $df$ is large.  Alternatively, the BIC is often preferred
-for accurate support recovery or avoiding false discovery; see, e.g.,
+uses $k(df) = \log(n)df/2$. As detailed in \cite{flynn_efficiency_2013}, the
+corrected AICc with $k(df) = df\times n/(n-df-1)$ does a better job than the
+AIC or BIC in choosing the optimal model for prediction when $df$ is large.
+Alternatively, the BIC is often preferred for accurate support recovery or
+avoiding false discovery; see, e.g.,
 \cite{zou_degrees_2007}.
 
 
@@ -697,9 +696,10 @@ of $\hat\beta_j\neq0$.   This relationship switches only when $df^t$
 nears $n$, indicating that the heuristic in (\ref{edf}) might underestimate $df^t$ for clearly over-fit models.
 Figure \ref{simcv} shows CV and AICc error estimates and we see that 
 the two criteria roughly track each other.  Notice that
-as $\gamma$ increases, the CV error increases more quickly after it's minimum;
-this indicates that the consequences of over-fit are worse under faster
-diminishing-bias.
+for larger $\gamma$ the CV error increases more quickly away from
+its minimum; this is predicted by Theorem \ref{thm:sparseapprox} and shows that the consequences of over fit are worse with
+faster diminishing-bias.  Computation times also increase with larger $\gamma$, although a
+single run at $\gamma=10$ still requires less than a second.
 
 
 \begin{figure}[tb]
@@ -749,9 +749,9 @@ $\mr{sd}(\bs{\eta})/\sigma$ & {\sf d} & $\rho$
  & \it  100  & \it  0.5  & 10 & {\bf 6} & 8 & {\bf 6} & 7 & 8 & 9 & 8 & {\bf 6} & \it  0.75 \\
 & & \it  0.9  & 10 & {\bf 6} & 8 & {\bf 6} & 7 & 8 & 9 & 8 & {\bf 6} & \it  0.75 \\[1ex]
 \cline{2-3}\rule{0pt}{3ex}
-& & \it  0  & 11 & {\bf -1} & 5 & 0 & 3 & 7 & 6 & 2 & {\bf -1} & \it  0.67 \\
- & \it  200  & \it  0.5  & 13 & {\bf 0} & 6 & 1 & 3 & 8 & 8 & 4 & {\bf 0} & \it  0.67 \\
-& & \it  0.9  & 13 & {\bf 0} & 6 & 1 & 3 & 9 & 9 & 4 & {\bf 0} & \it  0.67 \\[1ex]
+& & \it  0  & 11 & {\bf -1} & 3 & 0 & 3 & 7 & 6 & 2 & {\bf -1} & \it  0.67 \\
+ & \it  200  & \it  0.5  & 13 & {\bf 0} & 4 & 1 & 3 & 8 & 8 & 4 & {\bf 0} & \it  0.67 \\
+& & \it  0.9  & 13 & {\bf 0} & 4 & 1 & 3 & 9 & 9 & 4 & {\bf 0} & \it  0.67 \\[1ex]
 \cline{2-3}\hline\rule{0pt}{3ex}
 & & \it  0  & 8 & 8 & 7 & 7 & 9 & {\bf 5} & 9 & 10 & {\bf 5} & \it  0.48 \\
  & \it  10  & \it  0.5  & 9 & 9 & 7 & 8 & 9 & {\bf 6} & 9 & 10 & {\bf 6} & \it  0.48 \\
@@ -826,7 +826,8 @@ $\boldsymbol{{\sf d} = 100}$
 $\boldsymbol{{\sf d} = 200}$
 
 ~~~~~~\includegraphics[width=.9\textwidth]{graphs/weights-r09-s1-d200}
-\caption{\label{fig:weights} Average properties of the weighted $L_1$ penalized paths in our simulation, with $\rho=0.9$ and $\mathrm{sd}(\bs{\eta})/\sigma=1$.}
+\caption{\label{fig:weights} Average properties of the weighted $L_1$ penalized paths in our simulation, with $\rho=0.9$ and $\mathrm{sd}(\bs{\eta})/\sigma=1$.
+The {\sf\footnotesize w-min} values are $\omega^{\mr{min}}_{S^c}$, {\sf\footnotesize w-norm} are $\|\bs{\omega}_S\|$, and {\sf\footnotesize L} is the restricted eigenvalue constant; all as defined in Theorem \ref{thm:sparseapprox}.  Note that, by construction, the $\lambda$ grids are the same across all algorithms.}  
 \end{figure}
 
 \vskip .1cm \noindent {\bf Remarks}
@@ -834,57 +835,55 @@ $\boldsymbol{{\sf d} = 200}$
 \vskip .1cm \noindent $\bullet$~~ AICc selection for one of the three GL $\gamma$-specifications is always able to provide performance near to that of the computationally intensive routine of CV-selected MCP (over a grid in penalty size and scale).  The best GL OOS $R^2$ is never more than 4\% worse than MCP overall and never more than 2\% worse for all but the ${\sf d}=200$ (essentially dense regression) specifications; GL also occasionally outperforms MCP. 
 
 \vskip .1cm \noindent $\bullet$~~   A single {\tt gamlr} run requires a fraction of a second; {\tt sparsenet} with 5-fold CV requires 15-20 seconds per run.  
-  Investigation of AICc values finds that minimization of this
-criteria {\it across} GL0, GL1, and GL10 would have consistently chosen the rule that
-does best in Table \ref{tab:simsparse}.  Thus AICc selection on just three GL paths,
-with combined compute time still a fraction of a second,  yields a near
-best predictor in all scenarios.
+  Investigation the simulation runs finds that minimization of AICc {\it across} GL0 and GL1 would have consistently chosen the rule that
+does best in Table \ref{tab:simsparse}.  Thus AICc selection on just two GL paths,
+with combined compute time still a fraction of a second,  yields a near-best predictor in all scenarios.  Moreover, we note that each GL run is completely independent and can be executed in parallel.
 
-\vskip .1cm \noindent $\bullet$~~  AICc and 5-fold CV give roughly the same performance for the GL0 (lasso) and GL1; AICc is often much better than CV for the less stable GL10 paths.  The supplement shows that AICc is a massive improvement over either BIC or the uncorrected AIC;  the
+\vskip .1cm \noindent $\bullet$~~  For GL1, AICc gives roughly similar performance to 5-fold CV.  For the lasso (GL0), CV outperforms AICc in a dense (big {\sf d}) and high signal model, while AICc outperforms CV in low signal settings.  The opposite holds for GL10.   In any case, the supplement shows that AICc is a massive improvement over either BIC or the uncorrected AIC;  the
 latter leads to negative $R^2$ in many configurations. 
 
-\vskip .1cm \noindent $\bullet$~~  Selected GL2 fits had often half the number of nonzero
-coefficients as for the selected lasso fit; GL10 leads to even more sparsity,
-sometimes returning less than 10\% of the number of nonzero coefficients given by
-lasso.  The results suggest that running {\tt gamlr} with small $\gamma$
-(e.g., as in GL2) can provide much additional information compression without
-hurting performance.  Even the very sparse $\gamma=10$ fits do nearly as well
-as best except in the low signal settings, where all but lasso suffer.
-Increasing $\gamma$ also leads to lower false discovery rates with respect to
-the $C_p$ oracle.
+\vskip .1cm \noindent $\bullet$~~  Both CV and AICc selected GL1 fits had 50-75\% the number of nonzero
+coefficients as for the correspondingly selected lasso fit.  GL10 leads to
+even more sparsity, often returning less than 10\% of the number of nonzero
+coefficients given by lasso.  The results suggest that running {\tt gamlr}
+with small but nonzero $\gamma$ (e.g., as in GL1) can provide much additional
+information compression without hurting performance.  The supplement also
+shows that even $\gamma=1$ leads to a large drop in false discovery relative
+the the lasso.   GL10 does nearly as well as best in
+the high-signal settings, while yielding much more sparse models, however the simulations show that we should be cautious about use of such
+rapidly diminishing bias in noisy applications.
 
-\vskip .1cm \noindent $\bullet$~~ As $\gamma$ increases, the CV error increases more quickly after
-it's minimum; this is predicted by Theorem \ref{thm:sparseapprox}, and indicates that the consequences of over-fit are worse under
-faster diminishing-bias. The computation times also increase, although a
-single run at $\gamma=10$ still requires less than a second.
+\vskip .1cm \noindent $\bullet$~~ Marginal AL is usually within a few percent of MCP or the best GL.  However, we find in our simulations that neither CV nor AICc selection with marginal AL yield any more sparsity than the standard lasso -- we usually do not see any information compression gain.  Indeed, with collinear covariates marginal AL tends to yield {\it more} nonzero coefficients than the lasso.   
+
+
+\vskip .2cm
+
+
+ Figure \ref{fig:weights}
+provides a deeper look at how the quantities in Theorem \ref{thm:sparseapprox} behave in practice.
+This picture shows results for various coefficient
+decay rates in a highly collinear ($\rho=.9$) and moderately noisy
+($\mathrm{sd}(\bs{\eta})/\sigma=1$) setting.  Recall that prediction error
+should get closer to that of an $L_0$ oracle if $\|\bs{\omega}_S\|$ -- the
+norm on the weights in the support of the $L_0$ rule -- can be made small
+without $\omega^{\mr{min}}_{S^c}$ -- the smallest weight on the complement of
+this support -- shrinking too much.\footnote{Marginal AL provides an interesting side-case; it maintains higher
+$\omega^{\mr{min}}_{S^c}$ at the expense of a {\it much} higher
+$\|\bs{\omega}_S\|$. }   Comparing  lasso and GL1 lines, we see
+that this is achieved for $\gamma=1$ under faster coefficient decay (more
+effective sparsity; at {\sf d} of 10 or even 50) while at slower decay rates
+$\omega^{\mr{min}}_{S^c}$  drops right after the path begins.   Under the fast
+diminishing bias of GL10,  $\omega^{\mr{min}}_{S^c}$ drops more dramatically
+and earlier than it does for GL1; only in the ${\sf d}=10$ setting does there
+appear to be any opportunity for improved prediction from $\gamma=10$ relative
+to $\gamma=1$.
+
+The far right panels in Figure \ref{fig:weights} show the realized value of $L = \frac{\|\bs{\omega}_S\|}{\sqrt{s}}\left(\omega^{\mr{min}}_{S^c}-\sqrt{2}\sigma/\lambda\right)^{-1}$, the constant governing our restricted eigenvalue $\phi^2(L,S)$ at the $C_p$ optimal model (see Definition \ref{redef}).  A small value of this constant is important for keeping prediction error low (by keeping $\phi^2(L,S)$ big).  Moreover, in the supplement we show that small values of $L$ are essential in controlling the false discovery rate.  In Figure \ref{fig:weights}, we see that $L$ is decreasing steadily for each algorithm until the point where $\omega^{\mr{min}}_{S^c}$ drops; after this point it explodes and, soon after that, becomes undefined when $\omega^{\mr{min}}_{S^c} < \sqrt{2}\sigma/\lambda$.
+
 
 \section{Hockey example}
 \label{sec:nhl}\vskip -.1cm
 
-
-
-\begin{table*}[t]\footnotesize\setstretch{1}
-\makebox[\linewidth]{
-\begin{tabular}{l|lcc|lcc|lcc|}
-\multicolumn{1}{c}{} & \multicolumn{3}{l}{\normalsize \it ~~~$\gamma=0$} & \multicolumn{3}{l}{\normalsize \it ~~~$\gamma=1$} &  \multicolumn{3}{l}{\normalsize \it ~~~$\gamma=10$}\\
-%\multicolumn{1}{c}{} & \multicolumn{3}{r|}{} & \multicolumn{3}{r|}{} &  \multicolumn{3}{r|}{}\\
-\multicolumn{1}{c}{}  &     &    PPM & PM &    &   PPM & PM        &   & PPM & PM \\
-\cline{3-4}\cline{6-7}\cline{9-10}\rule{0pt}{3ex}
-1 & Ondrej Palat & 33.8 & 38 & Sidney Crosby & 29.2 & 52 & Sidney Crosby & 32.6 & 52 \\
-2 & Sidney Crosby & 31.2 & 52 & Ondrej Palat & 29 & 38 & Jonathan Toews & 22.8 & 35 \\
-3 & Henrik Lundqvist & 25.8 & 9 & Jonathan Toews & 21.4 & 35 & Joe Thornton & 22 & 34 \\
-4 & Jonathan Toews & 24 & 35 & Joe Thornton & 21 & 34 & Anze Kopitar & 22 & 39 \\
-5 & Andrei Markov & 23.1 & 34 & Andrei Markov & 20.9 & 34 & Andrei Markov & 20.7 & 34 \\
-6 & Joe Thornton & 21.4 & 34 & Henrik Lundqvist & 19.8 & 9 & Alex Ovechkin & 18.1 & 16 \\
-7 & Anze Kopitar & 20.6 & 39 & Anze Kopitar & 19.5 & 39 & Pavel Datsyuk & 16.6 & 13 \\
-8 & Tyler Toffoli & 18.9 & 31 & Pavel Datsyuk & 16.1 & 13 & Ryan Getzlaf & 15.8 & 16 \\
-9 & Pavel Datsyuk & 17.7 & 13 & Logan Couture & 15.9 & 29 & Henrik Sedin & 15.2 & 7 \\
-10 & Ryan Nugent-hopkins & 17.4 & 18 & Alex Ovechkin & 15.8 & 16 & Marian Hossa & 14.9 & 21 \\[-1ex]
-\multicolumn{1}{c}{} & \multicolumn{3}{r|}{} & \multicolumn{3}{r|}{} &  \multicolumn{3}{r|}{}\\
- \multicolumn{1}{c}{} & \multicolumn{3}{r|}{\it 305 nonzero effects} & \multicolumn{3}{r|}{\it 204 nonzero effects} &  \multicolumn{3}{r|}{\it 64 nonzero effects}
-\end{tabular}}
-\caption{\label{nhleffects} Top 10 AICc selected player `partial plus-minus' (PPM) values for the 2013-2014 season.}
-\end{table*}
 
 We close with an example analysis: measuring the
 performance of hockey players.  It extends  analysis in
@@ -913,20 +912,64 @@ average for a given season.
 We estimate GL paths of $\bs{\hat\beta}$ from (\ref{hockeymod}) with
 $\bs{\alpha}$ and $\bs{\phi}$ left {\it unpenalized}. Coefficient costs are
 {\it not} scaled by covariate standard deviation, since this would have
-favored players with little ice time.   The AICc surface
-is shown in Figure \ref{nhlic}; it selects denser models with low $\lambda$ but
-not-to-big $\gamma$.  See the supplement for additional study, including comparison to BIC and CV.
+favored players with little ice time.   Joint $[\gamma,\lambda]$ surfaces for AICc and BIC are in Figure \ref{nhlic}.
+AICc favors denser models with low $\lambda$ but not-to-big $\gamma$,
+while the BIC  prefers very sparse but relatively unbiased  models with large
+$\lambda$ and small $\gamma$.  Both criteria are strongly adverse to any model
+above $\gamma=100$, which is also where timings explode (supplement).  Ten-fold CV results are shown in Figure
+\ref{nhlcv} for $\gamma$ of 0, 1, and 10.  The OOS error minima are around the
+same in each case -- average deviance slightly above 1.16 -- but errors
+increase much faster away from optimality with larger $\gamma$.  AICc selection is always between the CV error-minimizing selection and that of the common {\it 1SE} rule (largest $\lambda$ with mean OOS error no more than
+1 standard error away from the minimum). 
 
 
-\begin{figure}[h]
-\begin{center}
-\includegraphics[width=0.35\textwidth]{graphs/nhl_aicc}
-\vskip -.4cm
-\caption{ \label{nhlic} Hockey AICc, rising from white to black.
+
+\begin{figure}[tb]
+\begin{center}\vskip -.5cm
+~~~~~~~~\includegraphics[width=5.5in]{nhl_ic}
+\caption{ \label{nhlic} Hockey example AICc and BIC surfaces, rising from white to black on log scale.
 }
 \end{center}
-\vskip -.25cm
+% \end{figure}
+% \begin{figure}[htb]
+\includegraphics[width=6.3in]{nhl_cv}
+\caption{\label{nhlcv} Hockey example 10-fold CV: mean OOS deviance $\pm 1$se, with minimum-error and 1SE selection rules marked with black dotted lines, and solid orange line showing AICc selection. }
 \end{figure}
+
+
+\begin{table}[tb]\footnotesize\setstretch{1}
+\makebox[\linewidth]{
+\begin{tabular}{l|lcc|lcc|lcc|}
+\multicolumn{1}{c}{} & \multicolumn{3}{l}{\normalsize \it ~~~lasso} & \multicolumn{3}{l}{\normalsize \it ~~~$\gamma=1$} &  \multicolumn{3}{l}{\normalsize \it ~~~$\gamma=10$}\\
+%\multicolumn{1}{c}{} & \multicolumn{3}{r|}{} & \multicolumn{3}{r|}{} &  \multicolumn{3}{r|}{}\\
+\multicolumn{1}{c}{}  &     &    PPM & PM &    &   PPM & PM        &   & PPM & PM \\
+\cline{3-4}\cline{6-7}\cline{9-10}
+1 & Ondrej Palat & 33.8 & 38 & Sidney Crosby & 29.2 & 52 & Sidney Crosby & 32.6 & 52 \\
+2 & Sidney Crosby & 31.2 & 52 & Ondrej Palat & 29 & 38 & Jonathan Toews & 22.8 & 35 \\
+3 & Henrik Lundqvist & 25.8 & 9 & Jonathan Toews & 21.4 & 35 & Joe Thornton & 22 & 34 \\
+4 & Jonathan Toews & 24 & 35 & Joe Thornton & 21 & 34 & Anze Kopitar & 22 & 39 \\
+5 & Andrei Markov & 23.1 & 34 & Andrei Markov & 20.9 & 34 & Andrei Markov & 20.7 & 34 \\
+6 & Joe Thornton & 21.4 & 34 & Henrik Lundqvist & 19.8 & 9 & Alex Ovechkin & 18.1 & 16 \\
+7 & Anze Kopitar & 20.6 & 39 & Anze Kopitar & 19.5 & 39 & Pavel Datsyuk & 16.6 & 13 \\
+8 & Tyler Toffoli & 18.9 & 31 & Pavel Datsyuk & 16.1 & 13 & Ryan Getzlaf & 15.8 & 16 \\
+9 & Pavel Datsyuk & 17.7 & 13 & Logan Couture & 15.9 & 29 & Henrik Sedin & 15.2 & 7 \\
+10 & Ryan Nugent-hopkins & 17.4 & 18 & Alex Ovechkin & 15.8 & 16 & Marian Hossa & 14.9 & 21 \\
+11 & Gabriel Landeskog & 16.6 & 36 & Marian Hossa & 14.4 & 21 & Alexander Semin & 14.7 & -1 \\
+12 & Logan Couture & 16.5 & 29 & Alexander Semin & 14.2 & -1 & Jaromir Jagr & 14.5 & 28 \\
+13 & Alex Ovechkin & 15.8 & 16 & Matt Moulson & 13.9 & 22 & Logan Couture & 14.2 & 29 \\
+14 & Marian Hossa & 15.4 & 21 & Tyler Toffoli & 13.3 & 31 & Matt Moulson & 13.7 & 22 \\
+15 & Alexander Semin & 14.8 & -1 & David Perron & 12.7 & 2 & Mikko Koivu & 13 & 12 \\
+16 & Zach Parise & 14.7 & 21 & Mikko Koivu & 12.5 & 12 & Joe Pavelski & 12.6 & 33 \\
+17 & Frans Nielsen & 13.5 & 8 & Frans Nielsen & 12.3 & 8 & Steven Stamkos & 12.6 & 24 \\
+18 & Mikko Koivu & 13.4 & 12 & Ryan Getzlaf & 12.1 & 16 & Frans Nielsen & 12.5 & 8 \\
+19 & Matt Moulson & 13.4 & 22 & Ryan Nugent-hopkins & 11.9 & 18 & Marian Gaborik & 12.3 & 29 \\
+20 & David Perron & 13.1 & 2 & Jaromir Jagr & 11.8 & 28 & Zach Parise & 12.2 & 21 \\
+\multicolumn{1}{c}{} & \multicolumn{3}{r|}{} & \multicolumn{3}{r|}{} &  \multicolumn{3}{r|}{}\\
+ \multicolumn{1}{c}{} & \multicolumn{3}{r|}{\it 305 nonzero effects} & \multicolumn{3}{r|}{\it 204 nonzero effects} &  \multicolumn{3}{r|}{\it 64 nonzero effects}
+\end{tabular}}
+\caption{\label{nhleffects} Top 20 AICc selected player `partial plus-minus' (PPM) values for the 2013-2014 season, under $\gamma = 0,1,10$.  The number of nonzero player effects for each $\gamma$ are noted along the bottom.}
+\end{table}
+
 
 The original goal with this dataset was to build a better version of
 hockey's `plus-minus' (PM) statistic: number of goals {\it for} minus {\it
@@ -938,11 +981,11 @@ plus/minus' (PPM) is
  \mr{ppm}_j = N_j(p_j - (1-p_j)) = N_j(2p_j-1)
  \end{equation}  where
 $N_j$ is the  number of goals for which he was on-ice.  This measures 
-quality and quantity of contribution and lives on the same scale as PM.
+quality and quantity of contribution and lives on the same scale as PM.  See \cite{gramacy_hockey_2015} for details.
 
 Table \ref{nhleffects} contains the estimated PPM values for the 2013-2014
 season under various $\gamma$ levels, using AICc selection.  We see that, even
-if changing concavity ($\gamma$) has little effect on minimum CV errors (see supplement),
+if changing concavity ($\gamma$) has little effect on minimum CV errors (Figure \ref{nhlcv}),
 larger $\gamma$  yield more sparse models and different conclusions about
 player contribution. At the $\gamma=0$ lasso, there are 305 nonzero player
 effects (individuals measurably different from their team's average ability)
@@ -961,7 +1004,7 @@ amongst the 64 nonzero player effects.
 Concave penalized estimation for Big Data, where exact solvers are too
  expensive, reduces largely to weighted-$L_1$ penalization.
 Path adaptation is an intuitively reasonable source of weights, and we are able to show that POSE -- particularly {\tt gamlr} with AICc selection -- provides high quality diminishing-bias sparse regression
-no more cost than a  standard lasso.  We know of no other software that meets this standard.
+{\it no more cost} than a  single lasso path.  We know of no other software that meets this standard.
 
 
 

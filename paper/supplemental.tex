@@ -510,26 +510,6 @@ n\ds{E}_{\bm{y}|g}\left[\frac{1}{n\sigma^2_{\bm{y}}/\sigma^2}\right]df =
 Multiplying by $-2$ and subtracting from $-2\log f(\bm{y}; \bs{\eta}_{\bm{y}},\sigma_{\bm{y}})$ yields the AICc.
 
 
-\section{Hockey players}
-
-Ten-fold CV results are shown in Figure
-\ref{nhlcv} for $\gamma$ of 0, 1, and 10.  The OOS error minima are around the
-same in each case -- average deviance slightly above 1.16 -- but errors
-increase much faster away from optimality with larger $\gamma$.   We also see
-that AICc selection is always between the CV.min and CV.1se selctions:  at
-$\gamma=0$ AICc matches the CV.1se choice, while at $\gamma=10$ it has moved
-right to the CV.1se  selection.  Our heuristic might be
-over-estimating $df$ for large-$\gamma$ models (especially under this very
-collinear design), but one would also suspect that CV estimates of minimum
-deviance are biased downward more dramatically for larger $\gamma$ than for
-low-variance small-$\gamma$ estimators.
-
-
-\begin{figure}[h!]
-\includegraphics[width=\textwidth]{graphs/nhl_cv}
-\caption{\label{nhlcv} Hockey example 10-fold CV: mean OOS deviance $\pm 1$se, with minimum-error and 1SE selection rules marked with black dotted lines, and solid orange line showing AICc selection. }
-\end{figure}
-
 
 \section{Full simulation results}
 
