@@ -829,12 +829,19 @@ $\boldsymbol{{\sf d} = 200}$
 \caption{\label{fig:weights} Average properties of the weighted $L_1$ penalized paths in our simulation, with $\rho=0.9$ and $\mathrm{sd}(\bs{\eta})/\sigma=1$.}
 \end{figure}
 
-\noindent {\bf Remarks}
+\vskip .1cm \noindent {\bf Remarks}
 
-\vskip .1cm \noindent $\bullet$~~ AICc selection for one of the three GL $\gamma$-specifications is always able to provide performance near to that of the computationally intensive routine of CV-selected MCP (over a grid in penalty size and scale).  The best GL OOS $R^2$ is never more than 4\% worse than MCP overall and never more than 2\% worse for all but the ${\sf d}=200$ (essentially dense regression) specifications; GL also occasionally outperforms MCP.  A single {\tt gamlr} run requires a fraction of a second; {\tt sparsenet} with 5-fold CV requires 15-20 seconds per run.  
+\vskip .1cm \noindent $\bullet$~~ AICc selection for one of the three GL $\gamma$-specifications is always able to provide performance near to that of the computationally intensive routine of CV-selected MCP (over a grid in penalty size and scale).  The best GL OOS $R^2$ is never more than 4\% worse than MCP overall and never more than 2\% worse for all but the ${\sf d}=200$ (essentially dense regression) specifications; GL also occasionally outperforms MCP. 
 
-\vskip .1cm \noindent $\bullet$~~  AICc and 5-fold CV give roughly the same performance for the GL0 (lasso) and GL1; AICc is often much better than CV for the less stable GL10 paths.  For prediction, AICc is a massive improvement over either BIC or the uncorrected AIC;  the
-latter leads to negative $R^2$ in many configurations.
+\vskip .1cm \noindent $\bullet$~~   A single {\tt gamlr} run requires a fraction of a second; {\tt sparsenet} with 5-fold CV requires 15-20 seconds per run.  
+  Investigation of AICc values finds that minimization of this
+criteria {\it across} GL0, GL1, and GL10 would have consistently chosen the rule that
+does best in Table \ref{tab:simsparse}.  Thus AICc selection on just three GL paths,
+with combined compute time still a fraction of a second,  yields a near
+best predictor in all scenarios.
+
+\vskip .1cm \noindent $\bullet$~~  AICc and 5-fold CV give roughly the same performance for the GL0 (lasso) and GL1; AICc is often much better than CV for the less stable GL10 paths.  The supplement shows that AICc is a massive improvement over either BIC or the uncorrected AIC;  the
+latter leads to negative $R^2$ in many configurations. 
 
 \vskip .1cm \noindent $\bullet$~~  Selected GL2 fits had often half the number of nonzero
 coefficients as for the selected lasso fit; GL10 leads to even more sparsity,
@@ -850,12 +857,6 @@ the $C_p$ oracle.
 it's minimum; this is predicted by Theorem \ref{thm:sparseapprox}, and indicates that the consequences of over-fit are worse under
 faster diminishing-bias. The computation times also increase, although a
 single run at $\gamma=10$ still requires less than a second.
-
-\vskip .1cm \noindent $\bullet$~~  Investigation of AICc values finds that minimization of this
-criteria {\it across} GL0 and GL2 would have consistently chosen the rule that
-does best in Table \ref{tab:simsparse}.  Thus AICc selection on just two GL paths,
-with combined compute time still less than a second,  yields the best or near
-best predictor in all scenarios.
 
 \section{Hockey example}
 \label{sec:nhl}\vskip -.1cm
