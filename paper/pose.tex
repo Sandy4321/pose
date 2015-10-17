@@ -193,15 +193,16 @@ an extensive  simulation experiment in Section \ref{sec:sim}, and in Section \re
 \label{sec:algos}
 
 Denote $n$ response observations as $\bm{y} = [y_1,\ldots,y_n]'$ and the associated matrix of $p$ covariates as $\bm{X} =
-[\bm{x}_1 \cdots \bm{x}_n]'$, with rows $\bm{x}_i = [x_{i1},\ldots,x_{ip}]'$ and columns $\bs{x}_j = [x_{1j},\ldots,x_{nj}]'$.\footnote{Since the size of penalized $\beta_j$ depends upon the units of $x_{ij}$,  it is common to scale
+[\bm{x}_1 \cdots \bm{x}_n]'$, with rows $\bm{x}_i = [x_{i1},\ldots,x_{ip}]'$ and columns $\bs{x}_j = [x_{1j},\ldots,x_{nj}]'$. Since the size of penalized $\beta_j$ depends upon the units of $x_{ij}$,  it is common to scale
 the coefficient by $\mr{sd}(\bs{x}_j)$, the standard deviation of the $j^{th}$ column
 of $\bm{X}$; this is achieved if $x_{ij}$ is replaced by $x_{ij}/\mr{sd}(\bs{x}_j)$
-throughout.} Write $\eta_{i} =
-\alpha+\bm{x}_i'\bs{\beta}$ as the linear equation for observation $i$, and
-denote with $l(\alpha, \bs{\beta}) = l(\bs{\eta})$  the negative log likelihood.  For example, in Gaussian (linear)
+throughout. Write $\eta_{i} =
+\alpha+\bm{x}_i'\bs{\beta}$ as the linear model  for observation $i$.  Denote with $l(\alpha, \bs{\beta})$, or shortened to $l(\bs{\eta})$ for convenience,  the negative log likelihood.  For example, in Gaussian (linear)
 regression, $l(\bs{\eta})$ is the sum-of-squares $0.5\sum_i \left(y_i - \eta_i\right)^2$ and in binomial (logistic)
 regression,  $l(\bs{\eta}) = -\sum_i \left[\eta_iy_i -
-\log(1+e^{\eta_i})\right]$ for $y_i \in [0,1]$. A penalized estimator is  the
+\log(1+e^{\eta_i})\right]$ for $y_i \in [0,1]$. 
+
+A penalized estimator is  the
 solution to
 \begin{equation} \label{pendev}
 \argmin_{\alpha,\beta_j\in\ds{R}}~~\left\{~l(\alpha,{\bs{\beta}}) + n\lambda \sum_{j=1}^p c(|\beta_j|)~\right\},
@@ -328,11 +329,8 @@ lasso (or gamma lasso).  The most efficient exact solver that we've found is the
 \texttt{sparsenet} of \citet{mazumder_sparsenet_2011}, also implemented in R,
 which first fits a lasso path and, for
 each segment on this path, adapts coefficient estimates along a second path of
-increasing penalty concavity. However, \texttt{sparsenet}  relies upon solution
-over a large set of specifications\footnote{POSE shares with
-\texttt{sparsenet} the idea of moving along a path of closely related
-specifications, but does not require a grid in both  cost size and concavity.
-Intuitively,  POSE runs  a path diagonally through this grid.}  
+increasing penalty concavity. However, \texttt{sparsenet}  relies upon sequential solution
+over a large set of specifications 
  and its compute cost remains much higher than for the [gamma] lasso.
 
 
@@ -385,7 +383,7 @@ Our oracle benchmark is estimation under $L_0$ costs, $c(\beta_j) =
 \ds{1}_{\{\beta_j\neq0\}}$, for which global solution is impractical.   We are
 interested in weighted-$L_1$ penalization as a way to obtain fits that are as
 sparse as possible without compromising predictive ability, regardless of the
-underlying data generating process (or `true' sparsity).
+underlying data generating process (or `true' sparsity).  Throughout, we consider the design $\bm{X}$ as {\it fixed}.
 
  For  $S \subset \{1\ldots p\}$ with cardinality $|S|=s$ and complement $S^c =
 \{1\ldots p\}\setminus S$, denote vectors restricted to covariates in $S$ as
@@ -407,12 +405,9 @@ $\mr{cov}(\bs{x}_j,\bm{e}^S) = \bs{x}_j'(\bm{y}-\bm{X}\bs{\beta}^S)/n$ are sampl
 \]
 \end{lemma}
 
-In addition, we need to define {\it restricted eigenvalues} (RE) on the gram matrix $\bm{X}'\bm{X}/n$.\footnote{
+In addition, we need to define {\it restricted eigenvalues} (RE) on the gram matrix $\bm{X}'\bm{X}/n$.
   This  RE  matches the `adaptive restricted eigenvalues' of \cite{buhlmann_statistics_2011}.  
-Similar quantities are common in the theory of regularized estimators; see also
-\cite{raskutti_restricted_2010} and  \cite{bickel_simultaneous_2009}.}
-
-  
+Similar quantities are common in the theory of regularized estimators; \cite{raskutti_restricted_2010} show that similar conditions hold given  $\omega^{\mr{min}}_{S_c}=1$ with high probability for $\bm{X}$ drawn from a broad class of Gaussian distributions.  \cite{bickel_simultaneous_2009} provide a nice overview of sufficient conditions, and \cite{buhlmann_statistics_2011} have extensive discussion and examples.  
 \begin{definition}\label{redef}
 The restricted eigenvalue is
 $
@@ -620,13 +615,13 @@ leading to the GL degrees of freedom
 \label{edf} df^t = \sum_j \mr{Ga}(|g_{j}|;~n\lambda^t/(\gamma\phi),
 1/\gamma), \end{equation} where $\mr{Ga}(~\cdot~;~\mr{shape}, 1/\mr{scale})$
 is the Gamma cumulative distribution function and $g_j$ is an estimate of  the
-$j^{th}$ coefficient gradient evaluated at $\hat\beta_j=0$.\footnote{Note that
+$j^{th}$ coefficient gradient evaluated at $\hat\beta_j=0$. Note that
 the number of unpenalized variables (e.g., 1 for $\alpha$) should also be
-added to the total  estimation $df$. } For  orthogonal covariates,  $g_j$ is
+added to the total  estimation $df$.  For  orthogonal covariates,  $g_j$ is
 just the marginal gradient at zero. In the non-orthogonal case, where $g_{j} =
 g_j(0)$ becomes a function of all of the elements of $\bs{\hat\beta}$, we plug
 in the most recent $g_j$ at which $\hat\beta^t_j=0$:  this requires no extra
-computation and has the advantage of maintaining $df =
+computation and has the advantage of maintaining $df^t =
 \hat p^t$ for $\gamma = 0$.
 
 \subsection{Selection via information criteria}
@@ -693,7 +688,7 @@ estimates move quickly to MLE for the nonzero-coefficients. Degrees of
 freedom, calculated as in (\ref{edf}), are along the top of each plot; at all but the smallest $\lambda$ values, equal
 $\lambda$ have higher $df^t$ for higher $\gamma$ since there is less shrinkage
 of $\hat\beta_j\neq0$.   This relationship switches only when $df^t$
-nears $n$, indicating that the heuristic in (\ref{edf}) might underestimate $df^t$ for clearly over-fit models.
+nears $n$, indicating that the heuristic in (\ref{edf}) might underestimate $df$ for clearly over-fit models.
 Figure \ref{simcv} shows CV and AICc error estimates and we see that 
 the two criteria roughly track each other.  Notice that
 for larger $\gamma$ the CV error increases more quickly away from
@@ -799,14 +794,15 @@ measured through out-of-sample (OOS) $R^2 = 1 -
 \mr{var}(\bm{\tilde y} - \bm{\hat y})/\mr{var}(\bm{\tilde y})$, for {\tt
 gamlr} runs of GL with $\gamma$ of 0 (lasso), 1, and 10. For penalty
 selection, we use AICc with the GL $df$ from Section \ref{sec:select} as well as 5-fold CV (with $\lambda$ selected to {\it minimize} CV error estimates). 
-The OOS $R^2$ results are reported in terms of percentage worse than the oracle $C_p$ rule from (\ref{l0oracle}).  As a comparator of similarly low computational cost (again, little more expensive than a standard lasso) we also consider results for the {\it marginal} adaptive lasso with $L_1$ penalty weights\footnote{The AL weights are then scaled so that $\mathrm{min}(\omega_j)=1$.  This implies that each AL $\lambda$ path is the same as for any GL run on the same data (since this is the weight on the first coefficient to enter the regression, which dictates $\lambda^1$).} $\omega_j \propto |\mr{cor}(\bm{x}_j,\bm{y})|^{-1}$.  AICc selection for marginal AL just sets $df$ to the number of nonzero estimated parameters.   As a sort of `expensive' gold standard, we also compare to an exact solver for concave MCP penalized regression. As described in Section \ref{sec:weighted}, {\tt sparsenet} applies 5-fold CV to optimize out-of-sample error over a
+The OOS $R^2$ results are reported in terms of percentage worse than the oracle $C_p$ rule from (\ref{l0oracle}).  As a comparator of similarly low computational cost, we  consider results for the {\it marginal} adaptive lasso with $L_1$ penalty weights $\omega_j \propto |\mr{cor}(\bm{x}_j,\bm{y})|^{-1}$.   The AL weights are scaled so that $\mathrm{min}(\omega_j)=1$, such that each AL $\lambda$ path is the same as for any GL run on the same data,  AICc selection for marginal AL  sets $df$ to the number of nonzero estimated parameters.   As an `expensive' gold standard, we also compare to an exact solver for concave MCP penalized regression. As described in Section \ref{sec:weighted}, {\tt sparsenet} applies 5-fold CV to optimize out-of-sample error over a
 dense grid of potential penalty sizes ($\lambda$) and concavities (analogous
-to our $\gamma$) for the MCP penalty.\footnote{
+to our $\gamma$) for the MCP penalty.
+
 Note that Table \ref{tab:simsparse} represents only a small portion of our
 simulation study.  The supplemental material includes results for hundreds of
 additional data generating processes and model configurations: for an alternative {\it dense} $\bm{x}$ model, other CV selection rules, and uncorrected AIC and BIC.  Moreover, the supplement includes results on sensitivity and false
 discovery rates with respect to the support selected by the oracle $C_p$.
-}
+
 
 
 
@@ -836,11 +832,11 @@ The {\sf\footnotesize w-min} values are $\omega^{\mr{min}}_{S^c}$, {\sf\footnote
 
 \vskip .1cm \noindent $\bullet$~~   A single {\tt gamlr} run requires a fraction of a second; {\tt sparsenet} with 5-fold CV requires 15-20 seconds per run.  
   Investigation the simulation runs finds that minimization of AICc {\it across} GL0 and GL1 would have consistently chosen the rule that
-does best in Table \ref{tab:simsparse}.  Thus AICc selection on just two GL paths,
-with combined compute time still a fraction of a second,  yields a near-best predictor in all scenarios.  Moreover, we note that each GL run is completely independent and can be executed in parallel.
+does best in Table \ref{tab:simsparse}.  Thus AICc selection on just two GL paths (potentially in parallel),
+with combined compute time still a fraction of a second,  yields a near-best predictor in all scenarios. 
 
-\vskip .1cm \noindent $\bullet$~~  For GL1, AICc gives roughly similar performance to 5-fold CV.  For the lasso (GL0), CV outperforms AICc in a dense (big {\sf d}) and high signal model, while AICc outperforms CV in low signal settings.  The opposite holds for GL10.   In any case, the supplement shows that AICc is a massive improvement over either BIC or the uncorrected AIC;  the
-latter leads to negative $R^2$ in many configurations. 
+\vskip .1cm \noindent $\bullet$~~  For GL1, AICc gives roughly similar performance to 5-fold CV.  For the lasso (GL0), CV outperforms AICc in a dense (big {\sf d}) and high signal model, while AICc outperforms CV in low signal settings.  The opposite holds for GL10.   In any case, the supplement shows that AICc is a massive improvement over either BIC or  AIC;  the
+latter sometimes yields negative $R^2$. 
 
 \vskip .1cm \noindent $\bullet$~~  Both CV and AICc selected GL1 fits had 50-75\% the number of nonzero
 coefficients as for the correspondingly selected lasso fit.  GL10 leads to
@@ -867,16 +863,16 @@ decay rates in a highly collinear ($\rho=.9$) and moderately noisy
 should get closer to that of an $L_0$ oracle if $\|\bs{\omega}_S\|$ -- the
 norm on the weights in the support of the $L_0$ rule -- can be made small
 without $\omega^{\mr{min}}_{S^c}$ -- the smallest weight on the complement of
-this support -- shrinking too much.\footnote{Marginal AL provides an interesting side-case; it maintains higher
-$\omega^{\mr{min}}_{S^c}$ at the expense of a {\it much} higher
-$\|\bs{\omega}_S\|$. }   Comparing  lasso and GL1 lines, we see
+this support -- shrinking too much.    Comparing  lasso and GL1, we see
 that this is achieved for $\gamma=1$ under faster coefficient decay (more
 effective sparsity; at {\sf d} of 10 or even 50) while at slower decay rates
 $\omega^{\mr{min}}_{S^c}$  drops right after the path begins.   Under the fast
 diminishing bias of GL10,  $\omega^{\mr{min}}_{S^c}$ drops more dramatically
 and earlier than it does for GL1; only in the ${\sf d}=10$ setting does there
 appear to be any opportunity for improved prediction from $\gamma=10$ relative
-to $\gamma=1$.
+to $\gamma=1$.  Marginal AL provides an interesting side-case; it maintains higher
+$\omega^{\mr{min}}_{S^c}$ at the expense of a {\it much} higher
+$\|\bs{\omega}_S\|$. 
 
 The far right panels in Figure \ref{fig:weights} show the realized value of $L = \frac{\|\bs{\omega}_S\|}{\sqrt{s}}\left(\omega^{\mr{min}}_{S^c}-\sqrt{2}\sigma/\lambda\right)^{-1}$, the constant governing our restricted eigenvalue $\phi^2(L,S)$ at the $C_p$ optimal model (see Definition \ref{redef}).  A small value of this constant is important for keeping prediction error low (by keeping $\phi^2(L,S)$ big).  Moreover, in the supplement we show that small values of $L$ are essential in controlling the false discovery rate.  In Figure \ref{fig:weights}, we see that $L$ is decreasing steadily for each algorithm until the point where $\omega^{\mr{min}}_{S^c}$ drops; after this point it explodes and, soon after that, becomes undefined when $\omega^{\mr{min}}_{S^c} < \sqrt{2}\sigma/\lambda$.
 
