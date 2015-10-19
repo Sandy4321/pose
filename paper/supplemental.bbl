@@ -1,0 +1,152 @@
+\begin{thebibliography}{}
+
+\bibitem[\protect\citeauthoryear{Armagan, Dunson, and Lee}{Armagan
+  et~al.}{2013}]{armagan_generalized_2013}
+Armagan, A., D.~B. Dunson, and J.~Lee (2013).
+\newblock Generalized double pareto shrinkage.
+\newblock {\em Statistica Sinica\/}~{\em 23}, 119.
+
+\bibitem[\protect\citeauthoryear{Buhlmann and van~de Geer}{Buhlmann and van~de
+  Geer}{2011}]{buhlmann_statistics_2011}
+Buhlmann, P. and S.~van~de Geer (2011).
+\newblock {\em Statistics for High-Dimensional Data}.
+\newblock Springer.
+
+\bibitem[\protect\citeauthoryear{Efron, Hastie, Johnstone, and
+  Tibshirani}{Efron et~al.}{2004}]{efron_least_2004}
+Efron, B., T.~Hastie, I.~Johnstone, and R.~Tibshirani (2004).
+\newblock Least angle regression.
+\newblock {\em Annals of Statistics\/}~{\em 32}, 407--499.
+
+\bibitem[\protect\citeauthoryear{Fan and Li}{Fan and
+  Li}{2001}]{fan_variable_2001}
+Fan, J. and R.~Li (2001).
+\newblock Variable selection via nonconcave penalized likelihood and its oracle
+  properties.
+\newblock {\em Journal of the American Statistical Association\/}~{\em 96},
+  1348--1360.
+
+\bibitem[\protect\citeauthoryear{Fan, Xue, and Zou}{Fan
+  et~al.}{2014}]{fan_strong_2014}
+Fan, J., L.~Xue, and H.~Zou (2014).
+\newblock Strong oracle optimality of folded concave penalized estimation.
+\newblock {\em The Annals of Statistics\/}~{\em 42\/}(3), 819--849.
+
+\bibitem[\protect\citeauthoryear{Friedman, Hastie, Hofling, and
+  Tibshirani}{Friedman et~al.}{2007}]{friedman_pathwise_2007}
+Friedman, J., T.~Hastie, H.~Hofling, and R.~Tibshirani (2007).
+\newblock Pathwise coordinate optimization.
+\newblock {\em The Annals of Applied Statistics\/}~{\em 1}, 302--332.
+
+\bibitem[\protect\citeauthoryear{Friedman, Hastie, and Tibshirani}{Friedman
+  et~al.}{2010}]{friedman_regularization_2010}
+Friedman, J., T.~Hastie, and R.~Tibshirani (2010).
+\newblock Regularization paths for generalized linear models via coordinate
+  descent.
+\newblock {\em Journal of Statistical Software\/}~{\em 33}, 1--22.
+
+\bibitem[\protect\citeauthoryear{Goldberger}{Goldberger}{1961}]{goldberger_stepwise_1961}
+Goldberger, A.~S. (1961).
+\newblock Stepwise least squares: Residual analysis and specification error.
+\newblock {\em Journal of the American Statistical Association\/}~{\em
+  56\/}(296), 998.
+
+\bibitem[\protect\citeauthoryear{Green}{Green}{1984}]{green_iteratively_1984}
+Green, P.~J. (1984).
+\newblock Iteratively reweighted least squares for maximum likelihood
+  estimation, and some robust and resistant alternatives.
+\newblock {\em Journal of the Royal Statistical Society, Series B\/}~{\em 46},
+  149--192.
+
+\bibitem[\protect\citeauthoryear{Kass and Raftery}{Kass and
+  Raftery}{1995}]{kass_bayes_1995}
+Kass, R.~E. and A.~E. Raftery (1995).
+\newblock Bayes factors.
+\newblock {\em Journal of the American Statistical Association\/}~{\em 90},
+  773--795.
+
+\bibitem[\protect\citeauthoryear{Lange}{Lange}{2010}]{lange_numerical_2010}
+Lange, K. (2010).
+\newblock {\em Numerical Analysis for Statisticians\/} (2nd ed.).
+\newblock Springer.
+
+\bibitem[\protect\citeauthoryear{Lee, Sun, and Saunders}{Lee
+  et~al.}{2014}]{lee_proximal_2014}
+Lee, J., Y.~Sun, and M.~Saunders (2014).
+\newblock Proximal newton-type methods for minimizing convex objective
+  functions in composite form.
+\newblock {\em {SIAM} Journal on Optimization\/}~{\em 24}, 1420--1443.
+
+\bibitem[\protect\citeauthoryear{Luenberger and Ye}{Luenberger and
+  Ye}{2008}]{luenberger_linear_2008}
+Luenberger, D.~G. and Y.~Ye (2008).
+\newblock {\em Linear and Nonlinear Programming\/} (3rd ed.).
+\newblock Springer.
+
+\bibitem[\protect\citeauthoryear{Mallows}{Mallows}{1973}]{mallows_comments_1973}
+Mallows, C.~L. (1973).
+\newblock Some comments on {CP}.
+\newblock {\em Technometrics\/}~{\em 15}, 661--675.
+
+\bibitem[\protect\citeauthoryear{Schwarz}{Schwarz}{1978}]{schwarz_estimating_1978}
+Schwarz, G. (1978).
+\newblock Estimating the dimension of a model.
+\newblock {\em The Annals of Statistics\/}~{\em 6}, 461--464.
+
+\bibitem[\protect\citeauthoryear{Tseng}{Tseng}{2001}]{tseng_convergence_2001}
+Tseng, P. (2001).
+\newblock Convergence of a block coordinate descent method for
+  nondifferentiable minimization.
+\newblock {\em Journal of Optimization Theory and Applications\/}~{\em 109},
+  475--494.
+
+\bibitem[\protect\citeauthoryear{Wainwright}{Wainwright}{2006}]{wainwright_sharp_2006}
+Wainwright, M.~J. (2006).
+\newblock Sharp thresholds for high-dimensional and noisy recovery of sparsity.
+\newblock {\em UC Berkeley Technical Report\/}.
+
+\bibitem[\protect\citeauthoryear{Wainwright}{Wainwright}{2009}]{wainwright_sharp_2009}
+Wainwright, M.~J. (2009).
+\newblock Sharp thresholds for high-dimensional and noisy sparsity recovery
+  using {L1}-constrained quadratic programming (lasso).
+\newblock {\em {IEEE} Transactions on Information Theory\/}~{\em 55\/}(5),
+  2183--2202.
+
+\bibitem[\protect\citeauthoryear{Wu and Lange}{Wu and
+  Lange}{2008}]{wu_coordinate_2008}
+Wu, T.~T. and K.~Lange (2008).
+\newblock Coordinate descent algorithms for lasso penalized regression.
+\newblock {\em The Annals of Applied Statistics\/}~{\em 2}, 1--21.
+
+\bibitem[\protect\citeauthoryear{Zhou}{Zhou}{2009}]{zhou_thresholding_2009}
+Zhou, S. (2009).
+\newblock Thresholding procedures for high-dimensional variable selection and
+  statistical estimation.pdf.
+\newblock {\em Advances in Neural Information Processing Systems\/}~{\em 22}.
+
+\bibitem[\protect\citeauthoryear{Zhou, van~de Geer, and Bühlmann}{Zhou
+  et~al.}{2009}]{zhou_adaptive_2009}
+Zhou, S., S.~van~de Geer, and P.~Bühlmann (2009).
+\newblock Adaptive lasso for high dimensional regression and gaussian graphical
+  modeling.
+\newblock {\em {arXiv} preprint {arXiv}:0903.2515\/}.
+
+\bibitem[\protect\citeauthoryear{Zou}{Zou}{2006}]{zou_adaptive_2006}
+Zou, H. (2006).
+\newblock The adaptive lasso and its oracle properties.
+\newblock {\em Journal of the American Statistical Association\/}~{\em 101},
+  1418--1429.
+
+\bibitem[\protect\citeauthoryear{Zou, Hastie, and Tibshirani}{Zou
+  et~al.}{2007}]{zou_degrees_2007}
+Zou, H., T.~Hastie, and R.~Tibshirani (2007).
+\newblock On the degrees of freedom of the lasso.
+\newblock {\em The Annals of Statistics\/}~{\em 35}, 2173--2192.
+
+\bibitem[\protect\citeauthoryear{Zou and Li}{Zou and
+  Li}{2008}]{zou_one-step_2008}
+Zou, H. and R.~Li (2008).
+\newblock One-step sparse estimates in nonconcave penalized likelihood models.
+\newblock {\em The Annals of Statistics\/}~{\em 36\/}(4), 1509--1533.
+
+\end{thebibliography}
