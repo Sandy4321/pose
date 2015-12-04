@@ -237,7 +237,7 @@ Our path of one-step estimators (POSE) framework is in  Algorithm \ref{posealgo}
 \begin{algorithm}[hb]
 \caption{\label{posealgo} POSE }
 \vskip .2cm
-Initialize $\lambda^1 = \mathrm{inf}\left\{\lambda:~ \bs{\hat\beta}\vert_{\lambda} = \bf{0}\right\}$, so that $\bs{\hat\beta}_1 = \bf{0}$.
+Initialize $\lambda^1 = \mathrm{inf}\left\{\lambda:~ \bs{\hat\beta}\vert_{\lambda} = \bf{0}\right\}$, so that $\bs{\hat\beta}_1 = \bf{0}$. ~~Say $S_t = \{j: \hat\beta_j^t\neq 0 \}$
 
 \vskip .2cm
 Set step size
@@ -250,8 +250,8 @@ $0 < \delta < 1$.
 \omega^{t}_j  &=  
 \left\{ 
   \begin{array}{r}
-    c'(|\hat\beta^{t-1}_j|) ~\text{for}~j \in \hat S_t \\
-    1  ~\text{for}~j \in \hat S_t^c  
+    c'(|\hat\beta^{t-1}_j|) ~\text{for}~j \in \hat S_{t-1} \\
+    1  ~\text{for}~j \in \hat S_{t-1}^c  
   \end{array} 
   \right. 
   \label{wset}\\
@@ -602,8 +602,8 @@ Lipschitz; see][]{zou_degrees_2007}, the SURE framework of
 Consider  a single coefficient $\beta$ estimated via least-squares under $L_1$
 penalty $\tau$.   Write gradient at zero $g = -\sum_i x_iy_i$ and curvature $h
 = \sum_i x_i^2$ and set $\varsigma = -{\tt sign}(g)$. The prediction rule is
-$\hat y = x(\varsigma/h)(|g|-\tau)_+$ with  derivative $\partial\hat y_i/\partial y = x_i^2/h \ds{1}_{[|g|<\tau]}$, so that the SURE expression
-yields $df = \ds{E}\left[ \ds{1}_{[|g|<\tau]} \right]$.   This expectation is
+$\hat y = x(\varsigma/h)(|g|-\tau)_+$ with  derivative $\partial\hat y_i/\partial y = x_i^2/h \ds{1}_{[|g|>\tau]}$, so that the SURE expression
+yields $df = \ds{E}\left[ \ds{1}_{[|g|>\tau]} \right]$.   This expectation is
 taken with respect to the {\it unknown true} distribution over $\bm{y} |
 \bm{X}$, not that estimated from the observed sample.  However, 
  one can evaluate this expression at observed
