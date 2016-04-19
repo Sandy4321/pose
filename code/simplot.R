@@ -1,9 +1,9 @@
 # simplot
-sparse <- "sparse-"
+binary <- "binary-"
 getit <- function(f, rho, s2n, decay){
 	segs <- c("CV.1se","CV.min","AICc","AIC","BIC")
 	fname <- sprintf("results/sim-%srho%g-s2n%g-decay%g-%s.txt",
-			sparse, rho, s2n, decay, f)
+			binary, rho, s2n, decay, f)
 	#print(fname)
 	lines <- readLines(fname)
 	parsed <- sapply(lines, strsplit, split="\\|",USE.NAMES=F)

@@ -24,7 +24,7 @@ export para="parallel --delay .5 -j $npartask --joblog results/$OUT-para.log"
 echo $para >> $LOG
 export srun="srun --exclusive -N1 -c1 --ntasks=1"  
 echo $srun >> $LOG
-$para $srun "Rscript code/simrun.R {1} $RHO $S2N $DECAY $OUT > results/$OUT-r.log" ::: {1..1000}
+$para $srun "Rscript code/simrun.R {1} $RHO $S2N $DECAY $OUT >> results/$OUT-r.log" ::: {1..2}
         
 echo "done @" `date` >> $LOG
 
