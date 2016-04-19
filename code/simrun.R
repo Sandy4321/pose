@@ -7,13 +7,15 @@ decay <- as.numeric(args[4])
 nobs <- 1000
 binary <- TRUE
 
+print(id)
+
+suppressMessages(library(gamlr))
+
 OUT=paste("sim-binary-rho",rho,"-s2n",s2n,"-decay",decay,collapse='',sep='')
 print(sessionInfo())
 
 source("code/simdata.R")
-library(gamlr)
 source("code/simfit.R")
-print(id)
 
 fill <- function(v){ c(v, rep(tail(v,1),100-length(v)) )}
 
