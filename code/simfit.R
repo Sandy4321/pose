@@ -12,7 +12,7 @@ tmrgal <- system.time({
 	mrgal <- cv.gamlr(d$x,d$y.train,varweight=wmrg) })[[3]]
 
 ## sparsenet 
-library(sparsenet)
+suppressMessages(library(sparsenet))
 tsnet <- system.time(
 	snet <- cv.sparsenet(as.matrix(d$x),d$y.train,nfolds=5))[[3]]
 #   user  system elapsed 
