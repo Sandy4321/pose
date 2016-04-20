@@ -46,6 +46,7 @@ segmrg <- c(onese=mrgal$seg.1se,min=mrgal$seg.min,
 write(paste(c(segmrg,seg0,seg1,seg10),collapse="|"),
       sprintf("results/%s-seg.txt",OUT),append=TRUE)
 
+
 # errors
 print("prediction error")
 source("code/simprederr.R")

@@ -2,14 +2,14 @@
 ## coefion
 pad0 <- function(v) c(v, rep(0,1001-length(v)))
 
-betaO <- pad0(coef(cpbest))
-este0 <- coef(gl0$gamlr,d$x,select=0)-betaO
-este1 <- coef(gl1$gamlr,d$x,select=0)-betaO
-este10 <- coef(gl10$gamlr,d$x,select=0)-betaO
-estemrg <- coef(mrgal$gamlr,d$x,select=0)-betaO
+#betaO <- pad0(coef(cpbest))
+este0 <- coef(gl0$gamlr,d$x,select=0)-d$beta
+este1 <- coef(gl1$gamlr,d$x,select=0)-d$beta
+este10 <- coef(gl10$gamlr,d$x,select=0)-d$beta
+estemrg <- coef(mrgal$gamlr,d$x,select=0)-d$beta
 estecp <- pad0(coef(cpbest,as.data.frame(as.matrix(d$x))))-d$beta
-estesnet1se <- coef(snet,as.matrix(d$x),which="parms.1se")-betaO
-estesnetmin <- coef(snet,as.matrix(d$x),which="parms.min")-betaO
+estesnet1se <- coef(snet,as.matrix(d$x),which="parms.1se")-d$beta
+estesnetmin <- coef(snet,as.matrix(d$x),which="parms.min")-d$beta
 
 estmse0 <- apply(este0^2,2,mean)
 estmse1 <- apply(este1^2,2,mean)

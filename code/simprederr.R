@@ -39,3 +39,12 @@ R2long <- 1-MSElong/mean( (d$y.val-mean(d$y.val))^2 )
 write(paste(round(R2long,2),collapse="|"),
       sprintf("results/%s-r2long.txt",OUT),append=TRUE)
 
+# best of the best
+CVbest <- c(0,1,10)[which.min(c(gl0$cvm[gl0$seg.min],gl1$cvm[gl1$seg.min],gl10$cvm[gl10$seg.min]))]
+ICbest <- c(0,1,10)[which.min(c(min(AICc(gl0$g)),min(AICc(gl1$g)),min(AICc(gl10$g))))]
+ECVbest <- get(sprintf("mse%d",CVbest))[get(sprintf("seg%d",CVbest))[2]]
+EICbest <- get(sprintf("mse%d",ICbest))[get(sprintf("seg%d",ICbest))[3]]
+bestests <- c(CVbest,ECVbest,ICbest,EICbest)
+write(paste(round(bestests,2),collapse="|"),
+      sprintf("results/%s-bestgamma.txt",OUT),append=TRUE)
+
