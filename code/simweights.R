@@ -12,10 +12,12 @@ w10 <- getw(gl10)
 
 nu <- d$sigma^2/nrow(d$x)
 
-S <- 1:sCp
+S <- 1:sO
+print(sO)
 writeE <- function(W,lam,f){  
+  #print(W)
   wsnorm <- lam*apply(W[S,],2,
-                  function(w) sqrt(sum(w^2)))/sqrt(sCp)
+                  function(w) sqrt(sum(w^2)))/sqrt(sO)
   wmin <- apply(W[-S,],2,min)
   L <- round(wsnorm/(wmin - sqrt(2*nu)/lam),2)
 

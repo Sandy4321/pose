@@ -22,16 +22,21 @@ tsnet <- system.time(
 # but GL is parallelizable over both gamma and fold
 
 ## Cp optimal L0 pen
-fitcp <- function(l){
+fitl0 <- function(l){
 	lm(d$y.train ~ as.matrix(d$x[,1:l]))}
-cpfits <- lapply(1:200,fitcp)
 
-pencp <- function(fit){
-	0.5*sum(fit$resid^2) + d$sigma^2*length(coef(fit)) }
-cpcosts <- sapply(cpfits,pencp)
+if(support=="dense"){
+	L0fits <- lapply(1:300,fitl0)
+	pencp <- function(fit){
+		0.5*sum(fit$resid^2) + d$sigma^2*length(coef(fit)) }
+	cpcosts <- sapply(L0fits,pencp)
 
-sCp <- which.min(cpcosts)
-cpbest <- cpfits[[sCp]]
+	sO <- which.min(cpcosts)
+	oracle <- L0fits[[sO]]
+} else{
+	sO <- d$pnz
+	oracle <- fitl0(sO)
+}
 
 
 

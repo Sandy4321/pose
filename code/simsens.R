@@ -18,7 +18,7 @@ smrg <- sapply(Smrg,length)
 ssnet1se <- length(Ssnet1se) 
 ssnetmin <- length(Ssnetmin) 
 
-s <- c(cp=sCp,snet1se=ssnet1se,
+s <- c(oracle=sO,snet1se=ssnet1se,
        snetmin=ssnetmin, mrg=smrg[segmrg],
        gl0=s0[seg0],gl1=s1[seg1],gl10=s10[seg10])
 write(paste(round(s,2),collapse="|"),
@@ -29,14 +29,14 @@ slong <- c(mrg=fill(smrg),
 write(paste(round(slong,2),collapse="|"),
       sprintf("results/%s-slong.txt",OUT),append=TRUE)
 
-fp0 <- sapply(S0,function(set) sum(set>sCp))
-fp1 <- sapply(S1,function(set) sum(set>sCp))
-fp10 <- sapply(S10,function(set) sum(set>sCp))
-fpmrg <- sapply(Smrg,function(set) sum(set>sCp))
-fpsnet1se <- sum(Ssnet1se>sCp)
-fpsnetmin <- sum(Ssnetmin>sCp)
+fp0 <- sapply(S0,function(set) sum(set>sO))
+fp1 <- sapply(S1,function(set) sum(set>sO))
+fp10 <- sapply(S10,function(set) sum(set>sO))
+fpmrg <- sapply(Smrg,function(set) sum(set>sO))
+fpsnet1se <- sum(Ssnet1se>sO)
+fpsnetmin <- sum(Ssnetmin>sO)
 
-fdr <- c(cp=0, 
+fdr <- c(oracle=0, 
          snet1se=fpsnet1se/ssnet1se,
          snetmin=fpsnetmin/ssnetmin,
          mrg=(fpmrg/smrg)[segmrg],gl0=(fp0/s0)[seg0],
@@ -51,24 +51,24 @@ fdrlong[is.nan(fdrlong)|is.infinite(fdrlong)] <- 0
 write(paste(round(fdrlong*100,2),collapse="|"),
       sprintf("results/%s-fdrlong.txt",OUT),append=TRUE)
 
-tp0 <- sapply(S0,function(set) sum(set<=sCp))
-tp1 <- sapply(S1,function(set) sum(set<=sCp))
-tp10 <- sapply(S10,function(set) sum(set<=sCp))
-tpmrg <- sapply(Smrg,function(set) sum(set<=sCp))
-tpsnet1se <- sum(Ssnet1se<=sCp)
-tpsnetmin <- sum(Ssnetmin<=sCp)
+tp0 <- sapply(S0,function(set) sum(set<=sO))
+tp1 <- sapply(S1,function(set) sum(set<=sO))
+tp10 <- sapply(S10,function(set) sum(set<=sO))
+tpmrg <- sapply(Smrg,function(set) sum(set<=sO))
+tpsnet1se <- sum(Ssnet1se<=sO)
+tpsnetmin <- sum(Ssnetmin<=sO)
 
-sens <- c(cp=1,
-          snet1se=tpsnet1se/sCp,
-          snetmin=tpsnetmin/sCp,
-          mrg=tpmrg[segmrg]/sCp,gl0=tp0[seg0]/sCp,
-          gl1=tp1[seg1]/sCp,gl10=tp10[seg10]/sCp)
+sens <- c(oracle=1,
+          snet1se=tpsnet1se/sO,
+          snetmin=tpsnetmin/sO,
+          mrg=tpmrg[segmrg]/sO,gl0=tp0[seg0]/sO,
+          gl1=tp1[seg1]/sO,gl10=tp10[seg10]/sO)
 write(paste(round(sens*100,2),collapse="|"),
       sprintf("results/%s-sens.txt",OUT),append=TRUE)
 
 senslong <- c(
-  mrg=fill(tpmrg/sCp),gl0=fill(tp0/sCp),
-  gl1=fill(tp1/sCp),gl10=fill(tp10/sCp))
+  mrg=fill(tpmrg/sO),gl0=fill(tp0/sO),
+  gl1=fill(tp1/sO),gl10=fill(tp10/sO))
 write(paste(round(senslong*100,2),collapse="|"),
       sprintf("results/%s-senslong.txt",OUT),append=TRUE)
 
@@ -88,11 +88,11 @@ sgn0 <-  getsign( coef(gl0$gamlr,select=0)[-1,] )
 sgn1 <-  getsign( coef(gl1$gamlr,select=0)[-1,] )
 sgn10 <-  getsign( coef(gl10$gamlr,select=0)[-1,] )
 sgnmrg <- getsign( coef(mrgal$gamlr,select=0)[-1,] )
-sgncp <- getsign( coef(cpbest)[-1] )
+sgnoracle <- getsign( coef(oracle)[-1] )
 sgnsnet1se <- getsign( coef(snet, which="parms.1se")[-1,] )
 sgnsnetmin <- getsign( coef(snet, which="parms.min")[-1,] )
 
-sgn <- c(cp=sgncp,
+sgn <- c(oracle=sgnoracle,
          snet1se=sgnsnet1se,
          snetmin=sgnsnetmin,
          mrg=sgnmrg[segmrg],gl0=sgn0[seg0],

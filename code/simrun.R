@@ -1,18 +1,20 @@
 ## extract sim var
 args <- commandArgs(TRUE)
 id <- as.integer(args[1])
-rho <- as.numeric(args[2])
-s2n <- as.numeric(args[3])
-decay <- as.numeric(args[4])
-nobs <- 1000
-binary <- TRUE
-
-print(id)
+nobs <- as.numeric(args[2])
+design <- args[3]
+support <- args[4]
+rho <- as.numeric(args[5])
+s2n <- as.numeric(args[6])
+decay <- as.numeric(args[7])
 
 suppressMessages(library(gamlr))
 
-OUT=paste("sim-binary-rho",rho,"-s2n",s2n,"-decay",decay,collapse='',sep='')
+print(id)
+OUT <- Sys.getenv("OUT") 
+print(OUT)
 print(sessionInfo())
+cat("\n\n")
 
 source("code/simdata.R")
 source("code/simfit.R")

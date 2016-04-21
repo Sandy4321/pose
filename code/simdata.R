@@ -14,22 +14,30 @@
 # For all, report prediction error on left-out true y,
 # and prediction error on Cp rule, and selection error on Cp.
 
-dgp <- function(id, p=1000, n=1e3, s2n, rho, decay, binary=FALSE){
+dgp <- function(id, p=1000, n, design, support, s2n, rho, decay){
 
 	## fixed 
 	xvar <- matrix(ncol=p,nrow=p)
 	for(i in 1:p) 
 		for(j in i:p) 
 			xvar[i,j] <- rho^{abs(i-j)}
+	
 	C = chol(xvar)
 	beta <- matrix( (-1)^(1:p)*exp(-(1:p)/decay) )
+	
+	pnz <- p
+	if(support=="sparse"){
+		if(nobs>=1000) pnz <- 100  
+		else pnz <- 10
+		beta[(pnz+1):p] <- 0
+	}
 
 	## random
 	require(Matrix)
 	set.seed(id*5807)
 	x <- rnorm(p*n)
 	x <- matrix(x, nrow=n)%*%C
-	if(binary){
+	if(design=="binary"){
         z <- rbinom(n*p, size=1, prob=1/(1+exp(-x)))
 		x <- matrix(z, nrow=n)
 		x <- Matrix(x, sparse=TRUE)
@@ -37,12 +45,12 @@ dgp <- function(id, p=1000, n=1e3, s2n, rho, decay, binary=FALSE){
 	mu = as.vector(as.matrix(x%*%beta))
 	sigma <- sd(mu)/s2n
 	y <- c(mu,mu) + rnorm(2*n,sd=sigma)
-	list(x=x,mu=mu,sigma=sigma, beta=c(0,beta[,1]),
+	list(x=x,mu=mu,sigma=sigma, beta=c(0,beta[,1]),pnz=pnz,
 		y.train=y[1:n],y.validate=y[n+1:n]) }
 
 
 ## draw the data
-d <- dgp(id=id, n=nobs, s2n=s2n, rho=rho, decay=decay, binary=binary)
+d <- dgp(id=id, n=nobs, design=design, support=support, s2n=s2n, rho=rho, decay=decay)
 
 
 

@@ -6,11 +6,16 @@
 #SBATCH --constraint=ib
 #SBATCH --exclusive
 
-RHO=$1
-S2N=$2
-DECAY=$3
+NOBS=$1
+DESIGN=$2
+SUPPORT=$3
 
-OUT=sim-rho$RHO-s2n$S2N-decay$DECAY        
+RHO=$4
+S2N=$5
+DECAY=$6
+
+export OUT=n$NOBS-$DESIGN-$SUPPORT/sim-rho$RHO-s2n$S2N-decay$DECAY   
+
 LOG=results/$OUT-sbatch.log
 echo `date` > $LOG
 echo "job id $SLURM_JOBID" >> $LOG
@@ -24,7 +29,7 @@ export para="parallel --delay .5 -j $npartask --joblog results/$OUT-para.log"
 echo $para >> $LOG
 export srun="srun --exclusive -N1 -c1 --ntasks=1"  
 echo $srun >> $LOG
-$para $srun "Rscript code/simrun.R {1} $RHO $S2N $DECAY $OUT >> results/$OUT-r.log" ::: {1..1000}
+$para $srun "Rscript code/simrun.R {1} $NOBS $DESIGN $SUPPORT $RHO $S2N $DECAY >> results/$OUT-r.log" ::: {1..1000}
         
 echo "done @" `date` >> $LOG
 
