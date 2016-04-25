@@ -72,6 +72,7 @@ printR2tab <- function(nobs, design, support, fname=""){
 	preamble <- 
 	sprintf(
 "
+\\clearpage
 \\begin{table}
 \\vspace{-.2cm}
 \\footnotesize
@@ -149,7 +150,7 @@ printdetail <- function(fname, means, rho, s2n, decay, cpline, bg=NULL){
 
 printMSE <- function(fname="", nobs, design, support, decay){
 	preamble <- sprintf(
-"\n
+"\n\\clearpage
 \\begin{table}\\vspace{-.5cm}
 \\caption[l]{ { \\bf Predictive MSE for n=%d, %s design, 
 %s covariates, and  decay  %d}.}
@@ -191,7 +192,7 @@ printMSE <- function(fname="", nobs, design, support, decay){
 
 printEMSE <- function(fname="", nobs, design, support, decay){
 	preamble <- sprintf(
-"\n
+"\n\\clearpage
 \\begin{table}\\vspace{-.5cm}
 \\caption[l]{ { \\bf Estimation MSE for n=%d, %s design, 
 %s covariates, and  decay  %d}.}
@@ -227,7 +228,7 @@ printEMSE <- function(fname="", nobs, design, support, decay){
 
 printS <- function(fname="", nobs, design, support, decay){
 	preamble <- sprintf(
-"\n
+"\n\\clearpage
 \\begin{table}\\vspace{-.5cm}
 \\caption[l]{ { \\bf Nonzero coefficients at n=%d, %s design, 
 %s covariates, and  decay  %d}.}
@@ -259,7 +260,7 @@ printS <- function(fname="", nobs, design, support, decay){
 
 printsens <- function(fname="", nobs, design, support, decay){
 	preamble <- sprintf(
-"
+"\n\\clearpage
 \\begin{table}\\vspace{-.5cm}
 \\caption[l]{ {\\it }
 { \\bf FDR $\\boldsymbol{\\mid}$ Sensitivity for n=%d, %s design, %s covariates, and  decay  %d}.}
@@ -295,32 +296,11 @@ cat(
 
 
 printsupp <- function(fname){
-	doctop <- 
-"\\documentclass[12pt]{article}
-\\usepackage{amssymb,amsmath,setspace,anysize,times,dsfont,multirow}
-\\usepackage{caption}
-\\captionsetup{
-  font=small,
-  labelfont=normalfont,
-  singlelinecheck=false,
-  justification=justified
-}
-\\marginsize{1.1in}{.9in}{.3in}{1.4in}
-\\pdfminorversion=4
-\\begin{document}
-\\setcounter{page}{25}
-\\setcounter{equation}{20}
-\\setcounter{section}{6}
-\\setcounter{table}{2}
-\\setcounter{figure}{3}
-\\setstretch{1.2}
-
-\\section{Simulation study: full results}\n\n"	
 
 cat("%%!TEX root = supplemental.tex\n\n", file=fname)
 
 print("summary")
-cat("\\subsection{Summary out-of-sample prediction results}\n\n", file=fname, append=TRUE)
+#cat("\\subsection{Summary out-of-sample prediction results}\n\n", file=fname, append=TRUE)
 for(nobs in c(100,1000))
 	for(support in c("dense","sparse"))
 		for(design in c("binary","continuous")){
@@ -328,9 +308,8 @@ for(nobs in c(100,1000))
 			cat("\n\n",file=fname, append=TRUE)
 		}
 
-cat("\\clearpage\n\n", file=fname, append=TRUE)
 print("mse")
-cat("\\subsection{Detailed out-of-sample prediction results}\n\n", file=fname, append=TRUE)
+#cat("\\subsection{Detailed out-of-sample prediction results}\n\n", file=fname, append=TRUE)
 for(nobs in c(100,1000))
 	for(support in c("dense","sparse"))
 		for(design in c("binary","continuous"))
@@ -339,9 +318,8 @@ for(nobs in c(100,1000))
 				cat("\n\n",file=fname, append=TRUE)
 		}
 
-cat("\\clearpage\n\n", file=fname, append=TRUE)
 print("estimation")
-cat("\\subsection{Estimation error relative to true parameters}\n\n", file=fname, append=TRUE)
+#cat("\\subsection{Estimation error relative to true parameters}\n\n", file=fname, append=TRUE)
 for(nobs in c(100,1000))
 	for(support in c("dense","sparse"))
 		for(design in c("binary","continuous"))
@@ -350,9 +328,8 @@ for(nobs in c(100,1000))
 				cat("\n\n",file=fname, append=TRUE)
 		}
 
-cat("\\clearpage\n\n", file=fname, append=TRUE)
 print("support")
-cat("\\subsection{Number of estimated nonzero coefficients}\n\n", file=fname, append=TRUE)
+#cat("\\subsection{Number of estimated nonzero coefficients}\n\n", file=fname, append=TRUE)
 for(nobs in c(100,1000))
 	for(support in c("dense","sparse"))
 		for(design in c("binary","continuous"))
@@ -362,9 +339,8 @@ for(nobs in c(100,1000))
 		}
 
 print("sensitivity")
-cat("\\clearpage\n\n", file=fname, append=TRUE)
-cat("\\subsection{Sensitivity and false discovery relative to true parameters
- (sparse covariates) or the $\\boldsymbol{C_p}$ Oracle (dense covariates). }\n\n", file=fname, append=TRUE)
+#cat("\\subsection{Sensitivity and false discovery relative to true parameters
+# (sparse covariates) or the $\\boldsymbol{C_p}$ Oracle (dense covariates). }\n\n", file=fname, append=TRUE)
 for(nobs in c(100,1000))
 	for(support in c("dense","sparse"))
 		for(design in c("binary","continuous"))
