@@ -3,30 +3,30 @@
 \bibitem[\protect\citeauthoryear{Akaike}{Akaike}{1973}]{akaike_information_1973}
 Akaike, H. (1973).
 \newblock Information theory and the maximum likelihood principle.
-\newblock In {\em 2nd International Symposium on Information Theory}, Akademiai
-  Kiado, Budapest.
+\newblock In B.~Petrov and F.~Csaki (Eds.), {\em 2nd {International}
+  {Symposium} on {Information} {Theory}}, Akademiai Kiado, Budapest.
 
 \bibitem[\protect\citeauthoryear{Armagan, Dunson, and Lee}{Armagan
   et~al.}{2013}]{armagan_generalized_2013}
 Armagan, A., D.~B. Dunson, and J.~Lee (2013).
-\newblock Generalized double pareto shrinkage.
-\newblock {\em Statistica Sinica\/}~{\em 23}, 119.
+\newblock Generalized {Double} {Pareto} {Shrinkage}.
+\newblock {\em Statistica Sinica\/}~{\em 23}, 119--143.
 
 \bibitem[\protect\citeauthoryear{Bickel}{Bickel}{1975}]{bickel_one-step_1975}
 Bickel, P.~J. (1975).
-\newblock One-step huber estimates in the linear model.
+\newblock One-{Step} {Huber} {Estimates} in the {Linear} {Model}.
 \newblock {\em Journal of the American Statistical Association\/}~{\em 70},
   428--434.
 
 \bibitem[\protect\citeauthoryear{Bickel, Ritov, and Tsybakov}{Bickel
   et~al.}{2009}]{bickel_simultaneous_2009}
 Bickel, P.~J., Y.~Ritov, and A.~B. Tsybakov (2009).
-\newblock Simultaneous analysis of lasso and dantzig selector.
+\newblock Simultaneous analysis of {Lasso} and {Dantzig} selector.
 \newblock {\em The Annals of Statistics\/}~{\em 37\/}(4), 1705--1732.
 
 \bibitem[\protect\citeauthoryear{Breheny and Huang}{Breheny and
   Huang}{2011}]{breheny_coordinate_2011}
-Breheny, P. and J.~Huang (2011).
+Breheny, P. and J.~Huang (2011, March).
 \newblock Coordinate descent algorithms for nonconvex penalized regression,
   with applications to biological feature selection.
 \newblock {\em The Annals of Applied Statistics\/}~{\em 5\/}(1), 232--253.
@@ -39,24 +39,24 @@ Breiman, L. (1996).
 \bibitem[\protect\citeauthoryear{Buhlmann and van~de Geer}{Buhlmann and van~de
   Geer}{2011}]{buhlmann_statistics_2011}
 Buhlmann, P. and S.~van~de Geer (2011).
-\newblock {\em Statistics for High-Dimensional Data}.
+\newblock {\em Statistics for {High}-{Dimensional} {Data}}.
 \newblock Springer.
 
 \bibitem[\protect\citeauthoryear{Candes, Wakin, and Boyd}{Candes
   et~al.}{2008}]{candes_enhancing_2008}
 Candes, E.~J., M.~B. Wakin, and S.~P. Boyd (2008).
-\newblock Enhancing sparsity by reweighted l1 minimization.
+\newblock Enhancing {Sparsity} by {Reweighted} {L}1 {Minimization}.
 \newblock {\em Journal of Fourier Analysis and Applications\/}~{\em 14},
   877--905.
 
 \bibitem[\protect\citeauthoryear{Cevher}{Cevher}{2009}]{cevher_learning_2009}
 Cevher, V. (2009).
-\newblock Learning with compressible priors.
-\newblock In {\em Neural Information Processing Systems ({NIPS})}.
+\newblock Learning with {Compressible} {Priors}.
+\newblock In {\em Neural {Information} {Processing} {Systems} ({NIPS})}.
 
 \bibitem[\protect\citeauthoryear{Efron}{Efron}{2004}]{efron_estimation_2004}
 Efron, B. (2004).
-\newblock The estimation of prediction error: Covariance penalties and
+\newblock The estimation of prediction error: covariance penalties and
   cross-validation.
 \newblock {\em Journal of the American Statistical Association\/}~{\em 99},
   619--632.
@@ -64,22 +64,22 @@ Efron, B. (2004).
 \bibitem[\protect\citeauthoryear{Efron, Hastie, Johnstone, and
   Tibshirani}{Efron et~al.}{2004}]{efron_least_2004}
 Efron, B., T.~Hastie, I.~Johnstone, and R.~Tibshirani (2004).
-\newblock Least angle regression.
+\newblock Least {Angle} {Regression}.
 \newblock {\em Annals of Statistics\/}~{\em 32}, 407--499.
 
 \bibitem[\protect\citeauthoryear{Fan and Li}{Fan and
   Li}{2001}]{fan_variable_2001}
 Fan, J. and R.~Li (2001).
-\newblock Variable selection via nonconcave penalized likelihood and its oracle
-  properties.
+\newblock Variable {Selection} via {Nonconcave} {Penalized} {Likelihood} and
+  its {Oracle} {Properties}.
 \newblock {\em Journal of the American Statistical Association\/}~{\em 96},
   1348--1360.
 
 \bibitem[\protect\citeauthoryear{Fan and Peng}{Fan and
   Peng}{2004}]{fan_nonconcave_2004}
 Fan, J. and H.~Peng (2004).
-\newblock Nonconcave penalized likelihood with a diverging number of
-  parameters.
+\newblock Nonconcave {Penalized} {Likelihood} with a {Diverging} {Number} of
+  {Parameters}.
 \newblock {\em The Annals of Statistics\/}~{\em 32}, 928--961.
 
 \bibitem[\protect\citeauthoryear{Fan, Xue, and Zou}{Fan
@@ -105,8 +105,15 @@ Friedman, J., T.~Hastie, and R.~Tibshirani (2010).
 
 \bibitem[\protect\citeauthoryear{Friedman}{Friedman}{2008}]{friedman_fast_2008}
 Friedman, J.~H. (2008).
-\newblock Fast sparse regression and classification.
+\newblock Fast {Sparse} {Regression} and {Classification}.
 \newblock Technical Report, Dept. of Statistics, Stanford University.
+
+\bibitem[\protect\citeauthoryear{Gramacy, Jensen, and Taddy}{Gramacy
+  et~al.}{2013}]{gramacy_estimating_2013}
+Gramacy, R., S.~Jensen, and M.~Taddy (2013).
+\newblock Estimating player contribution in hockey with regularized logistic
+  regression.
+\newblock {\em Journal of Quantitative Analysis in Sports\/}~{\em 9}, 97--111.
 
 \bibitem[\protect\citeauthoryear{Gramacy, Taddy, and Tian}{Gramacy
   et~al.}{2015}]{gramacy_hockey_2015}
@@ -115,23 +122,17 @@ Gramacy, R., M.~Taddy, and S.~Tian (2015).
 \newblock {\em to appear in the Handbook of statistical methods for design and
   analysis in sports\/}.
 
-\bibitem[\protect\citeauthoryear{Gramacy, Jensen, and Taddy}{Gramacy
-  et~al.}{2013}]{gramacy_estimating_2013}
-Gramacy, R.~B., S.~T. Jensen, and M.~Taddy (2013).
-\newblock Estimating player contribution in hockey with regularized logistic
-  regression.
-\newblock {\em Journal of Quantitative Analysis in Sports\/}~{\em 9}.
-
 \bibitem[\protect\citeauthoryear{Hoerl and Kennard}{Hoerl and
   Kennard}{1970}]{hoerl_ridge_1970}
 Hoerl, A. and R.~Kennard (1970).
-\newblock Ridge regression: Biased estimation for nonorthogonal problems.
+\newblock Ridge {Regression}: {Biased} {Estimation} for {Nonorthogonal}
+  {Problems}.
 \newblock {\em Technometrics\/}~{\em 12}, 55--67.
 
 \bibitem[\protect\citeauthoryear{Huang, Ma, and Zhang}{Huang
   et~al.}{2008}]{huang_adaptive_2008}
 Huang, J., S.~Ma, and C.-H. Zhang (2008).
-\newblock Adaptive lasso for sparse high-dimensional regression models.
+\newblock Adaptive {Lasso} for sparse high-dimensional regression models.
 \newblock {\em Statistica Sinica\/}~{\em 18\/}(4), 1603.
 
 \bibitem[\protect\citeauthoryear{Hurvich and Tsai}{Hurvich and
@@ -148,21 +149,21 @@ Mallows, C.~L. (1973).
 \bibitem[\protect\citeauthoryear{Mazumder, Friedman, and Hastie}{Mazumder
   et~al.}{2011}]{mazumder_sparsenet_2011}
 Mazumder, R., J.~H. Friedman, and T.~Hastie (2011).
-\newblock {SparseNet} : Coordinate descent with nonconvex penalties.
+\newblock {SparseNet} : {Coordinate} {Descent} {With} {Nonconvex} {Penalties}.
 \newblock {\em Journal of the American Statistical Association\/}~{\em 106},
   1125--1138.
 
 \bibitem[\protect\citeauthoryear{Park and Casella}{Park and
   Casella}{2008}]{park_bayesian_2008}
 Park, T. and G.~Casella (2008).
-\newblock The bayesian lasso.
+\newblock The {Bayesian} {Lasso}.
 \newblock {\em Journal of the American Statistical Association\/}~{\em 103},
   681--686.
 
 \bibitem[\protect\citeauthoryear{Raskutti, Wainwright, and Yu}{Raskutti
   et~al.}{2010}]{raskutti_restricted_2010}
 Raskutti, G., M.~J. Wainwright, and B.~Yu (2010).
-\newblock Restricted eigenvalue properties for correlated gaussian designs.
+\newblock Restricted eigenvalue properties for correlated {Gaussian} designs.
 \newblock {\em The Journal of Machine Learning Research\/}~{\em 11},
   2241--2259.
 
@@ -202,13 +203,12 @@ Wainwright, M.~J. (2006).
 \bibitem[\protect\citeauthoryear{Wainwright}{Wainwright}{2009}]{wainwright_sharp_2009}
 Wainwright, M.~J. (2009).
 \newblock Sharp thresholds for high-dimensional and noisy sparsity recovery
-  using {L1}-constrained quadratic programming (lasso).
-\newblock {\em {IEEE} Transactions on Information Theory\/}~{\em 55\/}(5),
-  2183--2202.
+  using {L1}-constrained quadratic programming ({Lasso}).
+\newblock {\em IEEE Transactions on Information Theory\/}~{\em 55}, 2183--2202.
 
 \bibitem[\protect\citeauthoryear{Wang, Kim, and Li}{Wang
   et~al.}{2013}]{wang_calibrating_2013}
-Wang, L., Y.~Kim, and R.~Li (2013).
+Wang, L., Y.~Kim, and R.~Li (2013, October).
 \newblock Calibrating nonconvex penalized regression in ultra-high dimension.
 \newblock {\em The Annals of Statistics\/}~{\em 41\/}(5), 2505--2536.
 
@@ -224,7 +224,7 @@ Zhang, T. (2010b).
   1081--1107.
 
 \bibitem[\protect\citeauthoryear{Zhang}{Zhang}{2013}]{zhang_multi-stage_2013}
-Zhang, T. (2013).
+Zhang, T. (2013, November).
 \newblock Multi-stage convex relaxation for feature selection.
 \newblock {\em Bernoulli\/}~{\em 19\/}(5B), 2277--2293.
 
@@ -251,6 +251,6 @@ Zou, H., T.~Hastie, and R.~Tibshirani (2007).
   Li}{2008}]{zou_one-step_2008}
 Zou, H. and R.~Li (2008).
 \newblock One-step sparse estimates in nonconcave penalized likelihood models.
-\newblock {\em The Annals of Statistics\/}~{\em 36\/}(4), 1509--1533.
+\newblock {\em The Annals of Statistics\/}~{\em 36}, 1509--1533.
 
 \end{thebibliography}

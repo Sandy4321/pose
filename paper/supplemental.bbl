@@ -3,26 +3,26 @@
 \bibitem[\protect\citeauthoryear{Armagan, Dunson, and Lee}{Armagan
   et~al.}{2013}]{armagan_generalized_2013}
 Armagan, A., D.~B. Dunson, and J.~Lee (2013).
-\newblock Generalized double pareto shrinkage.
-\newblock {\em Statistica Sinica\/}~{\em 23}, 119.
+\newblock Generalized {Double} {Pareto} {Shrinkage}.
+\newblock {\em Statistica Sinica\/}~{\em 23}, 119--143.
 
 \bibitem[\protect\citeauthoryear{Buhlmann and van~de Geer}{Buhlmann and van~de
   Geer}{2011}]{buhlmann_statistics_2011}
 Buhlmann, P. and S.~van~de Geer (2011).
-\newblock {\em Statistics for High-Dimensional Data}.
+\newblock {\em Statistics for {High}-{Dimensional} {Data}}.
 \newblock Springer.
 
 \bibitem[\protect\citeauthoryear{Efron, Hastie, Johnstone, and
   Tibshirani}{Efron et~al.}{2004}]{efron_least_2004}
 Efron, B., T.~Hastie, I.~Johnstone, and R.~Tibshirani (2004).
-\newblock Least angle regression.
+\newblock Least {Angle} {Regression}.
 \newblock {\em Annals of Statistics\/}~{\em 32}, 407--499.
 
 \bibitem[\protect\citeauthoryear{Fan and Li}{Fan and
   Li}{2001}]{fan_variable_2001}
 Fan, J. and R.~Li (2001).
-\newblock Variable selection via nonconcave penalized likelihood and its oracle
-  properties.
+\newblock Variable {Selection} via {Nonconcave} {Penalized} {Likelihood} and
+  its {Oracle} {Properties}.
 \newblock {\em Journal of the American Statistical Association\/}~{\em 96},
   1348--1360.
 
@@ -47,14 +47,15 @@ Friedman, J., T.~Hastie, and R.~Tibshirani (2010).
 
 \bibitem[\protect\citeauthoryear{Goldberger}{Goldberger}{1961}]{goldberger_stepwise_1961}
 Goldberger, A.~S. (1961).
-\newblock Stepwise least squares: Residual analysis and specification error.
-\newblock {\em Journal of the American Statistical Association\/}~{\em
-  56\/}(296), 998.
+\newblock Stepwise {Least} {Squares}: Residual analysis and specification
+  error.
+\newblock {\em Journal of the American Statistical Association\/}~{\em 56},
+  998.
 
 \bibitem[\protect\citeauthoryear{Green}{Green}{1984}]{green_iteratively_1984}
 Green, P.~J. (1984).
-\newblock Iteratively reweighted least squares for maximum likelihood
-  estimation, and some robust and resistant alternatives.
+\newblock Iteratively {Reweighted} {Least} {Squares} for {Maximum} {Likelihood}
+  {Estimation}, and some {Robust} and {Resistant} {Alternatives}.
 \newblock {\em Journal of the Royal Statistical Society, Series B\/}~{\em 46},
   149--192.
 
@@ -67,7 +68,7 @@ Kass, R.~E. and A.~E. Raftery (1995).
 
 \bibitem[\protect\citeauthoryear{Lange}{Lange}{2010}]{lange_numerical_2010}
 Lange, K. (2010).
-\newblock {\em Numerical Analysis for Statisticians\/} (2nd ed.).
+\newblock {\em Numerical {Analysis} for {Statisticians}\/} (2nd ed.).
 \newblock Springer.
 
 \bibitem[\protect\citeauthoryear{Lee, Sun, and Saunders}{Lee
@@ -80,7 +81,7 @@ Lee, J., Y.~Sun, and M.~Saunders (2014).
 \bibitem[\protect\citeauthoryear{Luenberger and Ye}{Luenberger and
   Ye}{2008}]{luenberger_linear_2008}
 Luenberger, D.~G. and Y.~Ye (2008).
-\newblock {\em Linear and Nonlinear Programming\/} (3rd ed.).
+\newblock {\em Linear and {Nonlinear} {Programming}\/} (3rd ed.).
 \newblock Springer.
 
 \bibitem[\protect\citeauthoryear{Mallows}{Mallows}{1973}]{mallows_comments_1973}
@@ -108,9 +109,8 @@ Wainwright, M.~J. (2006).
 \bibitem[\protect\citeauthoryear{Wainwright}{Wainwright}{2009}]{wainwright_sharp_2009}
 Wainwright, M.~J. (2009).
 \newblock Sharp thresholds for high-dimensional and noisy sparsity recovery
-  using {L1}-constrained quadratic programming (lasso).
-\newblock {\em {IEEE} Transactions on Information Theory\/}~{\em 55\/}(5),
-  2183--2202.
+  using {L1}-constrained quadratic programming ({Lasso}).
+\newblock {\em IEEE Transactions on Information Theory\/}~{\em 55}, 2183--2202.
 
 \bibitem[\protect\citeauthoryear{Wu and Lange}{Wu and
   Lange}{2008}]{wu_coordinate_2008}
@@ -121,15 +121,15 @@ Wu, T.~T. and K.~Lange (2008).
 \bibitem[\protect\citeauthoryear{Zhou}{Zhou}{2009}]{zhou_thresholding_2009}
 Zhou, S. (2009).
 \newblock Thresholding procedures for high-dimensional variable selection and
-  statistical estimation.pdf.
+  statistical estimation.
 \newblock {\em Advances in Neural Information Processing Systems\/}~{\em 22}.
 
-\bibitem[\protect\citeauthoryear{Zhou, van~de Geer, and Bühlmann}{Zhou
+\bibitem[\protect\citeauthoryear{Zhou, {van de Geer}, and {B\"u}hlmann}{Zhou
   et~al.}{2009}]{zhou_adaptive_2009}
-Zhou, S., S.~van~de Geer, and P.~Bühlmann (2009).
-\newblock Adaptive lasso for high dimensional regression and gaussian graphical
-  modeling.
-\newblock {\em {arXiv} preprint {arXiv}:0903.2515\/}.
+Zhou, S., S.~{van de Geer}, and P.~{B\"u}hlmann (2009).
+\newblock Adaptive lasso for high dimensional regression and {Gaussian}
+  graphical modeling.
+\newblock {\em {arXiv:0903.2515}\/}.
 
 \bibitem[\protect\citeauthoryear{Zou}{Zou}{2006}]{zou_adaptive_2006}
 Zou, H. (2006).
@@ -147,6 +147,6 @@ Zou, H., T.~Hastie, and R.~Tibshirani (2007).
   Li}{2008}]{zou_one-step_2008}
 Zou, H. and R.~Li (2008).
 \newblock One-step sparse estimates in nonconcave penalized likelihood models.
-\newblock {\em The Annals of Statistics\/}~{\em 36\/}(4), 1509--1533.
+\newblock {\em The Annals of Statistics\/}~{\em 36}, 1509--1533.
 
 \end{thebibliography}
