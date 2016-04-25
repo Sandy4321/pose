@@ -1,10 +1,4 @@
 # simplot
-nobs <- 100
-design <- "binary"
-support <- "sparse"
-rho <- 0.5
-s2n <- 1
-decay <- 10
 
 getit <- function(f, nobs, design, support, rho, s2n, decay){
 	segs <- c("CV.1se","CV.min","AICc","AIC","BIC")
@@ -172,7 +166,7 @@ printMSE <- function(fname="", nobs, design, support, decay){
 			means <- round(colMeans(getit("mse", 
 				nobs=nobs, design=design, support=support, rho=rho, s2n=s2n, decay),
 				na.rm=TRUE),2)
-			ismin <- which(means==min(means[-1]))
+			ismin <- 1+ which(means[-1]==min(means[-1]))
 			means[-ismin] <- sprintf("%.2f",means[-ismin])
 			means[ismin] <- sprintf("{\\bf %s}",means[ismin])
 			cpline = sprintf("\\multirow{2}{*}{$Oracle: $ %s}", means["Oracle"])
@@ -210,7 +204,7 @@ printEMSE <- function(fname="", nobs, design, support, decay){
 			means <- round(colMeans(getit("mse", 
 				nobs=nobs, design=design, support=support, rho=rho, s2n=s2n, decay),
 				na.rm=TRUE),2)
-			ismin <- which(means==min(means[-1]))
+			ismin <- 1+ which(means[-1]==min(means[-1]))
 			means[-ismin] <- sprintf("%.2f",means[-ismin])
 			means[ismin] <- sprintf("{\\bf %s}",means[ismin])
 			cpline = sprintf("\\multirow{2}{*}{$Oracle: $ %s}", means["Oracle"])
@@ -351,33 +345,34 @@ for(nobs in c(100,1000))
 		}
 }
 
-#printsupp("paper/simulations.tex")
 
-printR2sumline  <- function(fname="", nobs, support, s2n){
+printsumline  <- function(fname="", nobs, support, s2n){
 	if(s2n == 1) cat("\\it ", nobs, " & \\it ", s2n, " & ", file=fname, append=TRUE)
 	else cat("& \\it ", s2n, " & ", file=fname, append=TRUE)
 
-	mat <- bg <- mse <- c()
+	r2 <- bg <- mse <- c()
 	for(design in c("binary","continuous"))
 		for(decay in c(10,50,100,200))
 			for(rho in c(0,0.5,0.9)){
-				mat <- rbind(mat, getit("r2",nobs, design, support, rho,s2n,decay))
+				r2 <- rbind(r2, getit("r2",nobs, design, support, rho,s2n,decay))
 				bg <- rbind(bg, getit("bestgamma",nobs, design, support, rho,s2n,decay))
 				mse <- rbind(mse, getit("mse",nobs, design, support, rho,s2n,decay))
 			}
 
-	m <- apply(mat,2,mean)
+	mr2 <- apply(r2,2,mean)
+	or2 <- mr2["Oracle"]
+
+	m <- apply(sqrt(mse),2,mean)
 	cp <- m["Oracle"]
 	m <- m[
 		c("gl0.AICc","gl0.CV.min",
 		"gl1.AICc","gl1.CV.min",
 		"gl10.AICc","gl10.CV.min",
 		"mrg.AICc","mrg.CV.min","snetmin")]
-	wtb <- round( (cp-m)/abs(cp)*100 )
+	wtb <- round( (m-cp)/abs(cp)*100 )
 
-	bgm <- apply(bg,2,mean)
-	msem <- apply(mse,2,mean)
-	bgwtb <- round( (bgm[c(4,2)]-msem["Oracle"])/abs(msem["Oracle"])*100)
+	bgm <- apply(sqrt(bg),2,mean)
+	bgwtb <- round( (bgm[c(4,2)]-cp)/abs(cp)*100)
 	wtb <- c(wtb[1:6],bgwtb,wtb[7:9])
 
 	best <- min(wtb)
@@ -386,7 +381,7 @@ printR2sumline  <- function(fname="", nobs, support, s2n){
 	wtb <- paste(wtb)
 	wtb[isbest] <- sprintf("{\\bf %s}",wtb[isbest])
 	cat(wtb, sep = " & ", file=fname, append=TRUE) 
-	cat(" & \\it ", sprintf("%0.2f",cp), file=fname, append=TRUE)
+	cat(" & \\it ", sprintf("%0.2f",or2), file=fname, append=TRUE)
 
 	if(s2n==0.5 & nobs==1000) cat(" \\\\[1ex]\n\\cline{2-2}\\rule{0pt}{3ex}", 
 		file=fname, append=TRUE)
@@ -395,7 +390,7 @@ printR2sumline  <- function(fname="", nobs, support, s2n){
 	else cat(" \\\\\n", file=fname, append=TRUE)
 }
 
-printR2summary <- function(fname=""){
+printSummary <- function(fname=""){
 	preamble <- 
 	"
 \\begin{table}
@@ -425,17 +420,17 @@ printR2summary <- function(fname=""){
 			file=fname, append=TRUE)
 		for(nobs in c(1000,100))
 			for(s2n in c(2,1,1/2)){
-				printR2sumline(fname=fname, nobs,support,s2n)
+				printsumline(fname=fname, nobs,support,s2n)
 			}
 	}
 	cat("\\end{tabular}
 \\end{center}
 \\vspace{-1cm}
-\\caption{\\label{tab:simsparse} Average out-of-sample $R^2$, reported as  \\%
-worse than the $C_p$ oracle (on far right), across 1000 different samples from
+\\caption{\\label{tab:simsparse} Average out-of-sample predictive RMSE, reported as  \\%
+worse than the $C_p$ oracle (corresponding $R^2$ on far right), across 1000 different samples from
 various configurations of (\\ref{simdgp}).   
 Each row of this table corresponds to average performance across many
-data generating processes; see suplement for more detailed results.  Lasso (GL $\\gamma=0$), GL, and
+data generating processes; see supplement for more detailed results.  Lasso (GL $\\gamma=0$), GL, and
 AL routines were executed in {\\tt gamlr}.  MCP denotes results from the {\\tt
 sparsenet} MCP solver with 5-fold CV selection. 
 GL select denotes a procedure that chooses amongst $\\gamma \\in \\{0,1,10\\}$ using either AICc or CV.
@@ -444,4 +439,5 @@ The best results are bolded.}
 \n", file=fname, append=TRUE)
 }
 
-printR2summary()
+printSummary()
+#printsupp("paper/simulations.tex")

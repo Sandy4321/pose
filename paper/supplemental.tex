@@ -518,14 +518,13 @@ Continuous-response data are simulated from
 \begin{align}
 \label{simdgp-both}
 y &\sim \mr{N}\left(\bm{x}'\bs{\beta},\sigma^2\right) ~~\text{where}~~
-\beta_j = (-1)^j\exp\left(-\frac{j}{{\sf d}} \right)\text{for}~~j=1\dots p~~\text{and,~given~}\bm{z} \sim \mr{N}\left(\bm{0},\bs{\Sigma}\right)\notag,\\
-&\text{either}~~\textit{dense design:~~} x_j=z_j ~~\text{or}~~ \textit{sparse design:~~} 
-x_j \stackrel{ind}{\sim} \mr{Bern}\left( 1/(1+e^{-z_j})\right).
+\beta_j = (-1)^j\exp\left(-\frac{j}{{\sf d}} \right)\ds{1}_{[j\leq J]}~~\text{for}~~j=1\dots p~~
 \end{align}
+We consider sample sizes of $n=100$ and $n=1000$.  For our {\it dense} simulation models, $J=p$ so that all true coefficients are nonzero.
+For our {\it sparse} simulation models, $J = n/10$.
+With $\bm{z}_i \sim \mr{N}\left(\bm{0},\bs{\Sigma}\right)$ for $i=1\ldots n$, the regression inputs $\bm{x}_i$ are generated as either \textit{continuous} $x_{ij}=z_{ij}$  or \textit{binary}  $x_{ij} \stackrel{ind}{\sim} \mr{Bern}\left( 1/(1+e^{-z_{ij}})\right)$.
 
-\vspace{-.4cm}
-\noindent
-Each simulation draws $n=1000$ means $\eta_i =
+Each simulation draws $n$ means $\eta_i =
 \bm{x}_i'\bs{\beta}$, and two independent response samples 
 $\bm{y},\bm{\tilde y} \sim \mr{N}(\bs{\eta},\sigma^2\bm{I})$. Residual
 variance $\sigma^2$ and covariate correlation $\bs{\Sigma}$ are adjusted across
@@ -538,23 +537,21 @@ ${\sf d}$ of $10$, $50$, $100$, and $200$.
 
 \begin{figure}[h]\centering
 \includegraphics[width=.8\textwidth]{./graphs/betadecay}
-\caption{\label{fig:betadecay} The linear model coefficients for our simulation in \ref{simdgp-both}.}
+\caption{\label{fig:betadecay} The linear model coefficients for our simulation in \ref{simdgp-both}. Vertical lines mark thresholding points for the {\it sparse} model simulations, at $J=10$ for $n=100$ and at $J=100$ for $n=1000$. }
 \end{figure}
-% pdf("betadecay.pdf",width=8,height=3.5)
-% par(mai=c(.9,.9,.1,.1))
+% pdf("paper/graphs/betadecay.pdf",width=8,height=3.5)
+% par(mai=c(.8,.8,.1,.1))
 % j <- 1:1000
 % b <- function(d){ ((-1)^j)*exp(-j/d) }
-% plot(j, b(10), bty="n",xlab="index",ylab="beta", ylim=c(-1,1))
-% points(j, b(50), col="grey20")
-% points(j, b(100), col="grey50")
-% points(j, b(200), col="grey80")
+% plot(j, b(10), bty="n",xlab="index",ylab="beta", ylim=c(-1,1), cex=.75)
+% points(j, b(50), col="grey20", cex=.75)
+% points(j, b(100), col="grey50", cex=.75)
+% points(j, b(200), col="grey80", cex=.75)
 % legend("topright", bty="n", fill=paste("grey",c(0,20,50,80),sep=""),legend=c(10,50,100,200),title="decay",border=0)
+% abline(v=11, col="navy")
+% abline(v=101, col="navy")
 % dev.off()
 
-
-Results for both sparse and dense designs, over a set of 1000 datasets, are presented in the following tables.  We first report out-of-sample $R^2 = 1 -
-\mr{var}(\bm{\tilde y} - \bs{\eta}_\bm{y})/\mr{var}(\bm{\tilde y})$, followed by tables showing false discovery and sensitivity with respect to the $C_p$
-oracle. 
 
 \setstretch{1}
 \bibliographystyle{chicago}
