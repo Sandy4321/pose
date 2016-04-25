@@ -348,8 +348,7 @@ for(nobs in c(100,1000))
 				printsens(fname=fname, nobs,design,support,decay)
 				cat("\n\n",file=fname, append=TRUE)
 		}
-
-cat("\\end{document}\n",file=fname, append=TRUE)
 }
+
 printsupp("paper/simulations.tex")
 #printsens(fname="", 1000,"binary","sparse",100)
