@@ -147,7 +147,7 @@ printMSE <- function(fname="", nobs, design, support, decay){
 	preamble <- sprintf(
 "\n\\clearpage
 \\begin{table}\\vspace{-.5cm}
-\\caption[l]{ { \\bf Predictive MSE for n=%d, %s design, 
+\\caption[l]{ { \\bf Prediction MSE for n=%d, %s design, 
 %s covariates, and  decay  %d}.}
 \\vspace{-.5cm}
 \\footnotesize\\setstretch{1}
@@ -201,11 +201,11 @@ printEMSE <- function(fname="", nobs, design, support, decay){
 	cat(preamble, file=fname, append=TRUE)
 	for(s2n in c(2,1,0.5)){
 		for(rho in c(0,0.5,0.9)){
-			means <- round(colMeans(getit("mse", 
+			means <- round(colMeans(getit("estmse", 
 				nobs=nobs, design=design, support=support, rho=rho, s2n=s2n, decay),
-				na.rm=TRUE),2)
+				na.rm=TRUE),3)
 			ismin <- 1+ which(means[-1]==min(means[-1]))
-			means[-ismin] <- sprintf("%.2f",means[-ismin])
+			means[-ismin] <- sprintf("%.3f",means[-ismin])
 			means[ismin] <- sprintf("{\\bf %s}",means[ismin])
 			cpline = sprintf("\\multirow{2}{*}{$Oracle: $ %s}", means["Oracle"])
 			printdetail(fname, means, rho, s2n, decay, cpline)
@@ -289,79 +289,30 @@ cat(
 }
 
 
+printsumline  <- function(fname="", nobs, support, s2n, decay, root=FALSE){
+	if(decay=="fast") dset <- c(10,50)
+	else dset <- c(100,200)
 
-printsupp <- function(fname){
-
-cat("%%!TEX root = supplemental.tex\n\n", file=fname)
-
-print("summary")
-#cat("\\subsection{Summary out-of-sample prediction results}\n\n", file=fname, append=TRUE)
-for(nobs in c(100,1000))
-	for(support in c("dense","sparse"))
-		for(design in c("binary","continuous")){
-			printR2tab(nobs,design,support,fname=fname)
-			cat("\n\n",file=fname, append=TRUE)
-		}
-
-print("mse")
-#cat("\\subsection{Detailed out-of-sample prediction results}\n\n", file=fname, append=TRUE)
-for(nobs in c(100,1000))
-	for(support in c("dense","sparse"))
-		for(design in c("binary","continuous"))
-			for(decay in c(10,50,100,200)){		
-				printMSE(fname=fname, nobs,design,support,decay)
-				cat("\n\n",file=fname, append=TRUE)
-		}
-
-print("estimation")
-#cat("\\subsection{Estimation error relative to true parameters}\n\n", file=fname, append=TRUE)
-for(nobs in c(100,1000))
-	for(support in c("dense","sparse"))
-		for(design in c("binary","continuous"))
-			for(decay in c(10,50,100,200)){		
-				printEMSE(fname=fname, nobs,design,support,decay)
-				cat("\n\n",file=fname, append=TRUE)
-		}
-
-print("support")
-#cat("\\subsection{Number of estimated nonzero coefficients}\n\n", file=fname, append=TRUE)
-for(nobs in c(100,1000))
-	for(support in c("dense","sparse"))
-		for(design in c("binary","continuous"))
-			for(decay in c(10,50,100,200)){		
-				printS(fname=fname, nobs,design,support,decay)
-				cat("\n\n",file=fname, append=TRUE)
-		}
-
-print("sensitivity")
-#cat("\\subsection{Sensitivity and false discovery relative to true parameters
-# (sparse covariates) or the $\\boldsymbol{C_p}$ Oracle (dense covariates). }\n\n", file=fname, append=TRUE)
-for(nobs in c(100,1000))
-	for(support in c("dense","sparse"))
-		for(design in c("binary","continuous"))
-			for(decay in c(10,50,100,200)){		
-				printsens(fname=fname, nobs,design,support,decay)
-				cat("\n\n",file=fname, append=TRUE)
-		}
-}
-
-
-printsumline  <- function(fname="", nobs, support, s2n, decay){
 	if(s2n == 1) cat(sprintf("\\it n=%d", nobs), " & \\it ", s2n, " & ", file=fname, append=TRUE)
 	else cat("& \\it ", s2n, " & ", file=fname, append=TRUE)
 
 	r2 <- bg <- mse <- c()
 	for(design in c("binary","continuous"))
-		for(rho in c(0,0.5,0.9)){
-			r2 <- rbind(r2, getit("r2",nobs, design, support, rho,s2n,decay))
-			bg <- rbind(bg, getit("bestgamma",nobs, design, support, rho,s2n,decay))
-			mse <- rbind(mse, getit("mse",nobs, design, support, rho,s2n,decay))
+		for(rho in c(0,0.5,0.9))
+			for(decay in dset){
+				r2 <- rbind(r2, getit("r2",nobs, design, support, rho,s2n,decay))
+				bg <- rbind(bg, getit("bestgamma",nobs, design, support, rho,s2n,decay))
+				mse <- rbind(mse, getit("mse",nobs, design, support, rho,s2n,decay))
 		}
 
 	mr2 <- apply(r2,2,mean)
 	or2 <- mr2["Oracle"]
 
-	m <- apply(sqrt(mse),2,mean)
+	if(root){
+		mse <- sqrt(mse)
+		bg <- sqrt(bg) }
+
+	m <- apply(mse,2,mean)
 	cp <- m["Oracle"]
 	m <- m[
 		c("gl0.AICc","gl0.CV.min",
@@ -370,7 +321,7 @@ printsumline  <- function(fname="", nobs, support, s2n, decay){
 		"mrg.AICc","mrg.CV.min","snetmin")]
 	wtb <- round( (m-cp)/abs(cp)*100 )
 
-	bgm <- apply(sqrt(bg),2,mean)
+	bgm <- apply(bg,2,mean)
 	bgwtb <- round( (bgm[c(4,2)]-cp)/abs(cp)*100)
 	wtb <- c(wtb[1:6],bgwtb,wtb[7:9])
 
@@ -384,21 +335,19 @@ printsumline  <- function(fname="", nobs, support, s2n, decay){
 
 	if(s2n==0.5 & nobs==1000) cat(" \\\\[1ex]\n\\cline{2-2}\\rule{0pt}{3ex}", 
 		file=fname, append=TRUE)
-	else if(s2n==0.5 & nobs==100) cat(" \\\\[1ex]\n\\hline\\rule{0pt}{3ex}", 
+	else if(s2n==0.5 & nobs==100) cat(" \\\\[1ex]\n\\hline", 
 		file=fname, append=TRUE)
 	else cat(" \\\\\n", file=fname, append=TRUE)
 }
 
-printSummary <- function(support, fname=""){
-	oracle <- c("{\\it MLE oracle on $C_p$-optimal support}", "{\\it MLE oracle on true support}")
-	names(oracle) <- c("dense","sparse")
-	preamble <- sprintf( 
-	"
+printSummary <- function(fname="", root=TRUE){
+	cat("%%!TEX root = pose.tex\n\n", file=fname)
+	preamble <- "
 \\begin{table}
 \\footnotesize
 \\begin{center}
 \\begin{tabular}{cc|cc|cc|cc|cc|cc|c|c}
-\\multicolumn{2}{c|}{\\bf %s model} & \\multicolumn{11}{l|}{\\bf \\%% worse than oracle } & \\\\[1ex]
+& & \\multicolumn{11}{l|}{\\bf \\% worse than oracle } & \\\\[1ex]
 & \\multirow{2}{*}{$\\displaystyle\\frac{\\mathrm{sd}(\\boldsymbol{\\eta})}{\\sigma}$} 
 & \\multicolumn{2}{c}{lasso} 
 & \\multicolumn{2}{c}{GL $\\gamma=1$} 
@@ -413,40 +362,211 @@ printSummary <- function(support, fname=""){
 & ~~\\scriptsize\\it AICc & \\multicolumn{1}{c}{\\scriptsize\\it CV~~}
 & ~~\\scriptsize\\it AICc & \\multicolumn{1}{c}{\\scriptsize\\it CV~~} 
 & \\multicolumn{1}{c|}{ MCP} & $R^2$ \\\\[1ex]
-\\hline\\rule{0pt}{3ex}
-",  support)
+\\hline
+"
 	cat(preamble,file=fname, append=TRUE)
-	for(decay in c(10,50,100,200)){
-		cat(sprintf("{\\it decay=%d} &&&&&&&&&&&&\\\\\n", decay), 
-			file=fname, append=TRUE)
-		for(nobs in c(1000,100))
-			for(s2n in c(2,1,1/2)){
-				printsumline(fname=fname, nobs,support,s2n, decay)
+	for(support in c("dense", "sparse"))
+		for(decay in c("fast","slow")){
+			cat(sprintf(
+				"\\multicolumn{2}{l|}{\\it %s model,} &&&&&&&&&&&\\\\
+\\multicolumn{2}{l|}{\\it %s decay} &&&&&&&&&&&\\\\", support, decay), 
+				file=fname, append=TRUE)
+			for(nobs in c(1000,100))
+				for(s2n in c(2,1,1/2)){
+					printsumline(fname=fname, nobs,support,s2n, decay, root=root)
 			}
 	}
+
+	oracle <- c("{\\it MLE oracle on support}", "{\\it MLE oracle on true support}")
+	names(oracle) <- c("dense","sparse")
+
+	if(root) msepre <- "R"
+	else msepre <- ""
+
 	cat(sprintf("\\end{tabular}
 \\end{center}
-\\vspace{-1cm}
-\\caption{\\label{tab:sim%s} Out-of-sample predictive RMSE for our {\\it %s truth} simulation model, 
-reported as  \\%%
-worse than the %s (corresponding $R^2$ on far right), averaged over 1000  samples from
-various configurations of (\\ref{simdgp}).   
-Each row of this table corresponds to average performance across many
-data generating processes; see the supplement for more detailed results.  Lasso (GL $\\gamma=0$), GL, and
-AL routines were executed in {\\tt gamlr}.  MCP denotes results from the {\\tt
-sparsenet} MCP solver. 
-GL `select' chooses amongst $\\gamma \\in \\{0,1,10\\}$ using either AICc or CV.
+\\caption{\\label{tab:sumtables} Out-of-sample predictive %sMSE, 
+reported as  \\%% worse than Oracle (corresponding $R^2$ on far right),
+averaged over 1000  samples from various configurations of (\\ref{simdgp}).
+The Oracle is MLE fit either on  $C_p$-optimal support for the dense model or
+on the true sparse support. Each row of this table corresponds to average
+performance across many data generating processes; see the supplement for more
+detailed results.  Lasso (GL $\\gamma=0$), GL, and AL routines were executed
+in {\\tt gamlr}.  MCP denotes results from the {\\tt sparsenet} MCP solver. GL
+`select' chooses amongst $\\gamma \\in \\{0,1,10\\}$ using either AICc or CV.
 The best results are bolded.}
 \\end{table}
-\n",support, support, oracle[support]), file=fname, append=TRUE)
+\n", msepre), file=fname, append=TRUE)
 }
 
 
-papertables <- function(fname=""){
-	cat("%%!TEX root = pose.tex\n\n", file=fname)
+#printSummary("paper/sumtables.tex")
 
-	printSummary("dense", fname)
-	printSummary("sparse", fname)
+
+
+printestimsumline  <- function(fname="", nobs, support, s2n, decay, root=TRUE){
+	if(decay=="fast") dset <- c(10,50)
+	else dset <- c(100,200)
+
+	if(s2n == 1) cat(sprintf("\\it n=%d", nobs), " & \\it ", s2n, " & ", file=fname, append=TRUE)
+	else cat("& \\it ", s2n, " & ", file=fname, append=TRUE)
+
+	mse <- c()
+	for(design in c("binary","continuous"))
+		for(rho in c(0,0.5,0.9))
+			for(decay in dset){
+				mse <- rbind(mse, getit("estmse",nobs, design, support, rho,s2n,decay))
+		}
+
+
+	if(root){
+		mse <- sqrt(mse)
+		}
+
+	m <- apply(mse,2,mean)
+	cp <- m["Oracle"]
+	m <- m[
+		c("gl0.AICc","gl0.CV.min",
+		"gl1.AICc","gl1.CV.min",
+		"gl10.AICc","gl10.CV.min",
+		"mrg.AICc","mrg.CV.min","snetmin")]
+	m <- round( m, 3)
+
+	best <- min(m)
+	isbest <- which( m==best )
+
+	m <- paste(m)
+	m[isbest] <- sprintf("{\\bf %s}",m[isbest])
+	cat(m, sep = " & ", file=fname, append=TRUE) 
+	cat(" & \\it ", sprintf("%0.2f",cp), file=fname, append=TRUE)
+
+	if(s2n==0.5 & nobs==1000) cat(" \\\\[1ex]\n\\cline{2-2}\\rule{0pt}{3ex}", 
+		file=fname, append=TRUE)
+	else if(s2n==0.5 & nobs==100) cat(" \\\\[1ex]\n\\hline", 
+		file=fname, append=TRUE)
+	else cat(" \\\\\n", file=fname, append=TRUE)
 }
 
-papertables("paper/sumtables.tex")
+printEstimSummary <- function(fname="", root=TRUE){
+	if(root) msepre <- "R"
+	else msepre <- ""
+	preamble <- sprintf("
+\\begin{table}[h!]
+\\footnotesize
+\\caption{\\label{tab:esttables}Summary of estimation %sMSE against the true coefficients,
+averaged over 1000  samples from our simulation model under different designs and $\\rho$.
+The Oracle is MLE fit either on  $C_p$-optimal support for the dense model or
+on the true sparse support.  
+The best results are bolded.}
+\\begin{center}
+\\vskip -.5cm
+\\begin{tabular}{cc|cc|cc|cc|cc|c|c}
+& & \\multicolumn{9}{l}{\\bf %sMSE} & \\\\[1ex]
+& \\multirow{2}{*}{$\\displaystyle\\frac{\\mathrm{sd}(\\boldsymbol{\\eta})}{\\sigma}$} 
+& \\multicolumn{2}{c}{lasso} 
+& \\multicolumn{2}{c}{GL $\\gamma=1$} 
+& \\multicolumn{2}{c}{GL $\\gamma=10$} 
+& \\multicolumn{2}{c}{ adapt. lasso} 
+& \\multicolumn{1}{c}{~} & \\\\[-0.5ex]
+& 
+& ~~\\scriptsize\\it AICc & \\multicolumn{1}{c}{\\scriptsize\\it CV~~}
+& ~~\\scriptsize\\it AICc & \\multicolumn{1}{c}{\\scriptsize\\it CV~~}
+& ~~\\scriptsize\\it AICc & \\multicolumn{1}{c}{\\scriptsize\\it CV~~}
+& ~~\\scriptsize\\it AICc & \\multicolumn{1}{c}{\\scriptsize\\it CV~~}
+& \\multicolumn{1}{c}{ MCP} & \\it Oracle \\\\[1ex]
+\\hline
+", msepre)
+	cat(preamble,file=fname, append=TRUE)
+	for(support in c("dense", "sparse"))
+		for(decay in c("fast","slow")){
+			cat(sprintf(
+				"\\multicolumn{2}{l|}{\\it %s model,} &&&&&&&&&\\\\
+\\multicolumn{2}{l|}{\\it %s decay} &&&&&&&&&\\\\", support, decay), 
+				file=fname, append=TRUE)
+			for(nobs in c(1000,100))
+				for(s2n in c(2,1,1/2)){
+					printestimsumline(fname=fname, nobs,support,s2n, decay, root=root)
+			}
+	}
+
+	cat(sprintf("\\end{tabular}
+\\end{center}
+\\end{table}
+\n", msepre), file=fname, append=TRUE)
+}
+
+
+
+printsupp <- function(fname){
+
+cat("%%!TEX root = supplemental.tex\n\n", file=fname)
+
+print("summary")
+cat("\\noindent {\\bf\\large Detailed simulation results}
+
+\\vskip .25cm
+\\noindent
+Table \\ref{tab:esttables} is a summary of estimation error 
+across various configurations of our simulation model, 
+analogous to the predictive RMSE table in the main draft.
+This is followed by detailed tabulation of prediction MSE (Tables 4-35), 
+estimation MSE (36-67),  estimated model dimension (68-99), 
+and sensitivity/FDR across (100-131) all 
+simulation models and selection methods.
+\\vskip .25cm
+
+", file=fname, append=TRUE)
+
+# #cat("\\subsection{Summary out-of-sample prediction results}\n\n", file=fname, append=TRUE)
+# for(nobs in c(100,1000))
+# 	for(support in c("dense","sparse"))
+# 		for(design in c("binary","continuous")){
+# 			printR2tab(nobs,design,support,fname=fname)
+# 			cat("\n\n",file=fname, append=TRUE)
+# 		}
+printEstimSummary(fname)
+
+print("mse")
+#cat("\\subsection{Detailed out-of-sample prediction results}\n\n", file=fname, append=TRUE)
+for(nobs in c(1000,100))
+	for(support in c("dense","sparse"))
+		for(design in c("binary","continuous"))
+			for(decay in c(10,50,100,200)){		
+				printMSE(fname=fname, nobs,design,support,decay)
+				cat("\n\n",file=fname, append=TRUE)
+		}
+
+print("estimation")
+#cat("\\subsection{Estimation error relative to true parameters}\n\n", file=fname, append=TRUE)
+for(nobs in c(1000,100))
+	for(support in c("dense","sparse"))
+		for(design in c("binary","continuous"))
+			for(decay in c(10,50,100,200)){		
+				printEMSE(fname=fname, nobs,design,support,decay)
+				cat("\n\n",file=fname, append=TRUE)
+		}
+
+print("support")
+#cat("\\subsection{Number of estimated nonzero coefficients}\n\n", file=fname, append=TRUE)
+for(nobs in c(1000,100))
+	for(support in c("dense","sparse"))
+		for(design in c("binary","continuous"))
+			for(decay in c(10,50,100,200)){		
+				printS(fname=fname, nobs,design,support,decay)
+				cat("\n\n",file=fname, append=TRUE)
+		}
+
+print("sensitivity")
+#cat("\\subsection{Sensitivity and false discovery relative to true parameters
+# (sparse covariates) or the $\\boldsymbol{C_p}$ Oracle (dense covariates). }\n\n", file=fname, append=TRUE)
+for(nobs in c(1000,100))
+	for(support in c("dense","sparse"))
+		for(design in c("binary","continuous"))
+			for(decay in c(10,50,100,200)){		
+				printsens(fname=fname, nobs,design,support,decay)
+				cat("\n\n",file=fname, append=TRUE)
+		}
+}
+
+
+printsupp("paper/simulations.tex")
