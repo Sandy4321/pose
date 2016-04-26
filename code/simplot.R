@@ -346,18 +346,17 @@ for(nobs in c(100,1000))
 }
 
 
-printsumline  <- function(fname="", nobs, support, s2n){
-	if(s2n == 1) cat("\\it ", nobs, " & \\it ", s2n, " & ", file=fname, append=TRUE)
+printsumline  <- function(fname="", nobs, support, s2n, decay){
+	if(s2n == 1) cat(sprintf("\\it n=%d", nobs), " & \\it ", s2n, " & ", file=fname, append=TRUE)
 	else cat("& \\it ", s2n, " & ", file=fname, append=TRUE)
 
 	r2 <- bg <- mse <- c()
 	for(design in c("binary","continuous"))
-		for(decay in c(10,50,100,200))
-			for(rho in c(0,0.5,0.9)){
-				r2 <- rbind(r2, getit("r2",nobs, design, support, rho,s2n,decay))
-				bg <- rbind(bg, getit("bestgamma",nobs, design, support, rho,s2n,decay))
-				mse <- rbind(mse, getit("mse",nobs, design, support, rho,s2n,decay))
-			}
+		for(rho in c(0,0.5,0.9)){
+			r2 <- rbind(r2, getit("r2",nobs, design, support, rho,s2n,decay))
+			bg <- rbind(bg, getit("bestgamma",nobs, design, support, rho,s2n,decay))
+			mse <- rbind(mse, getit("mse",nobs, design, support, rho,s2n,decay))
+		}
 
 	mr2 <- apply(r2,2,mean)
 	or2 <- mr2["Oracle"]
@@ -376,7 +375,7 @@ printsumline  <- function(fname="", nobs, support, s2n){
 	wtb <- c(wtb[1:6],bgwtb,wtb[7:9])
 
 	best <- min(wtb)
-	isbest <- which( (wtb-best)/abs(best) <0.01 )
+	isbest <- which( (wtb-best) < 0.01 )
 
 	wtb <- paste(wtb)
 	wtb[isbest] <- sprintf("{\\bf %s}",wtb[isbest])
@@ -390,22 +389,24 @@ printsumline  <- function(fname="", nobs, support, s2n){
 	else cat(" \\\\\n", file=fname, append=TRUE)
 }
 
-printSummary <- function(fname=""){
-	preamble <- 
+printSummary <- function(support, fname=""){
+	oracle <- c("{\\it MLE oracle on $C_p$-optimal support}", "{\\it MLE oracle on true support}")
+	names(oracle) <- c("dense","sparse")
+	preamble <- sprintf( 
 	"
 \\begin{table}
 \\footnotesize
 \\begin{center}
 \\begin{tabular}{cc|cc|cc|cc|cc|cc|c|c}
-&& \\multicolumn{11}{l|}{\\bf \\% Worse than Oracle } & \\\\[1ex]
-&
+\\multicolumn{2}{c|}{\\bf %s model} & \\multicolumn{11}{l|}{\\bf \\%% worse than oracle } & \\\\[1ex]
+& \\multirow{2}{*}{$\\displaystyle\\frac{\\mathrm{sd}(\\boldsymbol{\\eta})}{\\sigma}$} 
 & \\multicolumn{2}{c}{lasso} 
 & \\multicolumn{2}{c}{GL $\\gamma=1$} 
 & \\multicolumn{2}{c}{GL $\\gamma=10$} 
 & \\multicolumn{2}{c}{GL select} 
 & \\multicolumn{2}{c}{ adapt. lasso} 
 & \\multicolumn{1}{c|}{~} & \\it Oracle \\\\[-0.5ex]
- n & $\\frac{\\mathrm{sd}(\\boldsymbol{\\eta})}{\\sigma}$
+& 
 & ~~\\scriptsize\\it AICc & \\multicolumn{1}{c}{\\scriptsize\\it CV~~}
 & ~~\\scriptsize\\it AICc & \\multicolumn{1}{c}{\\scriptsize\\it CV~~}
 & ~~\\scriptsize\\it AICc & \\multicolumn{1}{c}{\\scriptsize\\it CV~~}
@@ -413,31 +414,39 @@ printSummary <- function(fname=""){
 & ~~\\scriptsize\\it AICc & \\multicolumn{1}{c}{\\scriptsize\\it CV~~} 
 & \\multicolumn{1}{c|}{ MCP} & $R^2$ \\\\[1ex]
 \\hline\\rule{0pt}{3ex}
-"
+",  support)
 	cat(preamble,file=fname, append=TRUE)
-	for(support in c("dense","sparse")){
-		cat(sprintf("\\sc %s &&&&&&&&&&&&\\\\\n", support), 
+	for(decay in c(10,50,100,200)){
+		cat(sprintf("{\\it decay=%d} &&&&&&&&&&&&\\\\\n", decay), 
 			file=fname, append=TRUE)
 		for(nobs in c(1000,100))
 			for(s2n in c(2,1,1/2)){
-				printsumline(fname=fname, nobs,support,s2n)
+				printsumline(fname=fname, nobs,support,s2n, decay)
 			}
 	}
-	cat("\\end{tabular}
+	cat(sprintf("\\end{tabular}
 \\end{center}
 \\vspace{-1cm}
-\\caption{\\label{tab:simsparse} Average out-of-sample predictive RMSE, reported as  \\%
-worse than the $C_p$ oracle (corresponding $R^2$ on far right), across 1000 different samples from
+\\caption{\\label{tab:sim%s} Out-of-sample predictive RMSE for our {\\it %s truth} simulation model, 
+reported as  \\%%
+worse than the %s (corresponding $R^2$ on far right), averaged over 1000  samples from
 various configurations of (\\ref{simdgp}).   
 Each row of this table corresponds to average performance across many
-data generating processes; see supplement for more detailed results.  Lasso (GL $\\gamma=0$), GL, and
+data generating processes; see the supplement for more detailed results.  Lasso (GL $\\gamma=0$), GL, and
 AL routines were executed in {\\tt gamlr}.  MCP denotes results from the {\\tt
-sparsenet} MCP solver with 5-fold CV selection. 
-GL select denotes a procedure that chooses amongst $\\gamma \\in \\{0,1,10\\}$ using either AICc or CV.
+sparsenet} MCP solver. 
+GL `select' chooses amongst $\\gamma \\in \\{0,1,10\\}$ using either AICc or CV.
 The best results are bolded.}
 \\end{table}
-\n", file=fname, append=TRUE)
+\n",support, support, oracle[support]), file=fname, append=TRUE)
 }
 
-printSummary()
-#printsupp("paper/simulations.tex")
+
+papertables <- function(fname=""){
+	cat("%%!TEX root = pose.tex\n\n", file=fname)
+
+	printSummary("dense", fname)
+	printSummary("sparse", fname)
+}
+
+papertables("paper/sumtables.tex")

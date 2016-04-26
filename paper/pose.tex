@@ -724,55 +724,7 @@ The OOS $R^2$ results are reported in terms of percentage worse than the oracle 
 dense grid of potential penalty sizes ($\lambda$) and concavities (analogous
 to our $\gamma$) for the MCP penalty.
 
-
-\begin{table}
-\footnotesize
-\begin{center}
-\begin{tabular}{cc|cc|cc|cc|cc|cc|c|c}
-&& \multicolumn{11}{l|}{\bf RMSE~~ \% Worse than Oracle } & \\[1ex]
-&
-& \multicolumn{2}{c}{lasso} 
-& \multicolumn{2}{c}{GL $\gamma=1$} 
-& \multicolumn{2}{c}{GL $\gamma=10$} 
-& \multicolumn{2}{c}{GL select} 
-& \multicolumn{2}{c}{ adapt. lasso} 
-& \multicolumn{1}{c|}{~} & \it Oracle \\[-0.5ex]
- n & $\frac{\mathrm{sd}(\boldsymbol{\eta})}{\sigma}$
-& ~~\scriptsize\it AICc & \multicolumn{1}{c}{\scriptsize\it CV~~}
-& ~~\scriptsize\it AICc & \multicolumn{1}{c}{\scriptsize\it CV~~}
-& ~~\scriptsize\it AICc & \multicolumn{1}{c}{\scriptsize\it CV~~}
-& ~~\scriptsize\it AICc & \multicolumn{1}{c}{\scriptsize\it CV~~}
-& ~~\scriptsize\it AICc & \multicolumn{1}{c}{\scriptsize\it CV~~} 
-& \multicolumn{1}{c|}{ MCP} & $R^2$ \\[1ex]
-\hline\rule{0pt}{3ex}
-\sc dense &&&&&&&&&&&&\\
-& \it  2  & 20 & 9 & 15 & 9 & 9 & 17 & 9 & {\bf 8} & 18 & 15 & 9 & \it  0.75 \\
-\it  1000  & \it  1  & 11 & 9 & 10 & 11 & 13 & 17 & 10 & 9 & 9 & {\bf 8} & 9 & \it  0.41 \\
-& \it  0.5  & {\bf 3} & {\bf 3} & 4 & 4 & 5 & 4 & {\bf 3} & {\bf 3} & 4 & 5 & {\bf 3} & \it  0.11 \\[1ex]
-\cline{2-2}\rule{0pt}{3ex}& \it  2  & 48 & 46 & 19 & 54 & {\bf 3} & 57 & 11 & 47 & 24 & {\bf 3} & 46 & \it  0.64 \\
-\it  100  & \it  1  & 5 & 5 & 5 & 7 & 8 & 8 & 8 & 6 & {\bf -1} & 4 & 5 & \it  0.19 \\
-& \it  0.5  & {\bf -2} & -1 & 18 & -1 & 24 & -1 & 20 & 0 & 2 & 17 & -1 & \it  -0.03 \\[1ex]
-\hline\rule{0pt}{3ex}\sc sparse &&&&&&&&&&&&\\
-& \it  2  & 13 & 11 & 9 & 8 & 6 & 5 & 6 & 6 & 16 & 15 & {\bf 4} & \it  0.78 \\
-\it  1000  & \it  1  & 12 & 11 & 11 & 11 & 14 & 16 & 12 & {\bf 10} & 11 & 11 & {\bf 10} & \it  0.45 \\
-& \it  0.5  & {\bf 4} & {\bf 4} & 5 & 5 & 7 & 6 & 5 & {\bf 4} & 5 & 6 & {\bf 4} & \it  0.12 \\[1ex]
-\cline{2-2}\rule{0pt}{3ex}& \it  2  & 51 & 42 & 45 & 41 & 36 & 62 & 39 & 40 & 34 & {\bf 28} & 39 & \it  0.77 \\
-\it  100  & \it  1  & 24 & 25 & 27 & 28 & 32 & 31 & 31 & 25 & {\bf 18} & 27 & 25 & \it  0.44 \\
-& \it  0.5  & {\bf 6} & {\bf 6} & 16 & 7 & 33 & 7 & 28 & 7 & 9 & 26 & 7 & \it  0.10 \\[1ex]
-\hline\rule{0pt}{3ex}\end{tabular}
-\end{center}
-\vspace{-1cm}
-\caption{\label{tab:simsparse} Average out-of-sample predictive RMSE, reported as  \%
-worse than the $C_p$ oracle (corresponding $R^2$ on far right), across 1000 different samples from
-various configurations of (\ref{simdgp}).   
-Each row of this table corresponds to average performance across many
-data generating processes; see supplement for more detailed results.  Lasso (GL $\gamma=0$), GL, and
-AL routines were executed in {\tt gamlr}.  MCP denotes results from the {\tt
-sparsenet} MCP solver with 5-fold CV selection. 
-GL select denotes a procedure that chooses amongst $\gamma \in \{0,1,10\}$ using either AICc or CV.
-The best results are bolded.}
-\end{table}
-
+\include{sumtables}
 
 
 Note that Table \ref{tab:simsparse} represents only a small portion of our
