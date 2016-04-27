@@ -76,7 +76,7 @@ We use Coordinate descent \citep[CD; e.g.,][]{luenberger_linear_2008} to minimiz
 (3) at each step along the path. CD is a local optimization
 algorithm that cycles through minimization of the conditional objective for
 individual parameters when the remaining parameters are fixed. Algorithms of this type have have become popular in
-$L_1$ penalized estimation since the work by \citet{friedman_pathwise_2007} and
+$\ell_1$ penalized estimation since the work by \citet{friedman_pathwise_2007} and
 \citet{wu_coordinate_2008}.
 
 Our CD routine, outlined in Algorithm \ref{bmove}, is a solver for penalized
@@ -100,7 +100,7 @@ solution. For binomial regression, $v_i = q_i(1-q_i)$ and $z_i = \hat\eta_i -
 probability of success.
 
 This yields $\bs{\beta} = (\bm{X}'\bm{V}\bm{X})^{-1}\bm{X}'\bm{V}\bm{z}$, such
-that the Newton update solves a weighted-least-squares problem.   Adding $L_1$
+that the Newton update solves a weighted-least-squares problem.   Adding $\ell_1$
 costs,  the minimization objective from (3) becomes
 \begin{equation} \label{newton}  \argmin_{\alpha,\beta_1 \ldots \beta_p \in
 \ds{R}} \sum_i \frac{v_i}{2}(\alpha + \bm{x}_i'\bs{\beta} - z_i)^2  + n\sum_j \omega_j
@@ -162,7 +162,7 @@ and $\bs{\hat\eta} = \hat\alpha + \bm{X}'\bs{\hat\beta}$.
 non-differentiable part of our objective is a sum of functions on only a
 single coordinate.  Thus CD solves each weighted-least squares problem, and
 the full algorithm converges if IRLS does.  For non-Gaussian models,
-convergence of such nested $L_1$-penalized IRLS algorithms is shown
+convergence of such nested $\ell_1$-penalized IRLS algorithms is shown
 in \cite{lee_proximal_2014}.
 
 \subsection{Quasi-Newton acceleration}
@@ -210,11 +210,11 @@ $.
 In each case, it is implied that $\hat\alpha$ has been set
 to minimize $l(\alpha,\bs{\hat\beta})$. 
 
-For $L_1$ costs $c_j(|\beta_j|) = |\beta_j|$, the infimum $\lambda$ such
+For $\ell_1$ costs $c_j(|\beta_j|) = |\beta_j|$, the infimum $\lambda$ such
 that $\bs{\hat\beta} = \bm{0}$ is  available analytically as
 $\lambda^1 =
 n^{-1}\max\{|g_j(\bm{0})|,~j=1\ldots p\}$, the maximum mean
-absolute gradient for the null model with $\bs{\beta} = \bm{0}$.  This formula
+absolute gradient for the null model with $\bs{\hat\beta} = \bm{0}$.  This formula
 is used to obtain our starting values for the path algorithms.
 
 
@@ -240,10 +240,10 @@ Our results will require irrepresentable conditions with $\bm{v} =
 weights $\omega_j$ for $j\in S$.  See the remarks for more discussion.
 
 Our comparison of interest is between $\hat S = \{j:
-\hat\beta_j \neq 0\}$, for $\bs{\hat\beta}$ from weighted-$L_1$ penalized
+\hat\beta_j \neq 0\}$, for $\bs{\hat\beta}$ from weighted-$\ell_1$ penalized
 estimation, and $S = \{j:
-\beta^\nu_j \neq 0\}$ for $\bs{\beta}^\nu$ the $L_0$ penalized estimator from
-Theorem 3.1. Whether looking to an $L_0$ oracle or a sparse
+\beta^\nu_j \neq 0\}$ for $\bs{\beta}^\nu$ the $\ell_0$ penalized estimator from
+Theorem 3.1. Whether looking to an $\ell_0$ oracle or a sparse
 truth, our experience is that exact support recovery does not occur in
 practice   (e.g., see the simulation in Section 5).  Thus, we instead 
 focus on ability of the weighted-lasso to minimize {\it false discoveries}:
@@ -295,7 +295,7 @@ $\left|(\bm{X}_S'\bm{X}_S)^{-1}\bm{X}_S'\bm{y}\right|_\infty > n\lambda\left|(\b
 $\mr{sgn}(\bs{\hat\beta}) = \mr{sgn}(\bs{\beta}^\nu)$.
 \end{lemma}
 \begin{proof} 
-The Karush-Kuhn-Tucker (KKT) conditions at weighted-$L_1$ minimization convergence imply that 
+The Karush-Kuhn-Tucker (KKT) conditions at weighted-$\ell_1$ minimization convergence imply that 
 \begin{equation}
 \bm{x}_j'\bm{X}(\bs{\hat\beta}-\bs{\beta}^\nu) + \bm{x}_j'\bm{e}^S = -n\lambda\zeta_j~~\text{for}~~j=1\dots p
 \end{equation} where $|\zeta_j| = \omega_j$ for $j\in\hat S$ and $|\zeta_j| \leq \omega_j$ for $j\in\hat S^c$.  Following  closely related proofs in \cite{wainwright_sharp_2006,wainwright_sharp_2009,zhou_adaptive_2009}, 
@@ -416,7 +416,7 @@ implied prediction function, $\boldsymbol{\hat y} = \bm{X}\boldsymbol{\hat
 \beta}(\bm{y})$, which requires that   $
 \|\bm{\hat y}(\bm{y}_1)-\bm{\hat y}(\bm{y}_2)| \leq L\|\bm{y}_1-\bm{y}_2\| $
 for some finite constant $L$ on all possible $\bm{y}_1,\bm{y}_2$.
-\citet{zou_degrees_2007} establish Lipschitz continuity for $L_1$ estimated
+\citet{zou_degrees_2007} establish Lipschitz continuity for $\ell_1$ estimated
 predictors as part of their derivation of a degrees-of-freedom estimator.
 Thus, conditional upon values for the coefficient-specific weights, POSE and
 GL are trivially Lipschitz continuous.  Unconditionally, we do not believe
