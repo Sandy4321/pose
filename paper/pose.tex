@@ -292,26 +292,28 @@ The gamma lasso (GL) specification for POSE is based upon the log penalty,
 \begin{equation}\label{logpen}
 c(\beta_j) =  \gamma^{-1}\log(1+\gamma|\beta_j|),
 \end{equation} where $\gamma > 0$. 
-This appears under a variety of parameterizations and names in the
-literature; see
-\citet{mazumder_sparsenet_2011} and applications in
+This appears under a variety of parameterizations and names in the literature;
+see \citet{mazumder_sparsenet_2011} and applications in
 \citet{friedman_fast_2008}, \citet{candes_enhancing_2008},
-\citet{cevher_learning_2009}, \citet{taddy_multinomial_2013} and \citet{armagan_generalized_2013}. 
- The
-penalty is nondifferentiable at zero and is concave away from zero with curvature $c''(b) = -\gamma/(1+\gamma|b|)^2$ and gradient $c'(b) = 1/(1+\gamma|b|)$ (note that $\lim_{b\to 0} c'(b) = 1$ as required).  The penalty in (\ref{logpen})  spans the
-range from $\ell_1$ to $\ell_0$ 
-costs: L'Hopital's rule implies $\lim_{\gamma\to 0} c(b) = |b|$, while $\lim_{\gamma\to \infty} c'(b) = 0$ if $b\neq 0$ for a flat $\ell_0$ penalization (this latter case is complicated, because $\lim_{\gamma\to \infty} c(b) = 0$;  we also need $\lambda$ to grow with $\gamma/\log\gamma$ so that the cost doesn't just go to zero).
+\citet{cevher_learning_2009}, \citet{taddy_multinomial_2013} and
+\citet{armagan_generalized_2013}.   The penalty is nondifferentiable at zero
+and concave away from zero with curvature $c''(|b|) =
+-\gamma/(1+\gamma|b|)^2$ and gradient $c'(|b|) = 1/(1+\gamma|b|)$ (note that
+$\lim_{b\to 0} c'(b) = 1$ as required).  This  spans
+the range from $\ell_1$ to $\ell_0$  costs: L'Hopital's rule implies
+$\lim_{\gamma\to 0} c(b) = |b|$, and large values of $\gamma$ yield $c'(|b|) \approx 0$ for $\ell_0$-type penalization 
+(although $\lim_{\gamma\to\infty} c(b) = 0$, POSE yields forward stepwise selection in the limit).
+
 
 GL simply replaces line (\ref{wset}) in Algorithm \ref{posealgo}  with
-\begin{equation}\label{gammalasso}
-\omega^{t}_j  = \left(1 + \gamma |\hat\beta^{t-1}_j|\right)^{-1} ~~j=1\ldots p 
-\end{equation}
-Behavior of the resulting paths  is governed by $\gamma$, which we refer to as the
-penalty {\it scale}.  Under $\gamma=0$, GL is just the usual lasso.
- Bias diminishes faster for larger $\gamma$ and, at the  extreme,
-$\gamma=\infty$ yields a subset selection routine where a coefficient is
-unpenalized in all segments after it first becomes nonzero. Figure
-\ref{gamlr_eg} shows solutions in a simple problem.
+\begin{equation}\label{gammalasso} \omega^{t}_j  = \left(1 + \gamma
+|\hat\beta^{t-1}_j|\right)^{-1} ~~j=1\ldots p  \end{equation} Behavior of the
+resulting paths  is governed by $\gamma$, which we refer to as the penalty
+{\it scale}.  Under $\gamma=0$, GL is just the usual lasso.  Bias diminishes
+faster for larger $\gamma$.  At the  extreme, $\gamma=\infty$ yields a greedy
+subset selection routine where a coefficient is unpenalized in all segments
+after it first becomes nonzero.   Figure \ref{gamlr_eg} shows solutions in a
+simple problem.
 
 Each  gamma lasso path segment is solved through coordinate descent (see supplement).  The algorithm is implemented in {\tt
 c} as part of the {\tt gamlr} package for {\sf R}. 
