@@ -44,11 +44,10 @@
 \begin{document}
 \setcounter{equation}{20}
 \setcounter{section}{6}
-\setcounter{table}{2}
+\setcounter{table}{3}
 \setcounter{figure}{3}
 \sgl 
 
-\pagestyle{empty}
 
 ~
 \vskip .5cm
@@ -225,7 +224,7 @@ For standard lasso estimated $\bs{\hat\beta}$, many authors have shown \citep[e.
 \begin{definition} 
 The $(\theta,S,\bm{v})$-irrepresentable condition for $\theta\in[0,1]$ and $\bm{v}\in \ds{R}^s$ holds that, 
 \begin{equation}\label{irrep}
-|\bs{x}_j'\bm{X}_S(\bm{X}_S'\bm{X}_S)^{-1}\bm{v}| \leq \theta ~~\forall~j\notin S
+|\bs{\chi}_j'\bm{X}_S(\bm{X}_S'\bm{X}_S)^{-1}\bm{v}| \leq \theta ~~\forall~j\notin S
 \end{equation}
 \end{definition}
 \noindent This is often presented with $\bm{v}=\bm{1}$.\footnote{\cite{wainwright_sharp_2009} shows that (\ref{irrep}) with $\theta=1$, $\bm{v}=\bm{1}$ is necessary for lasso sign recovery in the {\it noiseless} setting.} It
@@ -265,14 +264,14 @@ If $\omega_{S^c}^{\mr{min}} = 1$ and $\lambda > \sqrt{2\nu}$ then
 \noindent $\bullet$~~ 
 From Theorem 7.4 in \cite{buhlmann_statistics_2011}, 
 the irrepresentability condition holds with 
-$|\bs{x}_j'\bm{X}_S(\bm{X}_S'\bm{X}_S)^{-1}\bs{\omega}_S|
+$|\bs{\chi}_j'\bm{X}_S(\bm{X}_S'\bm{X}_S)^{-1}\bs{\omega}_S|
 \leq \frac{\|\bs{\omega}_S\|}{\sqrt{s}}\theta_{\mr{adap}}(S)$ where $\theta_{\mr{adap}}(S)$ is their `adaptive restricted regression' coefficient.  Of interest here, they show that $\theta_{\mr{adap}}(S) \leq \sqrt{s}/\Lambda_{\mr{min}}(S)$ where $\Lambda_{\mr{min}}(S)$ is the minimum eigenvalue of $\bm{X}_S'\bm{X}_S/n$.  Thus, $(i)$ can be replaced by the restriction $\Lambda_{\mr{min}}(S) \geq \|\bs{\omega}_S\|(1 - \sqrt{2\nu}/(\omega_{S^c}^{\mr{min}}\lambda))^{-1} = \sqrt{s}L$, with $L$ from Theorem 3.1, and small values for $L$ appear key in both predictive performance and support recovery.
 
 \vskip .25cm
 \noindent $\bullet$~~ Without irrepresentability,  limits on false discovery are more pessimistic.  Convergence
 conditions imply that for $j \in S^c \cap \hat S$ we have
-$n\lambda \omega_j = |\bs{x}_j'(\bm{X}\bs{\hat\beta}-\bm{y})| \leq
-|\bs{x}_j'\bm{X}(\bs{\hat\beta}-\bs{\beta}^\nu)| + |\bs{x}_j'\bm{e}^S| \leq
+$n\lambda \omega_j = |\bs{\chi}_j'(\bm{X}\bs{\hat\beta}-\bm{y})| \leq
+|\bs{\chi}_j'\bm{X}(\bs{\hat\beta}-\bs{\beta}^\nu)| + |\bs{\chi}_j'\bm{e}^S| \leq
 n\left(2\|\bs{\omega}_S\|/\phi(L,S) + \sqrt{2\nu}/\lambda\right) ~\forall~j$. 
 Dividing by $n\lambda\omega_j$ and counting yields
 \begin{equation}\label{pessimism}
@@ -288,7 +287,7 @@ like that of \citealt{zhou_thresholding_2009}), the result in (\ref{pessimism}) 
 \begin{lemma}\label{signrecov}
 Under the setting of Theorem 3.1, with $\hat S = \{j:\hat\beta_j \neq 0\}$, if $\omega_{S^c}^{\mr{min}}\lambda > \sqrt{2\nu}$ then
 \begin{equation}
-|\bs{x}_j'\bm{X}_S(\bm{X}_S'\bm{X}_S)^{-1}\bs{\omega}_S| \leq 1 - \frac{\sqrt{2\nu}}{\lambda\omega_j}~~\forall~j ~\in~S^c \Rightarrow \hat{S} \cap S^c = \varnothing.
+|\bs{\chi}_j'\bm{X}_S(\bm{X}_S'\bm{X}_S)^{-1}\bs{\omega}_S| \leq 1 - \frac{\sqrt{2\nu}}{\lambda\omega_j}~~\forall~j ~\in~S^c \Rightarrow \hat{S} \cap S^c = \varnothing.
 \end{equation}
  If in addition
 $\left|(\bm{X}_S'\bm{X}_S)^{-1}\bm{X}_S'\bm{y}\right|_\infty > n\lambda\left|(\bm{X}_S'\bm{X}_S)^{-1}\bs{\omega}_S\right|_\infty$, then 
@@ -307,9 +306,9 @@ hold for projections restricted to $S$,
 Thus all of the spurious regressors in $S^c$ will have $\hat \beta_j = 0$
 if and only if
 \begin{equation}
-\bs{x}_j'\bm{X}_S(\bs{\hat\beta}_S-\bs{\beta}^\nu_S) - \bs{x}_j'\bm{e}^S 
+\bs{\chi}_j'\bm{X}_S(\bs{\hat\beta}_S-\bs{\beta}^\nu_S) - \bs{\chi}_j'\bm{e}^S 
 \leq n\lambda\zeta_j ~~\Leftarrow~~
-1 - \frac{|x_j'\bm{e}^S|}{n} \geq 1 - \frac{\sqrt{2\nu}}{\lambda\omega_j} \geq |\bs{x}_j'\bm{X}_S(\bm{X}_S'\bm{X}_S)^{-1}\bs{\omega}_S|.
+1 - \frac{|x_j'\bm{e}^S|}{n} \geq 1 - \frac{\sqrt{2\nu}}{\lambda\omega_j} \geq |\bs{\chi}_j'\bm{X}_S(\bm{X}_S'\bm{X}_S)^{-1}\bs{\omega}_S|.
 \end{equation}
 Finally, for sign recovery on $j\in S$ we need 
 $
@@ -327,19 +326,19 @@ and our stated condition follows from  $\bs{\beta^\nu}_S =
 Theorem 3.1 uses the following simple result for stagewise regression -- iterative fitting of new covariates to the residuals of an existing linear model (as in, e.g., \citealt{goldberger_stepwise_1961}). 
 \begin{lemma}\label{SSElemma}
 Say $\mr{MSE}_S = \|\bm{X}\bs{\beta}^S-\bm{y}\|^2/n$ and 
-$\mr{cov}(\bs{x}_j,\bm{e}^S) = \bs{x}_j'(\bm{y}-\bm{X}\bs{\beta}^S)/n$ are sample variance and covariances.  Then for any $j \in 1\ldots p$, 
+$\mr{cov}(\bs{\chi}_j,\bm{e}^S) = \bs{\chi}_j'(\bm{y}-\bm{X}\bs{\beta}^S)/n$ are sample variance and covariances.  Then for any $j \in 1\ldots p$, 
 \[
-\mr{cov}^2(\bs{x}_j,\bm{e}^S) \leq \mr{MSE}_S - \mr{MSE}_{S\cup j}
+\mr{cov}^2(\bs{\chi}_j,\bm{e}^S) \leq \mr{MSE}_S - \mr{MSE}_{S\cup j}
 \]
 \end{lemma}
 \begin{proof}
 From the well-known property on the correlation coefficient ($R^2$) for linear models,   
 in-sample correlation and variances are such that
 \[
-\frac{\mr{cov}^2(\bs{x}_j,\bm{e}^S)}{\mr{var}(\bs{x}_j)\mr{var}(\bm{e}^S)} = 1 - \frac{\mr{var}(\bm{e}^S-\tilde\beta_j\bs{x}_j)}{\mr{var}(\bm{e}^S)}
+\frac{\mr{cov}^2(\bs{\chi}_j,\bm{e}^S)}{\mr{var}(\bs{\chi}_j)\mr{var}(\bm{e}^S)} = 1 - \frac{\mr{var}(\bm{e}^S-\tilde\beta_j\bs{\chi}_j)}{\mr{var}(\bm{e}^S)}
 \]
-where $\tilde\beta_j = \bs{x}_j'\bm{e}^S/(\bs{x}_j'\bs{x}_j)$ is the stagewise coefficient estimate.  Since $\mr{var}(\bs{x}_j)=1$, multiplying everything by $\mr{var}(\bm{e}^S)$ yields $\mr{cov}^2(\bs{x}_j,\bm{e}^S) =
-\mr{var}(\bm{e}^S) - \mr{var}(\bm{e}^S-\tilde\beta_j\bs{x}_j)
+where $\tilde\beta_j = \bs{\chi}_j'\bm{e}^S/(\bs{\chi}_j'\bs{\chi}_j)$ is the stagewise coefficient estimate.  Since $\mr{var}(\bs{\chi}_j)=1$, multiplying everything by $\mr{var}(\bm{e}^S)$ yields $\mr{cov}^2(\bs{\chi}_j,\bm{e}^S) =
+\mr{var}(\bm{e}^S) - \mr{var}(\bm{e}^S-\tilde\beta_j\bs{\chi}_j)
 \leq \mr{var}(\bm{e}^S) - \mr{var}(\bm{e}^{S\cup j})$.
 The last inequality holds because $\bm{e}^{S\cup j}$, residuals from OLS on $\bm{X}_{S\cup j}$, have the smallest-possible sum of squares for that set of covariates.  With $\mr{var}(\bm{e}^S) = \mr{MSE}_S$, etc, we are done.
 \end{proof}
@@ -553,9 +552,63 @@ ${\sf d}$ of $10$, $50$, $100$, and $200$.
 % dev.off()
 
 
+\noindent{\bf }
+\vskip .5cm
 \setstretch{1}
 \bibliographystyle{chicago}
 \bibliography{taddy}
+
+\vskip .5cm
+
+\noindent {\bf\large Detailed simulation tables}
+
+\vskip .25cm
+\noindent
+The remainder presents detailed tabulation of prediction MSE (Tables 4-35), 
+estimation MSE (36-67),  estimated model dimension (68-99), 
+and sensitivity/FDR  (100-131) across all 
+simulation models and selection methods.
+
+\vskip .25cm\footnotesize
+\noindent{\bf  Prediction MSE }
+\begin{itemize}
+\vspace{-.1cm}
+  \setlength\itemsep{0em}
+\item[] n=1000, sparse simulation model: tables 4-11
+\item[] n=1000, dense simulation model: tables 12-19
+\item[] n=100, sparse simulation model: tables 20-27 
+\item[] n=100, dense simulation model: tables 28-35
+\end{itemize}
+\noindent{\bf  Estimation MSE }
+\begin{itemize}
+\vspace{-.1cm}
+  \setlength\itemsep{0em}
+\item[] n=1000, sparse simulation model: tables 36-43
+\item[] n=1000, dense simulation model: tables 44-51
+\item[] n=100, sparse simulation model: tables 52-59 
+\item[] n=100, dense simulation model: tables 60-67
+\end{itemize}
+
+\noindent{\bf  Fitted Model Dimension }
+\begin{itemize}
+\vspace{-.1cm}
+  \setlength\itemsep{0em}
+\item[] n=1000, sparse simulation model: tables 68-75
+\item[] n=1000, dense simulation model: tables 76-83
+\item[] n=100, sparse simulation model: tables 84-91 
+\item[] n=100, dense simulation model: tables 92-99
+\end{itemize}
+
+\noindent{\bf  Sensitivity and FDR }
+\begin{itemize}
+\vspace{-.1cm}
+  \setlength\itemsep{0em}
+\item[] n=1000, sparse simulation model: tables 100-107
+\item[] n=1000, dense simulation model: tables 108-115
+\item[] n=100, sparse simulation model: tables 116-123
+\item[] n=100, dense simulation model: tables 124-131
+\end{itemize}
+
 
 \include{simulations}
 

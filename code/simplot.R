@@ -400,13 +400,8 @@ The best results are bolded.}
 }
 
 
-#printSummary("paper/sumtables.tex")
+printestimsumline  <- function(fname="", nobs, support, s2n, root=TRUE){
 
-
-
-printestimsumline  <- function(fname="", nobs, support, s2n, decay, root=TRUE){
-	if(decay=="fast") dset <- c(10,50)
-	else dset <- c(100,200)
 
 	if(s2n == 1) cat(sprintf("\\it n=%d", nobs), " & \\it ", s2n, " & ", file=fname, append=TRUE)
 	else cat("& \\it ", s2n, " & ", file=fname, append=TRUE)
@@ -414,7 +409,7 @@ printestimsumline  <- function(fname="", nobs, support, s2n, decay, root=TRUE){
 	mse <- c()
 	for(design in c("binary","continuous"))
 		for(rho in c(0,0.5,0.9))
-			for(decay in dset){
+			for(decay in c(10,50,100,200)){
 				mse <- rbind(mse, getit("estmse",nobs, design, support, rho,s2n,decay))
 		}
 
@@ -430,7 +425,7 @@ printestimsumline  <- function(fname="", nobs, support, s2n, decay, root=TRUE){
 		"gl1.AICc","gl1.CV.min",
 		"gl10.AICc","gl10.CV.min",
 		"mrg.AICc","mrg.CV.min","snetmin")]
-	m <- round( m, 3)
+	m <- round( m, 2)
 
 	best <- min(m)
 	isbest <- which( m==best )
@@ -451,15 +446,6 @@ printEstimSummary <- function(fname="", root=TRUE){
 	if(root) msepre <- "R"
 	else msepre <- ""
 	preamble <- sprintf("
-\\begin{table}[h!]
-\\footnotesize
-\\caption{\\label{tab:esttables}Summary of estimation %sMSE against the true coefficients,
-averaged over 1000  samples from our simulation model under different designs and $\\rho$.
-The Oracle is MLE fit either on  $C_p$-optimal support for the dense model or
-on the true sparse support.  
-The best results are bolded.}
-\\begin{center}
-\\vskip -.5cm
 \\begin{tabular}{cc|cc|cc|cc|cc|c|c}
 & & \\multicolumn{9}{l}{\\bf %sMSE} & \\\\[1ex]
 & \\multirow{2}{*}{$\\displaystyle\\frac{\\mathrm{sd}(\\boldsymbol{\\eta})}{\\sigma}$} 
@@ -475,56 +461,26 @@ The best results are bolded.}
 & ~~\\scriptsize\\it AICc & \\multicolumn{1}{c}{\\scriptsize\\it CV~~}
 & \\multicolumn{1}{c}{ MCP} & \\it Oracle \\\\[1ex]
 \\hline
-", msepre)
+", msepre, msepre)
 	cat(preamble,file=fname, append=TRUE)
-	for(support in c("dense", "sparse"))
-		for(decay in c("fast","slow")){
-			cat(sprintf(
-				"\\multicolumn{2}{l|}{\\it %s model,} &&&&&&&&&\\\\
-\\multicolumn{2}{l|}{\\it %s decay} &&&&&&&&&\\\\", support, decay), 
+	for(support in c("dense","sparse")){
+		cat(sprintf(
+				"\\multicolumn{2}{l|}{\\it %s model} &&&&&&&&&\\\\", support), 
 				file=fname, append=TRUE)
 			for(nobs in c(1000,100))
 				for(s2n in c(2,1,1/2)){
-					printestimsumline(fname=fname, nobs,support,s2n, decay, root=root)
+					printestimsumline(fname=fname, nobs,support,s2n, root=root)
 			}
-	}
+		}
 
-	cat(sprintf("\\end{tabular}
-\\end{center}
-\\end{table}
-\n", msepre), file=fname, append=TRUE)
+	cat("\\end{tabular}\n")
 }
 
-
+printEstimSummary()
 
 printsupp <- function(fname){
 
 cat("%%!TEX root = supplemental.tex\n\n", file=fname)
-
-print("summary")
-cat("\\noindent {\\bf\\large Detailed simulation results}
-
-\\vskip .25cm
-\\noindent
-Table \\ref{tab:esttables} is a summary of estimation error 
-across various configurations of our simulation model, 
-analogous to the predictive RMSE table in the main draft.
-This is followed by detailed tabulation of prediction MSE (Tables 4-35), 
-estimation MSE (36-67),  estimated model dimension (68-99), 
-and sensitivity/FDR across (100-131) all 
-simulation models and selection methods.
-\\vskip .25cm
-
-", file=fname, append=TRUE)
-
-# #cat("\\subsection{Summary out-of-sample prediction results}\n\n", file=fname, append=TRUE)
-# for(nobs in c(100,1000))
-# 	for(support in c("dense","sparse"))
-# 		for(design in c("binary","continuous")){
-# 			printR2tab(nobs,design,support,fname=fname)
-# 			cat("\n\n",file=fname, append=TRUE)
-# 		}
-printEstimSummary(fname)
 
 print("mse")
 #cat("\\subsection{Detailed out-of-sample prediction results}\n\n", file=fname, append=TRUE)
@@ -569,4 +525,50 @@ for(nobs in c(1000,100))
 }
 
 
-printsupp("paper/simulations.tex")
+#printsupp("paper/simulations.tex")
+
+
+cat("Detailed out-of-sample prediction results\n", file=fname, append=TRUE)
+
+counter=4
+for pred
+for(nobs in c(1000,100))
+	for(support in c("dense","sparse"))
+		for(design in c("binary","continuous"))
+			for(decay in c(10,50,100,200)){		
+				printMSE(fname=fname, nobs,design,support,decay)
+				cat("\n\n",file=fname, append=TRUE)
+		}
+
+print("estimation")
+#cat("\\subsection{Estimation error relative to true parameters}\n\n", file=fname, append=TRUE)
+for(nobs in c(1000,100))
+	for(support in c("dense","sparse"))
+		for(design in c("binary","continuous"))
+			for(decay in c(10,50,100,200)){		
+				printEMSE(fname=fname, nobs,design,support,decay)
+				cat("\n\n",file=fname, append=TRUE)
+		}
+
+print("support")
+#cat("\\subsection{Number of estimated nonzero coefficients}\n\n", file=fname, append=TRUE)
+for(nobs in c(1000,100))
+	for(support in c("dense","sparse"))
+		for(design in c("binary","continuous"))
+			for(decay in c(10,50,100,200)){		
+				printS(fname=fname, nobs,design,support,decay)
+				cat("\n\n",file=fname, append=TRUE)
+		}
+
+print("sensitivity")
+#cat("\\subsection{Sensitivity and false discovery relative to true parameters
+# (sparse covariates) or the $\\boldsymbol{C_p}$ Oracle (dense covariates). }\n\n", file=fname, append=TRUE)
+for(nobs in c(1000,100))
+	for(support in c("dense","sparse"))
+		for(design in c("binary","continuous"))
+			for(decay in c(10,50,100,200)){		
+				printsens(fname=fname, nobs,design,support,decay)
+				cat("\n\n",file=fname, append=TRUE)
+		}
+}
+

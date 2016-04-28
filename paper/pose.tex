@@ -828,6 +828,43 @@ $\boldsymbol{{\sf d} = 200}$
 The {\sf\footnotesize w-min} values are $\omega^{\mr{min}}_{S^c}$, {\sf\footnotesize w-norm} are $\|\bs{\omega}_S\|$, and {\sf\footnotesize L} is the restricted eigenvalue constant; all as defined in Theorem \ref{thm:sparseapprox}.  Note that, by construction, the $\lambda$ grids are the same across all algorithms.}  
 \end{figure}
 
+\begin{table}[ht]
+\footnotesize
+\begin{center}
+\vskip -.5cm
+\begin{tabular}{cc|cc|cc|cc|cc|c|c}
+& & \multicolumn{9}{l}{\bf Estimation RMSE on true coefficients} & \\[1ex]
+& \multirow{2}{*}{$\displaystyle\frac{\mathrm{sd}(\boldsymbol{\eta})}{\sigma}$} 
+& \multicolumn{2}{c}{lasso} 
+& \multicolumn{2}{c}{GL $\gamma=1$} 
+& \multicolumn{2}{c}{GL $\gamma=10$} 
+& \multicolumn{2}{c}{ adapt. lasso} 
+& \multicolumn{1}{c}{~} & \\[-0.5ex]
+& 
+& ~~\scriptsize\it AICc & \multicolumn{1}{c}{\scriptsize\it CV~~}
+& ~~\scriptsize\it AICc & \multicolumn{1}{c}{\scriptsize\it CV~~}
+& ~~\scriptsize\it AICc & \multicolumn{1}{c}{\scriptsize\it CV~~}
+& ~~\scriptsize\it AICc & \multicolumn{1}{c}{\scriptsize\it CV~~}
+& \multicolumn{1}{c}{ MCP} & \it Oracle \\[1ex]
+\hline\multicolumn{2}{l|}{\it sparse model} &&&&&&&&&\\& \it  2  & 0.05 & 0.05 & 0.04 & 0.03 & 0.01 & {\bf 0} & 1.78 & 1.77 & {\bf 0} & \it  0.00 \\
+\it n=1000  & \it  1  & 0.12 & {\bf 0.11} & {\bf 0.11} & {\bf 0.11} & 0.13 & 0.12 & 3.41 & 3.41 & {\bf 0.11} & \it  0.02 \\
+& \it  0.5  & {\bf 0.15} & {\bf 0.15} & {\bf 0.15} & {\bf 0.15} & 0.17 & {\bf 0.15} & 6.47 & 6.54 & {\bf 0.15} & \it  0.10 \\[1ex]
+\cline{2-2}\rule{0pt}{3ex}& \it  2  & 0.05 & 0.04 & {\bf 0.03} & 0.04 & 0.04 & 0.06 & 1.07 & 1.02 & 0.04 & \it  0.00 \\
+\it n=100  & \it  1  & {\bf 0.07} & 0.08 & 0.08 & 0.08 & 0.12 & 0.08 & 1.89 & 2.02 & 0.08 & \it  0.00 \\
+& \it  0.5  & {\bf 0.08} & {\bf 0.08} & 0.12 & {\bf 0.08} & 0.2 & {\bf 0.08} & 3.49 & 4.03 & {\bf 0.08} & \it  0.02 \\[1ex]
+\hline\end{tabular}
+\end{center}
+\vskip -.25cm
+\caption{\label{tab:esttables}Summary of estimation RMSE against the 
+true coefficients from our {\it sparse} simulation model. 
+ Results are averages over 1000 samples from each of the
+ possible data generating process configurations, 
+including both binary and continuous designs, 
+$\rho$ in \{0, 0.5, .9\} and all of our decay values.
+The Oracle is MLE fit  
+on the true sparse support and the best results are bolded.}
+\end{table}
+
 \vskip .1cm \noindent {\bf Remarks}
 
 \vskip .1cm \noindent $\bullet$~~ AICc selection for one of the three GL $\gamma$-specifications is always able to provide performance near to that of the computationally intensive routine of CV-selected MCP (over a grid in penalty size and scale).  The best GL OOS $R^2$ is never more than 4\% worse than MCP overall and never more than 2\% worse for all but the ${\sf d}=200$ (essentially dense regression) specifications; GL also occasionally outperforms MCP. 
