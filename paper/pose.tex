@@ -109,17 +109,16 @@ with little bias.
 The combination of  \textit{sparsity} and \textit{diminishing-bias} 
  is appealing in many settings, and a large literature on concave
 penalized estimation has developed over the past 15 years.  For example, many
-authors (e.g., from \citealt{fan_variable_2001} and
-\citealt{fan_nonconcave_2004})  have contributed work on their \textit{oracle
+authors \citep{fan_variable_2001,fan_nonconcave_2004}  have contributed work on their \textit{oracle
 properties}, a class of results showing conditions under which coefficient
 estimates through concave penalization, or in related schemes, will be the
 same as if you knew the sparse `truth' (either asymptotically or with high
 probability).   From an information compression perspective,  the increased
 sparsity encouraged by diminishing-bias penalties (since single large
-coefficients are allowed to account for the signals of other correlated
+coefficients are able to account for the signals of other correlated
 covariates) leads to lower memory, storage, and communication requirements.
-Such savings are very important in distributed  computing schemes
-\citep[e.g.,][]{taddy_distributed_2015}.
+Such savings are important in distributed  computing systems
+\citep[e.g.,][]{taddy_distributed_2015} and they are the original motivation behind our work here.
 
 
 Unfortunately,  exact solvers for nonconvex penalized estimation  all require
@@ -300,9 +299,10 @@ see \citet{mazumder_sparsenet_2011} and applications in
 and concave away from zero with curvature $c''(|b|) =
 -\gamma/(1+\gamma|b|)^2$ and gradient $c'(|b|) = 1/(1+\gamma|b|)$ (note that
 $\lim_{b\to 0} c'(b) = 1$ as required).  This  spans
-the range from $\ell_1$ to $\ell_0$  costs: L'Hopital's rule implies
-$\lim_{\gamma\to 0} c(b) = |b|$, and large values of $\gamma$ yield $c'(|b|) \approx 0$ for $\ell_0$-type penalization 
-(although $\lim_{\gamma\to\infty} c(b) = 0$, POSE yields forward stepwise selection in the limit).
+the range from $\ell_1$ to $\ell_0$  penalization: 
+$\lim_{\gamma\to 0} c(b) = |b|$, 
+while large $\gamma$  yield $\ell_0$-type costs with $c'(|b|) \approx 0~\forall b\neq 0$. 
+(Note that $\lim_{\gamma\to\infty} c(b) = 0$; however, POSE yields forward stepwise selection in this limit).
 
 
 GL simply replaces line (\ref{wset}) in Algorithm \ref{posealgo}  with
@@ -397,6 +397,9 @@ Our oracle benchmark is estimation under $\ell_0$ costs, $c(\beta_j) =
 interested in weighted-$\ell_1$ penalization as a way to obtain fits that are as
 sparse as possible without compromising predictive ability, regardless of the
 underlying data generating process (or `true' sparsity).  Throughout, we consider the design $\bm{X}$ as {\it fixed}.
+
+This is different from the setup that is more familiar to statisticians, where
+the oracle comparator is likelihood maximization on the some assumed true support.
 
  For  $S \subset \{1\ldots p\}$ with cardinality $|S|=s$ and complement $S^c =
 \{1\ldots p\}\setminus S$, denote vectors restricted to covariates in $S$ as
