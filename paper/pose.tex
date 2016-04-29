@@ -422,7 +422,7 @@ to an optimization objective rather than to some true model, we are able to
 present a finite-sample fully-nonparametric result with a straightforward and intuitive proof. Obviously, this result is only useful if an optimally-tuned $\ell_0$
 penalized estimator would work well for the problem at hand. However,  there
 is theoretical support for optimality of $\ell_0$ penalization in a
- variety of high-dimensional estimation settings
+ variety of high-dimensional prediction settings
 \citep[e.g,][]{mallows_comments_1973,efron_estimation_2004}.  Indeed, our
 simulation studies show that $\ell_0$ oracles are nearly always the
 best performing option in terms of both prediction and estimation error.  In
@@ -466,49 +466,49 @@ from $\ell_0$ and weighted-$\ell_1$ regularization.
 
 \begin{theorem} \label{thm:sparseapprox}  Consider squared-error loss
 $l(\bs{\beta}) =
-\frac{1}{2}\|\bm{X}\bs{\beta}-\bm{y}\|^2$, and suppose $\bs{\beta}^{\nu}$ minimizes the $\ell_0$ penalized objective $l(\bs{\beta}) + n\nu\sum_{j=1}^p\ds{1}_{\{\beta_j\neq0\}}$ with $\bs{\beta}^\nu = \bs{\beta}^S$ and $|S|=s<n$.   
+\frac{1}{2}\|\bm{X}\bs{\beta}-\bm{y}\|^2$, and suppose $\bs{\beta}^{S}$ minimizes the $\ell_0$ penalized objective $l(\bs{\beta}) + n\nu\sum_{j=1}^p\ds{1}_{\{\beta_j\neq0\}}$ with  $|S|=s<n$.   
 Write $\bs{\hat\beta}$ as solution to the weighted-$\ell_1$ minimization $l(\bs{\beta}) + n\lambda\sum_j\omega_j|\beta_j|$. 
 
 Then  
 $\omega^{\mr{min}}_{S^c}\lambda > \sqrt{2\nu}$ while $\phi^2(L,S) > 0$, with 
  $L = \frac{\|\bs{\omega}_S\|}{\sqrt{s}}\left(\omega^{\mr{min}}_{S^c}-\sqrt{2\nu}/\lambda\right)^{-1}$, implies
 \begin{equation} \label{sparseineq}
-\frac{\|\bm{X}(\bs{\hat\beta}-\bs{\beta}^\nu)\|^2}{n}\leq
+\frac{\|\bm{X}(\bs{\hat\beta}-\bs{\beta}^S)\|^2}{n}\leq
 \frac{4\lambda^2 \|\bs{\omega}_S\|^2}{\phi^2(L, S)}.
 \end{equation} 
 \end{theorem}
 
 \begin{proof}
-From the definitions of $\bs{\hat\beta}$ and $\bs{\beta}^\nu = \bs{\beta}^S$, 
+From the definitions of $\bs{\hat\beta}$ and $\bs{\beta}^S$, 
 \begin{align}\label{predconv}
-\frac{1}{2}\|\bm{X}\bs{\hat \beta}-\bm{y}\|^2 +  n\lambda\sum_j\omega_j|\hat\beta_j|   &= \frac{\|\bm{X}(\bs{\hat\beta}-\bs{\beta}^\nu)\|^2}{2} + \frac{\|\bm{e}^S\|^2}{2} - \bm{\hat y}'\bm{e}^S+ n\lambda\sum_j\omega_j|\hat\beta_j| 
+\frac{1}{2}\|\bm{X}\bs{\hat \beta}-\bm{y}\|^2 +  n\lambda\sum_j\omega_j|\hat\beta_j|   &= \frac{\|\bm{X}(\bs{\hat\beta}-\bs{\beta}^S)\|^2}{2} + \frac{\|\bm{e}^S\|^2}{2} - \bm{\hat y}'\bm{e}^S+ n\lambda\sum_j\omega_j|\hat\beta_j| 
 \\&\leq~~\frac{1}{2}\|\bm{e}^S\|^2 + n\lambda\sum_{j\in S}\omega_j|\beta^S_j|\notag
 \end{align}
   Since $\bm{\hat y}'\bm{e}^S = \bm{\hat y}'(\bm{I}-\bm{H}^S)\bm{y} =
-\bs{\hat\beta}'\bm{X}'(\bm{y}-\bm{X}\bs{\beta}^\nu) = 
-\sum_{j\in S^c} \hat\beta_j\bs{\chi}_j'(\bm{y}-\bm{X}\bs{\beta}^\nu)
+\bs{\hat\beta}'\bm{X}'(\bm{y}-\bm{X}\bs{\beta}^S) = 
+\sum_{j\in S^c} \hat\beta_j\bs{\chi}_j'(\bm{y}-\bm{X}\bs{\beta}^S)
 $,
- we can apply Lemma \ref{SSElemma} followed by $\bs{\beta}^\nu$ being optimal under $\ell_0$ penalty $\nu$ to get 
+ we can apply Lemma \ref{SSElemma} followed by $\bs{\beta}^S$ being optimal under $\ell_0$ penalty $\nu$ to get 
 \begin{equation} \label{L0ineq}
-\left(\frac{\bs{\chi}_j'(\bm{y}-\bm{X}\bs{\beta}^\nu)}{n}\right)^2
+\left(\frac{\bs{\chi}_j'(\bm{y}-\bm{X}\bs{\beta}^S)}{n}\right)^2
 \leq \mr{MSE}_S - \mr{MSE}_{S\cup j} < 2\nu ~~~\forall~j
 \end{equation}
-so that $|\bm{\hat y}'\bm{e}^S| = |\bs{\hat\beta}_{S^c}\bm{X}_{S^c}'(\bm{y}-\bm{X}\bs{\beta}^\nu)| < n\sqrt{2\nu}|\bs{\hat\beta}_{S^c}|$.  Applying this inside (\ref{predconv}),
+so that $|\bm{\hat y}'\bm{e}^S| = |\bs{\hat\beta}_{S^c}\bm{X}_{S^c}'(\bm{y}-\bm{X}\bs{\beta}^S)| < n\sqrt{2\nu}|\bs{\hat\beta}_{S^c}|$.  Applying this inside (\ref{predconv}),
 \begin{align}\label{predconvineq}
-\frac{1}{2}\|\bm{X}(\bs{\hat\beta}-\bs{\beta}^\nu)\|^2
+\frac{1}{2}\|\bm{X}(\bs{\hat\beta}-\bs{\beta}^S)\|^2
   + n\left(\omega^{\mr{min}}_{S^c}\lambda-\sqrt{2\nu}\right)|\bs{\hat\beta}_{S^c}|
-  ~\leq~ n\lambda\sum_{j\in S}\omega_j|\hat\beta_{j}-\beta^\nu_j|
-  ~\leq~ n\lambda\|\bs{\omega}_S\|\|\bs{\hat\beta}_{S}-\bs{\beta}^\nu_S\|.
+  ~\leq~ n\lambda\sum_{j\in S}\omega_j|\hat\beta_{j}-\beta^S_j|
+  ~\leq~ n\lambda\|\bs{\omega}_S\|\|\bs{\hat\beta}_{S}-\bs{\beta}^S_S\|.
 \end{align}
 Given $\omega^{\mr{min}}_{S^c}\lambda > \sqrt{2\nu}$,
-difference $\bs{\hat\beta}-\bs{\beta}^\nu$ is in the RE support for 
-$L=\frac{\|\bs{\omega}_S\|}{\sqrt{s}}(\omega^{\mr{min}}_{S^c}-\sqrt{2\nu}/\lambda)^{-1}$ and thus $\|\bs{\hat\beta}_{S}-\bs{\beta}^\nu_S\| \leq \|\bm{X}(\bs{\hat\beta}-\bs{\beta}^\nu)/\sqrt{n}\|/\phi(L,S)$.  Finally, applying this inside (\ref{predconvineq}) yields
+difference $\bs{\hat\beta}-\bs{\beta}^S$ is in the RE support for 
+$L=\frac{\|\bs{\omega}_S\|}{\sqrt{s}}(\omega^{\mr{min}}_{S^c}-\sqrt{2\nu}/\lambda)^{-1}$ and thus $\|\bs{\hat\beta}_{S}-\bs{\beta}^S_S\| \leq \|\bm{X}(\bs{\hat\beta}-\bs{\beta}^S)/\sqrt{n}\|/\phi(L,S)$.  Finally, applying this inside (\ref{predconvineq}) yields
 \begin{align}
-\frac{1}{2}\|\bm{X}(\bs{\hat\beta}-\bs{\beta}^\nu)\|^2
-  &~\leq~ \frac{\sqrt{n}\lambda\|\bs{\omega}_S\|\|\bm{X}(\bs{\hat\beta}-\bs{\beta}^\nu)\|}
+\frac{1}{2}\|\bm{X}(\bs{\hat\beta}-\bs{\beta}^S)\|^2
+  &~\leq~ \frac{\sqrt{n}\lambda\|\bs{\omega}_S\|\|\bm{X}(\bs{\hat\beta}-\bs{\beta}^S)\|}
   {\phi(L, S)}.
 \end{align}
-Dividing each side by $\sqrt{n}\|\bm{X}(\bs{\hat\beta}-\bs{\beta}^\nu)\|/2$ and squaring gives the result.
+Dividing each side by $\sqrt{n}\|\bm{X}(\bs{\hat\beta}-\bs{\beta}^S)\|/2$ and squaring gives the result.
 \end{proof}
 
 \noindent {\bf Remarks}
@@ -546,16 +546,16 @@ assumed to live in $S$, then increasing $\gamma >0$ will improve prediction.
 Of course, the moment that $\lambda$ becomes small enough that elements of
 $S_c$ get nonzero $\hat\beta$, then larger $\gamma$ can lead to over-fit.  For
 this reason it is essential that we have tools for choosing  optimal
-$\lambda$.
+$\lambda$.   In the following sections, we describe both cross-validation and information criteria
+for penalty selection.
 
 \noindent \vskip .2cm \noindent $\bullet$~~ Because we
 have no notion of a `true' model, this result has nothing to say about the
 estimation error on individual parameters.  We again refer the reader to
-\cite{buhlmann_statistics_2011}, and we note that many of their bounds on
+\cite{buhlmann_statistics_2011}, and note that many of their bounds on
 estimation error for weighted-$\ell_1$ penalization rely upon weights derived
-from model fits at smaller $\lambda$ than is used in the final esimation --
-i.e., the opposite of GL and POSE, where weights are derived from fits at larger
-$\lambda$. However, we do consider estimation error in our simulation study
+from model fits at smaller $\lambda$ than is used in the final estimation (i.e., the opposite of GL and POSE, where weights are derived from fits at larger
+$\lambda$).   However, we  consider estimation error in our simulation study
 and find that the GL algorithms do well compared to MCP and the adaptive
 lasso. Moreover, in the supplemental material we adapt standard results from
 \cite{wainwright_sharp_2006,wainwright_sharp_2009} to show how reducing
