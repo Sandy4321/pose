@@ -703,54 +703,32 @@ avoiding false discovery; see, e.g.,
 \section{Simulation experiment}
 \label{sec:sim}
 
-We consider samples of size $n=1000$ from the $p=1000$ dimensional linear model
+We consider continuous-response data simulated from
+ a $p=1000$ dimensional linear model
 \begin{align}
 \label{simdgp}
-y \sim &~ \mr{N}\!\left(\bm{x}'\bs{\beta},\sigma^2\right)~~\text{where}~~
-\beta_j = (-1)^j\exp\left(-\frac{j}{{\sf d}} \right)\\
-&\text{and}~x_j \sim \mr{Bernoulli}\left( 1/(1+e^{-z_j})\right) \text{for}~~j=1\dots p,~~\text{given}~~\bm{z} \sim \mr{N}\left(\bm{0},\bs{\Sigma}\right).\notag 
+y &\sim \mr{N}\left(\bm{x}'\bs{\beta},\sigma^2\right) ~~\text{where}~~
+\beta_j = (-1)^j\exp\left(-\frac{j}{{\kappa}} \right)\ds{1}_{[j\leq J]}~~\text{for}~~j=1\dots p~~.
 \end{align}
+Each simulation draws $n$ means $\eta_i =
+\bm{x}_i'\bs{\beta}$ and two independent samples 
+$\bm{y},\bm{\tilde y} \sim \mr{N}(\bs{\eta},\sigma^2\bm{I})$;  the first
+sample is used for training and we evaluate prediction error on the second
+sample.  Our experiments consist of all possible combinations of the following configuration options:
+\begin{itemize}
+\item the sample size is $n=100$ or $n=1000$;
+\item the simulation models is either {\it dense}, with $J=p$ so that all true coefficients are nonzero, or 
+  {\it sparse}, with $J = n/10$ for either 10 or 100 nonzero coefficients;
+\item defining $\bm{z}_i \sim \mr{N}\left(\bm{0},\bs{\Sigma}\right)$ for $i=1\ldots n$, the regression inputs $\bm{x}_i$ are generated as either \textit{continuous} $x_{ij}=z_{ij}$  or \textit{binary}  $x_{ij} \stackrel{ind}{\sim} \mr{Bern}\left( 1/(1+e^{-z_{ij}})\right)$;
+\item the error variance $\sigma^2$ is defined through {\it signal-to-noise}
+ratios $\mr{sd}(\bs{\eta})/\sigma$ of $1/2$, $1$, or $2$;
+\item design multicollinearity is parametrized via $\Sigma_{jk} =
+\rho^{|j-k|}$, with $\rho$ $0$, $0.5$, or $0.9$;
+\item the rate of coefficient decay is specified by
+${\kappa}$ of $10$, $50$, $100$, or $200$.  
+\end{itemize}
+This implies a total of 288 different models, and we simulate and estimate 1000 times for each.
 
-\vspace{-.4cm}
-\noindent
-Each simulation draws means $\eta_i =
-\bm{x}_i'\bs{\beta}$, and two response samples (train and test)
-$\bm{y},\bm{\tilde y} \sim \mr{N}(\bs{\eta},\sigma^2\bm{I})$. Multicollinearity is
-parametrized via $\Sigma_{jk} =
-\rho^{|j-k|}$ with $\rho = 0.5$, and the error variance $\sigma^2$ is specified through {\it signal-to-noise} ratios
-$\mr{sd}(\bs{\eta})/\sigma$ of $1/2$, $1$, and $2$. 
-
-
-The regression in (\ref{simdgp}) is {\it dense} in a strict sense:  true
-coefficients are all nonzero.  However, they decay in magnitude along the
-index $j$ and
-it will be useless to estimate many of them in a $p=n$ regression.
-For coefficient decay we consider
-${\sf d}$ of $10$, $50$, $100$, and $200$.  This decay controls the {\it effective sparsity}: at ${\sf d}=10$ only 23 coefficients have absolute value larger than 0.1, while at ${\sf d=200}$ there are 460 coefficients larger than this threshold. 
-
-Our sparse oracle comparator is the $C_p$ optimal $\ell_0$ penalized solution
-\begin{equation}\label{l0oracle}
-\bs{\beta}^{\star} = \argmin_{\bs{\beta}} \left\{ \|\bm{y}-\bm{X}\bs{\beta}\|^2 + 2\sigma^2\sum_j
-\ds{1}_{\{\beta_j\neq0\}}\right\},
-\end{equation} which we solve by searching through
-OLS on $\bm{X}_{\{1\ldots j\}}$ for $j=1\ldots p$ (since the true coefficients are ordered).
-See \cite{mallows_comments_1973} and remarks after Theorem \ref{thm:sparseapprox} for background on this oracle.
-
-
-Figures \ref{simpaths} and \ref{simcv} illustrate GL paths for a single
-dataset, with  $\mr{sd}(\bm{\eta})/\sigma=1$, $\rho=0.9$, and ${\sf d}=50$. In Figure
-\ref{simpaths}, increasing $\gamma$ leads to `larger shouldered' paths where
-estimates move quickly to MLE for the nonzero-coefficients. Degrees of
-freedom, calculated as in (\ref{edf}), are along the top of each plot; at all but the smallest $\lambda$ values, equal
-$\lambda$ have higher $df^t$ for higher $\gamma$ since there is less shrinkage
-of $\hat\beta_j\neq0$.   This relationship switches only when $df^t$
-nears $n$, indicating that the heuristic in (\ref{edf}) might underestimate $df$ for clearly over-fit models.
-Figure \ref{simcv} shows CV and AICc error estimates and we see that 
-the two criteria roughly track each other.  Notice that
-for larger $\gamma$ the CV error increases more quickly away from
-its minimum; this is predicted by Theorem \ref{thm:sparseapprox} and shows that the consequences of over fit are worse with
-faster diminishing-bias.  Computation times also increase with larger $\gamma$, although a
-single run at $\gamma=10$ still requires less than a second.
 
 
 \begin{figure}[tb]
@@ -768,17 +746,60 @@ Points-and-bars show mean OOS MSE $\pm 1$se.  }
 \vspace{-.25cm}
 \end{figure}
 
+Our simulation models include various levels for both true sparsity --
+adjusted through the threshold $J$ -- and the {\it effective sparsity} dictated by
+$\kappa$, which controls the rate of coefficient decay. At ${\kappa}=10$ only
+23 coefficients have absolute value larger than 0.1, while at ${\kappa=200}$
+there are 460 coefficients larger than this threshold. The strictly dense $J=p$
+models have all nonzero  true coefficients but it will be useless to estimate many of them
+when $p=n$ or $p>n$.
+
+For comparison, we include performance results for MLE fit on `oracle' restricted support.  For the strictly sparse model, with $J=n/10$, our oracle uses the true nonzero support.  For the strictly dense model, our oracle comparator is the $C_p$ optimal $\ell_0$ penalized solution
+\begin{equation}\label{l0oracle}
+\bs{\beta}^{\star} = \argmin_{\bs{\beta}} \left\{ \|\bm{y}-\bm{X}\bs{\beta}\|^2 + 2\sigma^2\sum_j
+\ds{1}_{\{\beta_j\neq0\}}\right\},
+\end{equation} which we solve by searching through
+OLS on $\bm{X}_{\{1\ldots j\}}$ for $j=1\ldots p$ (since the true coefficients are ordered).
+See \cite{mallows_comments_1973} and remarks after Theorem \ref{thm:sparseapprox} for background on this oracle.
+
+
+Figures \ref{simpaths} and \ref{simcv} illustrate GL paths for a single
+dataset, generated from our {\it dense} model with {\it binary} design,   $\mr{sd}(\bm{\eta})/\sigma=1$,  $\rho=0.9$, and  ${\kappa}=50$. In Figure
+\ref{simpaths}, increasing $\gamma$ leads to `larger shouldered' paths where
+estimates move quickly to MLE for the nonzero-coefficients. Degrees of
+freedom, calculated as in (\ref{edf}), are along the top of each plot; at all but the smallest $\lambda$ values, equal
+$\lambda$ have higher $df^t$ for higher $\gamma$ since there is less shrinkage
+of $\hat\beta_j\neq0$.   This relationship switches only when $df^t$
+nears $n$, indicating that the heuristic in (\ref{edf}) might underestimate $df$ for clearly over-fit models.
+Figure \ref{simcv} shows CV and AICc error estimates and we see that 
+the two criteria roughly track each other.  Notice that
+for larger $\gamma$ the CV error increases more quickly away from
+its minimum; this is predicted by Theorem \ref{thm:sparseapprox} and shows that the consequences of over fit are worse with
+faster diminishing-bias.  Computation times also increase with larger $\gamma$, although a
+single run at $\gamma=10$ still requires less than a second.
 
 
 
-Table \ref{tab:sumtables} shows  predictive performance, 
-measured through out-of-sample (OOS) $R^2 = 1 -
-\mr{var}(\bm{\tilde y} - \bm{\hat y})/\mr{var}(\bm{\tilde y})$, for {\tt
-gamlr} runs of GL with $\gamma$ of 0 (lasso), 1, and 10. For penalty
-selection, we use AICc with the GL $df$ from Section \ref{sec:select} as well as 5-fold CV (with $\lambda$ selected to {\it minimize} CV error estimates). 
-The OOS $R^2$ results are reported in terms of percentage worse than the oracle $C_p$ rule from (\ref{l0oracle}).  As a comparator of similarly low computational cost, we  consider results for the {\it marginal} adaptive lasso with $\ell_1$ penalty weights $\omega_j \propto |\mr{cor}(\bm{x}_j,\bm{y})|^{-1}$.   The AL weights are scaled so that $\mathrm{min}(\omega_j)=1$, such that each AL $\lambda$ path is the same as for any GL run on the same data,  AICc selection for marginal AL  sets $df$ to the number of nonzero estimated parameters.   As an `expensive' gold standard, we also compare to an exact solver for concave MCP penalized regression. As described in Section \ref{sec:weighted}, {\tt sparsenet} applies 5-fold CV to optimize out-of-sample error over a
-dense grid of potential penalty sizes ($\lambda$) and concavities (analogous
-to our $\gamma$) for the MCP penalty.
+Table \ref{tab:sumtables} presents a summary of predictive performance over
+all of our simulation models.  We include \texttt{gamlr} runs of GL with $\gamma$
+of 0 (lasso), 1, and 10. For penalty selection, we use AICc with the GL $df$
+from Section \ref{sec:select} as well as 5-fold CV (with $\lambda$ selected to
+{\it minimize} CV error estimates). We also consider `GL select', a routine which chooses $\gamma \in \{0,1,10\}$ to minimize these AICc or CV values.
+Predictive performance is measured through the average root
+mean square error (RMSE) for  $\bm{\hat y}$ on $\bm{\tilde y}$, and RMSE values are reported  in
+terms of percentage-worse than the oracle-support MLE procedure.  We include the
+oracle regression $R^2$ for reference.
+
+As a `cheap' comparator, with run-time similar to that of GL, we
+consider the {\it marginal} adaptive lasso with $\ell_1$ penalty
+weights $\omega_j
+\propto |\mr{cor}(\bm{x}_j,\bm{y})|^{-1}$.   The AL weights are scaled so that
+$\mathrm{min}(\omega_j)=1$ we set $df$ for AL to
+the number of nonzero estimated parameters.   As an `expensive' gold standard,
+we include an exact solver for MCP penalized regression. As
+described in Section \ref{sec:weighted}, {\tt sparsenet} applies 5-fold CV to
+optimize out-of-sample error over a dense grid of potential penalty sizes
+($\lambda$) and concavities (analogous to our $\gamma$) for the MCP penalty.
 
 
 \begin{table}
@@ -834,8 +855,10 @@ to our $\gamma$) for the MCP penalty.
 \caption{\label{tab:sumtables} Out-of-sample predictive RMSE, 
 reported as  \% worse than Oracle (corresponding $R^2$ on far right),
 averaged over 1000  samples from various configurations of (\ref{simdgp}).
+The dense models have $J=p$ and the sparse models have $J=n/10$.  Fast decay includes $\kappa \in \{10,50\}$, while slow decay is $\kappa \in
+\{100,200\}$.
 The Oracle is MLE fit either on  $C_p$-optimal support for the dense model or
-on the true sparse support. Each row of this table corresponds to average
+on the true support for the sparse model. Each row of this table corresponds to average
 performance across many data generating processes; see the supplement for more
 detailed results.  Lasso (GL $\gamma=0$), GL, and AL routines were executed
 in {\tt gamlr}.  MCP denotes results from the {\tt sparsenet} MCP solver. GL
@@ -844,37 +867,67 @@ The best results are bolded.}
 \end{table}
 
 
-Note that Table \ref{tab:sumtables} represents only a small portion of our
-simulation study.  The supplemental material includes results for hundreds of
-additional data generating processes and model configurations: for an alternative {\it dense} $\bm{x}$ model, other CV selection rules, and uncorrected AIC and BIC.  Moreover, the supplement includes results on sensitivity and false
-discovery rates with respect to the support selected by the oracle $C_p$.
+Table \ref{tab:sumtables} represents only a small portion of our simulation
+study.  We have aggregated across different covariate designs (binary or
+continuous, with various levels of multicollinearity) and have combined
+results from $\kappa \in \{10,50\}$ as  `fast' decay and those for $\kappa \in
+\{100,200\}$ as slow decay.  Our supplemental material contains an additional
+128 tables, detailing results for hundreds of data generating processes and
+model configurations.  These tables include results on estimation error
+(see also Table \ref{tab:esttables} below), on the fitted number of nonzero
+parameters, and on sensitivity and false discovery rates with respect to
+oracle support.
+
+
+\vskip .1cm \noindent {\bf Remarks}
+
+\vskip .1cm \noindent $\bullet$~~ AICc selection for one of the three GL $\gamma$-specifications is always able to provide performance near to that of the computationally intensive routine of CV-selected MCP (over a grid in penalty size and scale).  The best GL OOS $R^2$ is never more than 4\% worse than MCP overall and never more than 2\% worse for all but the ${\kappa}=200$ (essentially dense regression) specifications; GL also occasionally outperforms MCP. 
+
+\vskip .1cm \noindent $\bullet$~~   A single {\tt gamlr} run requires a fraction of a second; {\tt sparsenet} with 5-fold CV requires 15-20 seconds per run.  
+  Investigation the simulation runs finds that minimization of AICc {\it across} GL0 and GL1 would have consistently chosen the rule that
+does best in Table \ref{tab:sumtables}.  Thus AICc selection on just two GL paths (potentially in parallel),
+with combined compute time still a fraction of a second,  yields a near-best predictor in all scenarios. 
+
+\vskip .1cm \noindent $\bullet$~~  For GL1, AICc gives roughly similar performance to 5-fold CV.  For the lasso (GL0), CV outperforms AICc in a dense (big {$\kappa$}) and high signal model, while AICc outperforms CV in low signal settings.  The opposite holds for GL10.   In any case, the supplement shows that AICc is a massive improvement over either BIC or  AIC;  the
+latter sometimes yields negative $R^2$. 
+
+\vskip .1cm \noindent $\bullet$~~  Both CV and AICc selected GL1 fits had 50-75\% the number of nonzero
+coefficients as for the correspondingly selected lasso fit.  GL10 leads to
+even more sparsity, often returning less than 10\% of the number of nonzero
+coefficients given by lasso.  The results suggest that running {\tt gamlr}
+with small but nonzero $\gamma$ (e.g., as in GL1) can provide much additional
+information compression without hurting performance.  The supplement also
+shows that even $\gamma=1$ leads to a large drop in false discovery relative
+the the lasso.   GL10 does nearly as well as best in
+the high-signal settings, while yielding much more sparse models, however the simulations show that we should be cautious about use of such
+rapidly diminishing bias in noisy applications.
+
+\vskip .1cm \noindent $\bullet$~~ Marginal AL is usually within a few percent of MCP or the best GL.  However, we find in our simulations that neither CV nor AICc selection with marginal AL yield any more sparsity than the standard lasso -- we usually do not see any information compression gain.  Indeed, with collinear covariates marginal AL tends to yield {\it more} nonzero coefficients than the lasso.   
 
 
 
-\begin{figure}\small
-$\boldsymbol{{\sf d} = 10}$
+\begin{figure}[p]
+$\boldsymbol{{\kappa} = 10}$
 
 ~~~~~~\includegraphics[width=.9\textwidth]{graphs/weights-r09-s1-d10}
 
-$\boldsymbol{{\sf d} = 50}$
+% $\boldsymbol{{\kappa} = 50}$
 
-~~~~~~\includegraphics[width=.9\textwidth]{graphs/weights-r09-s1-d50}
+% ~~~~~~\includegraphics[width=.9\textwidth]{graphs/weights-r09-s1-d50}
 
-$\boldsymbol{{\sf d} = 100}$
+$\boldsymbol{{\kappa} = 100}$
 
 ~~~~~~\includegraphics[width=.9\textwidth]{graphs/weights-r09-s1-d100}
 
-$\boldsymbol{{\sf d} = 200}$
+% $\boldsymbol{{\kappa} = 200}$
 
-~~~~~~\includegraphics[width=.9\textwidth]{graphs/weights-r09-s1-d200}
+% ~~~~~~\includegraphics[width=.9\textwidth]{graphs/weights-r09-s1-d200}
 \caption{\label{fig:weights} Average properties of the weighted $\ell_1$ penalized paths in our simulation, with $\rho=0.9$ and $\mathrm{sd}(\bs{\eta})/\sigma=1$.
-The {\sf\footnotesize w-min} values are $\omega^{\mr{min}}_{S^c}$, {\sf\footnotesize w-norm} are $\|\bs{\omega}_S\|$, and {\sf\footnotesize L} is the restricted eigenvalue constant; all as defined in Theorem \ref{thm:sparseapprox}.  Note that, by construction, the $\lambda$ grids are the same across all algorithms.}  
+The {\sf\footnotesize w-min} values are $\omega^{\mr{min}}_{S^c}$, {\sf\footnotesize w-norm} are $\|\bs{\omega}_S\|$, and {\sf\footnotesize L} is the restricted eigenvalue constant; all as defined in Theorem \ref{thm:sparseapprox}.  Note that, by construction, the $\lambda$ grids are the same across all algorithms.} 
 \end{figure}
-
-\begin{table}[ht]
+\begin{table}[p]
 \footnotesize
 \begin{center}
-\vskip -.5cm
 \begin{tabular}{cc|cc|cc|cc|cc|c|c}
 & & \multicolumn{9}{l}{\bf Estimation RMSE on true coefficients} & \\[1ex]
 & \multirow{2}{*}{$\displaystyle\frac{\mathrm{sd}(\boldsymbol{\eta})}{\sigma}$} 
@@ -908,34 +961,6 @@ The Oracle is MLE fit
 on the true sparse support and the best results are bolded.}
 \end{table}
 
-\vskip .1cm \noindent {\bf Remarks}
-
-\vskip .1cm \noindent $\bullet$~~ AICc selection for one of the three GL $\gamma$-specifications is always able to provide performance near to that of the computationally intensive routine of CV-selected MCP (over a grid in penalty size and scale).  The best GL OOS $R^2$ is never more than 4\% worse than MCP overall and never more than 2\% worse for all but the ${\sf d}=200$ (essentially dense regression) specifications; GL also occasionally outperforms MCP. 
-
-\vskip .1cm \noindent $\bullet$~~   A single {\tt gamlr} run requires a fraction of a second; {\tt sparsenet} with 5-fold CV requires 15-20 seconds per run.  
-  Investigation the simulation runs finds that minimization of AICc {\it across} GL0 and GL1 would have consistently chosen the rule that
-does best in Table \ref{tab:sumtables}.  Thus AICc selection on just two GL paths (potentially in parallel),
-with combined compute time still a fraction of a second,  yields a near-best predictor in all scenarios. 
-
-\vskip .1cm \noindent $\bullet$~~  For GL1, AICc gives roughly similar performance to 5-fold CV.  For the lasso (GL0), CV outperforms AICc in a dense (big {\sf d}) and high signal model, while AICc outperforms CV in low signal settings.  The opposite holds for GL10.   In any case, the supplement shows that AICc is a massive improvement over either BIC or  AIC;  the
-latter sometimes yields negative $R^2$. 
-
-\vskip .1cm \noindent $\bullet$~~  Both CV and AICc selected GL1 fits had 50-75\% the number of nonzero
-coefficients as for the correspondingly selected lasso fit.  GL10 leads to
-even more sparsity, often returning less than 10\% of the number of nonzero
-coefficients given by lasso.  The results suggest that running {\tt gamlr}
-with small but nonzero $\gamma$ (e.g., as in GL1) can provide much additional
-information compression without hurting performance.  The supplement also
-shows that even $\gamma=1$ leads to a large drop in false discovery relative
-the the lasso.   GL10 does nearly as well as best in
-the high-signal settings, while yielding much more sparse models, however the simulations show that we should be cautious about use of such
-rapidly diminishing bias in noisy applications.
-
-\vskip .1cm \noindent $\bullet$~~ Marginal AL is usually within a few percent of MCP or the best GL.  However, we find in our simulations that neither CV nor AICc selection with marginal AL yield any more sparsity than the standard lasso -- we usually do not see any information compression gain.  Indeed, with collinear covariates marginal AL tends to yield {\it more} nonzero coefficients than the lasso.   
-
-
-\vskip .2cm
-
 
  Figure \ref{fig:weights}
 provides a deeper look at how the quantities in Theorem \ref{thm:sparseapprox} behave in practice.
@@ -947,10 +972,10 @@ norm on the weights in the support of the $\ell_0$ rule -- can be made small
 without $\omega^{\mr{min}}_{S^c}$ -- the smallest weight on the complement of
 this support -- shrinking too much.    Comparing  lasso and GL1, we see
 that this is achieved for $\gamma=1$ under faster coefficient decay (more
-effective sparsity; at {\sf d} of 10 or even 50) while at slower decay rates
+effective sparsity; at {$\kappa$} of 10 or even 50) while at slower decay rates
 $\omega^{\mr{min}}_{S^c}$  drops right after the path begins.   Under the fast
 diminishing bias of GL10,  $\omega^{\mr{min}}_{S^c}$ drops more dramatically
-and earlier than it does for GL1; only in the ${\sf d}=10$ setting does there
+and earlier than it does for GL1; only in the ${\kappa}=10$ setting does there
 appear to be any opportunity for improved prediction from $\gamma=10$ relative
 to $\gamma=1$.  Marginal AL provides an interesting side-case; it maintains higher
 $\omega^{\mr{min}}_{S^c}$ at the expense of a {\it much} higher
