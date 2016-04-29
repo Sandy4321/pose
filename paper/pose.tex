@@ -388,18 +388,49 @@ show that this efficient strategy works as well or better than  expensive
 exact solvers.  In the next section, we provide some theoretical intuition on
 why it works.
 
+%\subsection{$\bs{\ell_0}$ penalization as an infeasible oracle}
+\subsection{Comparison between weighted-$\bs{\ell_1}$ and $\bs{\ell_0}$ penalization}
 
-\subsection{Comparison between weighted-$\ell_1$ and $\ell_0$ penalized estimation}
+
+Our oracle comparator is estimation under $\ell_0$ costs, $c(\beta_j) =
+\ds{1}_{\{\beta_j\neq0\}}$, for which global solution is impractical.  We
+treat the design $\bm{X}$ as {\it fixed}, and make no assumptions
+about the distribution for $\bm{y} | \bm{X}$ (not even independence between
+observations; see remarks).   The question we address is thus more
+operational than statistical: for a fixed sample, what is the distance between
+an easy-to-find weighted-$\ell_1$ penalized solution and the infeasible
+$\ell_0$-penalized optimum?
+
+In the theoretical setups more familiar to statisticians,
+one bounds the expected difference  either between fitted coefficients
+and some assumed `true' model parameters or  between model predictions and future
+response.  Both of these evaluations are important, and they have been studied
+extensively elsewhere. The text by \cite{buhlmann_statistics_2011}
+includes a comprehensive treatment of such prediction and estimation risk for
+$\ell_1$ and weighted-$\ell_1$ penalized linear models,  and we refer the
+interested reader there for this material and abundant references to other
+relevant work.  This literature usually assumes a truth that is (at least
+approximately) linear and sparse in the available covariates.  The assumption
+of true sparsity is dubious in many realistic applications, but it is
+necessary inasmuch as, with finite data, most parameters in a
+high-dimensional model cannot be reliably measured as different from zero.
+
+Instead, we are
+interested in weighted-$\ell_1$ penalization as a way to obtain fits that are
+as sparse as possible without compromising predictive ability, regardless of the true data generating process.  By comparing
+to an optimization objective rather than to some true model, we are able to
+present a finite-sample fully-nonparametric result with a straightforward and intuitive proof. Obviously, this result is only useful if an optimally-tuned $\ell_0$
+penalized estimator would work well for the problem at hand. However,  there
+is theoretical support for optimality of $\ell_0$ penalization in a
+ variety of high-dimensional estimation settings
+\citep[e.g,][]{mallows_comments_1973,efron_estimation_2004}.  Indeed, our
+simulation studies show that $\ell_0$ oracles are nearly always the
+best performing option in terms of both prediction and estimation error.  In
+the case where an $\ell_0$ oracle does poorly, we would usually argue against
+penalized linear models as a strategy anyways.
 
 
-Our oracle benchmark is estimation under $\ell_0$ costs, $c(\beta_j) =
-\ds{1}_{\{\beta_j\neq0\}}$, for which global solution is impractical.   We are
-interested in weighted-$\ell_1$ penalization as a way to obtain fits that are as
-sparse as possible without compromising predictive ability, regardless of the
-underlying data generating process (or `true' sparsity).  Throughout, we consider the design $\bm{X}$ as {\it fixed}.
-
-This is different from the setup that is more familiar to statisticians, where
-the oracle comparator is likelihood maximization on the some assumed true support.
+\subsubsection{Approximation to an $\bs{\ell_0}$ oracle}
 
  For  $S \subset \{1\ldots p\}$ with cardinality $|S|=s$ and complement $S^c =
 \{1\ldots p\}\setminus S$, denote vectors restricted to covariates in $S$ as
@@ -517,10 +548,19 @@ $S_c$ get nonzero $\hat\beta$, then larger $\gamma$ can lead to over-fit.  For
 this reason it is essential that we have tools for choosing  optimal
 $\lambda$.
 
-\noindent \vskip .2cm \noindent $\bullet$~~ In the supplemental material,  we also adapt standard
-results from \cite{wainwright_sharp_2006,wainwright_sharp_2009} to show how
-reducing $\|\bs{\omega}_S\|$ without making $\omega^{\mr{min}}_{S_c}$ small
-can lead to lower false discovery rates with respect to the $\ell_0$ oracle.
+\noindent \vskip .2cm \noindent $\bullet$~~ Because we
+have no notion of a `true' model, this result has nothing to say about the
+estimation error on individual parameters.  We again refer the reader to
+\cite{buhlmann_statistics_2011}, and we note that many of their bounds on
+estimation error for weighted-$\ell_1$ penalization rely upon weights derived
+from model fits at smaller $\lambda$ than is used in the final esimation --
+i.e., the opposite of GL and POSE, where weights are derived from fits at larger
+$\lambda$. However, we do consider estimation error in our simulation study
+and find that the GL algorithms do well compared to MCP and the adaptive
+lasso. Moreover, in the supplemental material we adapt standard results from
+\cite{wainwright_sharp_2006,wainwright_sharp_2009} to show how reducing
+$\|\bs{\omega}_S\|$ without making $\omega^{\mr{min}}_{S_c}$ small can lead to
+lower false discovery rates with respect to the $\ell_0$ oracle.
 Unfortunately, this relies upon fairly strict design restrictions.
 
 
@@ -694,7 +734,7 @@ Our sparse oracle comparator is the $C_p$ optimal $\ell_0$ penalized solution
 \ds{1}_{\{\beta_j\neq0\}}\right\},
 \end{equation} which we solve by searching through
 OLS on $\bm{X}_{\{1\ldots j\}}$ for $j=1\ldots p$ (since the true coefficients are ordered).
-See \cite{mallows_comments_1973} and remarks in Section \ref{sec:weighted}.1 for background on this oracle.
+See \cite{mallows_comments_1973} and remarks after Theorem \ref{thm:sparseapprox} for background on this oracle.
 
 
 Figures \ref{simpaths} and \ref{simcv} illustrate GL paths for a single
