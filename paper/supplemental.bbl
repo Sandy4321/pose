@@ -6,9 +6,9 @@ Armagan, A., D.~B. Dunson, and J.~Lee (2013).
 \newblock Generalized {Double} {Pareto} {Shrinkage}.
 \newblock {\em Statistica Sinica\/}~{\em 23}, 119--143.
 
-\bibitem[\protect\citeauthoryear{Buhlmann and van~de Geer}{Buhlmann and van~de
-  Geer}{2011}]{buhlmann_statistics_2011}
-Buhlmann, P. and S.~van~de Geer (2011).
+\bibitem[\protect\citeauthoryear{B{\"u}hlmann and van~de Geer}{B{\"u}hlmann and
+  van~de Geer}{2011}]{buhlmann_statistics_2011}
+B{\"u}hlmann, P. and S.~van~de Geer (2011).
 \newblock {\em Statistics for {High}-{Dimensional} {Data}}.
 \newblock Springer.
 
@@ -77,6 +77,13 @@ Lee, J., Y.~Sun, and M.~Saunders (2014).
 \newblock Proximal newton-type methods for minimizing convex objective
   functions in composite form.
 \newblock {\em {SIAM} Journal on Optimization\/}~{\em 24}, 1420--1443.
+
+\bibitem[\protect\citeauthoryear{Liu, Wright, R{\'e}, Bittorf, and Sridhar}{Liu
+  et~al.}{2015}]{liu2015asynchronous}
+Liu, J., S.~J. Wright, C.~R{\'e}, V.~Bittorf, and S.~Sridhar (2015).
+\newblock An asynchronous parallel stochastic coordinate descent algorithm.
+\newblock {\em The Journal of Machine Learning Research\/}~{\em 16\/}(1),
+  285--322.
 
 \bibitem[\protect\citeauthoryear{Luenberger and Ye}{Luenberger and
   Ye}{2008}]{luenberger_linear_2008}

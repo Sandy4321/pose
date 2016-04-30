@@ -36,9 +36,9 @@ Breiman, L. (1996).
 \newblock Heuristics of instability and stabilization in model selection.
 \newblock {\em The Annals of Statistics\/}~{\em 24\/}(6), 2350--2383.
 
-\bibitem[\protect\citeauthoryear{Buhlmann and van~de Geer}{Buhlmann and van~de
-  Geer}{2011}]{buhlmann_statistics_2011}
-Buhlmann, P. and S.~van~de Geer (2011).
+\bibitem[\protect\citeauthoryear{B{\"u}hlmann and van~de Geer}{B{\"u}hlmann and
+  van~de Geer}{2011}]{buhlmann_statistics_2011}
+B{\"u}hlmann, P. and S.~van~de Geer (2011).
 \newblock {\em Statistics for {High}-{Dimensional} {Data}}.
 \newblock Springer.
 
@@ -107,6 +107,12 @@ Friedman, J., T.~Hastie, and R.~Tibshirani (2010).
 Friedman, J.~H. (2008).
 \newblock Fast {Sparse} {Regression} and {Classification}.
 \newblock Technical Report, Dept. of Statistics, Stanford University.
+
+\bibitem[\protect\citeauthoryear{Gentzkow, Shapiro, and Taddy}{Gentzkow
+  et~al.}{2015}]{gentzkow_measuring_2015}
+Gentzkow, M., J.~Shapiro, and M.~Taddy (2015).
+\newblock Measuring polarization in high dimensional data.
+\newblock {\em Chicago Booth working paper\/}.
 
 \bibitem[\protect\citeauthoryear{Gramacy, Jensen, and Taddy}{Gramacy
   et~al.}{2013}]{gramacy_estimating_2013}

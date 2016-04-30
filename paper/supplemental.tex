@@ -152,6 +152,7 @@ and $\bs{\hat\eta} = \hat\alpha + \bm{X}'\bs{\hat\beta}$.
 
 \end{algorithm}
 
+For distributed data, see  \cite{liu2015asynchronous} for a stochastic coordinate descent framework.
 
 \subsection{Descent convergence}
 
@@ -558,55 +559,51 @@ ${\sf d}$ of $10$, $50$, $100$, and $200$.
 \bibliographystyle{chicago}
 \bibliography{taddy}
 
-\vskip .5cm
+\vskip 1cm
 
 \noindent {\bf\large Detailed simulation tables}
 
-\vskip .25cm
-\noindent
-The remainder presents detailed tabulation of prediction MSE (Tables 4-35), 
-estimation MSE (36-67),  estimated model dimension (68-99), 
-and sensitivity/FDR  (100-131) across all 
-simulation models and selection methods.
+% \vskip .25cm
+% \noindent
+% The remainder presents detailed tabulation of prediction MSE (Tables 4-35), 
+% estimation MSE (36-67),  estimated model dimension (68-99), 
+% and sensitivity/FDR  (100-131) across all 
+% simulation models and selection methods.
 
-\vskip .25cm\footnotesize
-\noindent{\bf  Prediction MSE }
+\vskip .5cm\small
+\noindent{\sc  Prediction MSE }
 \begin{itemize}
 \vspace{-.1cm}
   \setlength\itemsep{0em}
-\item[] n=1000, sparse simulation model: tables 4-11
-\item[] n=1000, dense simulation model: tables 12-19
-\item[] n=100, sparse simulation model: tables 20-27 
-\item[] n=100, dense simulation model: tables 28-35
-\end{itemize}
-\noindent{\bf  Estimation MSE }
-\begin{itemize}
-\vspace{-.1cm}
-  \setlength\itemsep{0em}
-\item[] n=1000, sparse simulation model: tables 36-43
-\item[] n=1000, dense simulation model: tables 44-51
-\item[] n=100, sparse simulation model: tables 52-59 
-\item[] n=100, dense simulation model: tables 60-67
+\item[] n=1000. Sparse simulation model: Tables 4-11, Dense simulation model: Tables 12-19
+\item[] n=100. Sparse simulation model: Tables 20-27, Dense simulation model: Tables 28-35
 \end{itemize}
 
-\noindent{\bf  Fitted Model Dimension }
+\vskip .1cm
+\noindent{\sc  Estimation MSE }
 \begin{itemize}
 \vspace{-.1cm}
   \setlength\itemsep{0em}
-\item[] n=1000, sparse simulation model: tables 68-75
-\item[] n=1000, dense simulation model: tables 76-83
-\item[] n=100, sparse simulation model: tables 84-91 
-\item[] n=100, dense simulation model: tables 92-99
+\item[] n=1000. Sparse simulation model: Tables 36-43, Dense simulation model: Tables 44-51
+\item[] n=100. Sparse simulation model: Tables 52-59, Dense simulation model: Tables 60-67
 \end{itemize}
 
-\noindent{\bf  Sensitivity and FDR }
+\vskip .1cm
+\noindent{\sc  Fitted Model Dimension }
 \begin{itemize}
 \vspace{-.1cm}
   \setlength\itemsep{0em}
-\item[] n=1000, sparse simulation model: tables 100-107
-\item[] n=1000, dense simulation model: tables 108-115
-\item[] n=100, sparse simulation model: tables 116-123
-\item[] n=100, dense simulation model: tables 124-131
+\item[] n=1000. Sparse simulation model: Tables 68-75, Dense simulation model: Tables 76-83
+\item[] n=100. Sparse simulation model: Tables 84-91, Dense simulation model: Tables 92-99
+\end{itemize}
+
+\vskip .1cm
+\noindent{\sc  Sensitivity and FDR }
+\begin{itemize}
+\vspace{-.1cm}
+  \setlength\itemsep{0em}
+\item[] n=1000. Sparse simulation model: Tables 100-107, Dense simulation model: Tables 108-115
+\item[] n=100. Sparse simulation model: Tables 116-123, Dense simulation model: Tables 124-131
 \end{itemize}
 
 
