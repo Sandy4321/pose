@@ -108,7 +108,7 @@ with little bias.
 
 The combination of  \textit{sparsity} and \textit{diminishing-bias} 
  is appealing in many settings, and a large literature on concave
-penalized estimation has developed over the past 15 years.  For example, many
+penalized estimators has developed over the past 15 years.  For example, many
 authors \citep{fan_variable_2001,fan_nonconcave_2004}  have contributed work on their \textit{oracle
 properties}, a class of results showing conditions under which coefficient
 estimates through concave penalization, or in related schemes, will be the
@@ -415,18 +415,18 @@ of true sparsity is dubious in many realistic applications, but it is
 necessary inasmuch as, with finite data, most parameters in a
 high-dimensional model cannot be reliably measured as different from zero.
 
-Instead, we are mostly
-interested in weighted-$\ell_1$ penalization as a way to obtain fits that are
-as sparse as possible without compromising predictive ability, regardless of the true data generating process.  By comparing
-to an optimization objective rather than to some true model, we are able to
-present a finite-sample fully-nonparametric result with a straightforward and intuitive proof. Obviously, this result is only useful if an optimally-tuned $\ell_0$
-penalized estimator would work well for the problem at hand. However,  there
-is theoretical support for optimality of $\ell_0$ penalization in a
- variety of high-dimensional prediction settings
+Instead, we are mostly interested in weighted-$\ell_1$ penalization as a way
+to obtain fits that are as sparse as possible without compromising prediction, regardless of whether the data generating process is sparse.  By
+comparing to an ideal optimization objective rather than to some true model,
+we are able to present a finite-sample fully-nonparametric result with a
+straightforward intuitive proof. Obviously, this result is useful only if
+an $\ell_0$ penalized estimator would work well for the
+problem at hand. However,  there is theoretical support for optimality of
+$\ell_0$ penalization in a  variety of high-dimensional prediction settings
 \citep[e.g,][]{mallows_comments_1973,efron_estimation_2004}.  Indeed, our
-simulation studies show that $\ell_0$ oracles are nearly always the
-best performing option in terms of both prediction and estimation error.  In
-the case where an $\ell_0$ oracle does poorly, we would usually argue against
+simulation studies show that $\ell_0$ oracles are nearly always the best
+performing option in terms of both prediction and estimation error.  In the
+case where an $\ell_0$ oracle does poorly, we would usually argue against
 penalized linear models as a strategy anyways.
 
 
@@ -576,26 +576,23 @@ can be used to obtain paths of estimates corresponding to different levels of
 penalization.  Each penalty level corresponds to a different `model'
 and we must select the optimal choice from these candidates.
 
-$K$-fold cross-validation \cite[CV; e.g.,][]{efron_estimation_2004} 
-is the most common technique for penalty selection, and it does a good job.  However, there are many scenarios where
-we might want an analytic alternative to CV.  For example, if a single fit is expensive then doing it $K$
-times will be impractical.  More subtly, truly Big Data are distributed: they
-are too large to store on a single machine. Algorithms can be designed to work
-in parallel on subsets
-\citep[e.g.,][]{taddy_distributed_2015} but a bottleneck
-results if you need to communicate across machines for CV experimentation.
-Finally, CV can lead to over-fit for unstable algorithms whose
-results change dramatically in response to data jitter; see
-\cite{breiman_heuristics_1996} for a classic discussion.  Such instability
-arises for large $\gamma$ combined with small $\lambda$ in our GL algorithm
-and, more generally, in many nonconvex regularized estimators; see the
-supplemental material for a detailed overview.
+$K$-fold cross-validation \cite[CV; e.g.,][]{efron_estimation_2004}  is the
+most common technique for penalty selection, and it does a good job.  However,
+there are many scenarios where we might want an analytic alternative to CV.
+For example, if a single fit is expensive then doing it $K$ times will be
+impractical.  More subtly, truly Big Data are distributed.  Algorithms can be
+designed to work in parallel on subsets
+\citep[e.g.,][]{taddy_distributed_2015} but a bottleneck results if you need
+to communicate across machines for CV experimentation. Finally, CV can lead to
+over-fit for unstable algorithms whose results change dramatically in response
+to data jitter; see \cite{breiman_heuristics_1996} for a classic discussion and the supplement for an overview.
 
-A feature of the standard $\ell_1$ lasso is that it comes with a
+An important feature of the standard $\ell_1$ lasso is that it comes with a
 simple approximation for the estimation degrees-of-freedom (\textit{df}) at
 any $\lambda$: the number of nonzero estimated coefficients
-\citep[see][]{zou_degrees_2007}.  These \textit{df} can then combined with the fitted
-deviance for penalty selection  information criteria.
+\citep[see][]{zou_degrees_2007}.  These \textit{df} can combined with the fitted
+deviance  to create information criteria, such as the AIC or BIC, that provide alternative tools for penalty selection.
+
 This section derives the gamma lasso as approximately maximizing the posterior
 for a hierarchical Bayesian model, and uses this
 interpretation to obtain a heuristic degrees-of-freedom for each estimate
@@ -897,7 +894,7 @@ either AICc or CV. The best results are bolded.}
 & ~~\scriptsize\it AICc & \multicolumn{1}{c}{\scriptsize\it CV~~}
 & \multicolumn{1}{c}{ MCP} & \it Oracle \\[1ex]
 \hline\multicolumn{2}{l|}{\it sparse model} &&&&&&&&&\\& \it  2  & 0.05 & 0.05 & 0.04 & 0.03 & 0.01 & {\bf 0} & 1.78 & 1.77 & {\bf 0} & \it  0.00 \\
-\it n=1000  & \it  1  & 0.12 & {\bf 0.11} & {\bf 0.11} & {\bf 0.11} & 0.13 & 0.12 & 3.41 & 3.41 & {\bf 0.11} & \it  0.02 \\
+\it n=1000  & \it  1  & 0.12 & 0.12 & {\bf 0.11} & {\bf 0.11} & 0.13 & 0.12 & 3.41 & 3.41 & {\bf 0.11} & \it  0.02 \\
 & \it  0.5  & {\bf 0.15} & {\bf 0.15} & {\bf 0.15} & {\bf 0.15} & 0.17 & {\bf 0.15} & 6.47 & 6.54 & {\bf 0.15} & \it  0.10 \\[1ex]
 \cline{2-2}\rule{0pt}{3ex}& \it  2  & 0.05 & 0.04 & {\bf 0.03} & 0.04 & 0.04 & 0.06 & 1.07 & 1.02 & 0.04 & \it  0.00 \\
 \it n=100  & \it  1  & {\bf 0.07} & 0.08 & 0.08 & 0.08 & 0.12 & 0.08 & 1.89 & 2.02 & 0.08 & \it  0.00 \\
@@ -985,8 +982,7 @@ always a massive improvement over either BIC or  AIC for prediction.
 
 
 \vskip .2cm \noindent $\bullet$~~ Table \ref{tab:esttables} shows mostly
-similar estimation errors between the GL and MCP comparators. MCP gives
-dominant performance only in the $n=1000$ samples with strong $s2n=2$ signal.
+similar estimation errors between the GL and MCP comparators. MCP dominates only in the $n=1000$ samples with strong $s2n=2$ signal.  The simple lasso is also competitive, despite its non-diminishing bias, in all but the larger samples with $s2n \geq1$.
 
 \vskip .2cm \noindent $\bullet$~~ Marginal AL performed well in prediction,
 with RMSE that was near to that of the lasso when $n=1000$ and
@@ -1013,10 +1009,9 @@ Overall, MCP seems to have best variable selection properties (reducing FDR with
 
 \vskip .2cm \noindent $\bullet$~~  
  Figure \ref{fig:weights}
-provides a deeper look at how the quantities in Theorem \ref{thm:sparseapprox} behave in practice.
-This picture shows results for various coefficient
+shows how the quantities in Theorem \ref{thm:sparseapprox} behave  for various coefficient
 decay rates in a highly collinear ($\rho=.9$) and moderately noisy
-($\mathrm{sd}(\bs{\eta})/\sigma=1$) setting.  Recall that prediction error
+($s2n=1$) setting.  Recall that prediction error
 should get closer to that of an $\ell_0$ oracle if $\|\bs{\omega}_S\|$ -- the
 norm on the weights in the support of the $\ell_0$ rule -- can be made small
 without $\omega^{\mr{min}}_{S^c}$ -- the smallest weight on the complement of
