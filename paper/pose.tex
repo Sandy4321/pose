@@ -58,7 +58,7 @@
 
 {\large
 \vskip .2cm \noindent
-{Microsoft Research and the  University of Chicago Booth School of Business}\\
+{Microsoft Research and the  University of Chicago}\\
 \texttt{faculty.chicagobooth.edu/matt.taddy}}
 
 
@@ -916,17 +916,10 @@ $\boldsymbol{{\kappa} = 10}$
 
 ~~~~~~\includegraphics[width=.9\textwidth]{graphs/weights-r09-s1-d10}
 
-% $\boldsymbol{{\kappa} = 50}$
-
-% ~~~~~~\includegraphics[width=.9\textwidth]{graphs/weights-r09-s1-d50}
-
 $\boldsymbol{{\kappa} = 100}$
 
 ~~~~~~\includegraphics[width=.9\textwidth]{graphs/weights-r09-s1-d100}
 
-% $\boldsymbol{{\kappa} = 200}$
-
-% ~~~~~~\includegraphics[width=.9\textwidth]{graphs/weights-r09-s1-d200}
 \caption{\label{fig:weights} Properties of the weighted $\ell_1$ penalized paths in our simulation, averaged across 1000 samples of $n=1000$ for the {\it dense} model with {\it binary} design, $\rho=0.9$, and $\mathrm{sd}(\bs{\eta})/\sigma=1$.
 The {\sf\footnotesize w-min} values are $\omega^{\mr{min}}_{S^c}$, {\sf\footnotesize w-norm} are $\|\bs{\omega}_S\|$, and {\sf\footnotesize L} is the restricted eigenvalue constant; all as defined in Theorem \ref{thm:sparseapprox}.  Note that, by construction, the $\lambda$ grids are the same across all algorithms for the same data sample.} 
 \end{figure}
@@ -995,7 +988,7 @@ same scenario.
 
 \vskip .2cm \noindent $\bullet$~~  In the supplement, CV and AICc selected GL1 has usually 20-80\% the number of nonzero
 coefficients as the corresponding  lasso fit.  GL10 leads to
-even more sparsity, often returning less than 10\% of the selected {\it df} from lasso. This suggest  {\tt gamlr}
+even more sparsity, often returning less than 10\% of the selected {\it df} from lasso. This suggests  {\tt gamlr}
 with a small but nonzero $\gamma$ (e.g., as in GL1) as a reliable strategy for
 compressing information without hurting predictive performance (our original motivating goal).  The supplement also
 shows that $\gamma>0$ leads to a large drop in false discovery (with respect to oracle support) relative
